@@ -534,7 +534,7 @@ function buildProductsIndex(products) {
     if (p.specs && p.specs.length > 0) {
       specsArr = p.specs.map(s => [s.key, s.val]);
     }
-    if (p.sku)      specsArr.unshift(['SKU', p.sku]);
+    if (p.sku)      specsArr.unshift(['Model', p.sku]);
     if (p.colorway) specsArr.push(['Colorway', p.colorway]);
 
     PRODUCTS_INDEX[String(p.id)] = {
