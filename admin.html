@@ -1772,6 +1772,7 @@ function renderProductsTable() {
   if (!filtered.length) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
+    renderProductsCards([]);
     return;
   }
   empty.style.display = 'none';
@@ -1797,6 +1798,7 @@ function renderProductsTable() {
       </div></td>
     </tr>
   `).join('');
+  renderProductsCards(filtered);
 }
 
 function stockPill(stock) {
@@ -2211,6 +2213,7 @@ function renderResellersTable() {
   if (!filtered.length) {
     const msg = resellerTab === 'pending' ? 'No pending applications' : 'No approved resellers';
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:48px;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:3px;text-transform:uppercase;font-size:13px;">${msg}</td></tr>`;
+    renderResellersCards([]);
     return;
   }
 
@@ -2226,6 +2229,7 @@ function renderResellersTable() {
       </div></td>
     </tr>
   `).join('');
+  renderResellersCards(filtered);
 }
 
 async function loadResellers() {
@@ -2450,29 +2454,6 @@ function renderResellersCards(filtered) {
       </div>
     </div>
   `).join('');
-}
-
-// ===== PATCH renderProductsTable to also render cards =====
-const _origRenderProductsTable = renderProductsTable;
-function renderProductsTable() {
-  _origRenderProductsTable();
-  // Replicate the same filter logic for cards
-  const q = (document.getElementById('prodSearch')?.value || '').toLowerCase();
-  const cat = document.getElementById('catFilter')?.value || '';
-  const filtered = products.filter(p => {
-    const matchQ = !q || p.name.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q);
-    const matchCat = !cat || p.category === cat;
-    return matchQ && matchCat;
-  });
-  renderProductsCards(filtered);
-}
-
-// ===== PATCH renderResellersTable to also render cards =====
-const _origRenderResellersTable = renderResellersTable;
-function renderResellersTable() {
-  _origRenderResellersTable();
-  const filtered = allResellers.filter(r => resellerTab === 'approved' ? r.approved : !r.approved);
-  renderResellersCards(filtered);
 }
 
 // ===== INIT =====
