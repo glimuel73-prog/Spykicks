@@ -2101,11 +2101,17 @@ async function handleImages(input) {
     renderImagePreviews();
 
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-      const res = await fetch('/admin/upload-image', { method: 'POST', body: formData });
-      if (!res.ok) throw new Error('Upload failed');
+      // Extract base64 payload from the data URL (strip "data:image/...;base64,")
+      const base64 = tempUrl.split(',')[1];
+      const mimeType = file.type;
+      const res = await fetch('/admin/upload-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64, mimeType })
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Upload failed');
       imageDataURLs[tempIdx] = data.url;
       renderImagePreviews();
     } catch (err) {
