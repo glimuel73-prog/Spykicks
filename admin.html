@@ -876,7 +876,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 /* TOAST */
 .toast {
   position: fixed;
-  bottom: 100px;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
   background: var(--accent);
@@ -2227,11 +2227,16 @@ function saveProduct() {
     products.push(product);
   }
 
-  saveProducts();
-  closeModal();
-  renderProductsTable();
-  renderDashboard();
-  showToast(editingId ? 'Product updated!' : 'Product added!');
+  try {
+    saveProducts();
+    closeModal();
+    renderProductsTable();
+    renderDashboard();
+    showToast(editingId ? 'Product updated!' : 'Product added!');
+  } catch(err) {
+    console.error('saveProduct error:', err);
+    showToast('Error saving: ' + err.message, true);
+  }
 }
 
 function editProduct(id) {
@@ -2393,13 +2398,27 @@ async function submitAddReseller() {
 
 // ===== STORAGE =====
 function saveProducts() {
-  localStorage.setItem('adminProducts', JSON.stringify(products));
-  // Also push to backend if available
+  // Strip base64 image blobs before storing/sending — they're too large
+  // Keep only image URLs (strings that don't start with 'data:')
+  const productsForStorage = products.map(p => ({
+    ...p,
+    images: (p.images || []).filter(img => typeof img === 'string' && !img.startsWith('data:'))
+  }));
+
+  try {
+    localStorage.setItem('adminProducts', JSON.stringify(productsForStorage));
+  } catch(e) {
+    console.warn('localStorage full:', e);
+  }
+
   fetch('/admin/save-products', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ products })
-  }).catch(() => {});
+    body: JSON.stringify({ products: productsForStorage })
+  }).catch(err => {
+    console.error('Save failed:', err);
+    showToast('Save failed — check connection.', true);
+  });
 }
 
 // ===== TOAST =====
