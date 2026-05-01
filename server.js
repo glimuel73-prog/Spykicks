@@ -1,29 +1,31 @@
 const express = require("express");
 const cors = require("cors");
 const Database = require("better-sqlite3");
-
-const app = express();
 const path = require("path");
 const fs = require("fs");
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// Create uploads dir if it doesn't exist
+// ================= UPLOADS DIR =================
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+app.use("/uploads", express.static(uploadsDir));
 
+// ================= IMAGE UPLOAD =================
+// Saves image to disk and returns a real URL — NOT a base64 data URL.
+// This prevents the DB and localStorage from being bloated with MB-sized strings,
+// which was causing products to silently vanish in the admin panel.
 app.post("/admin/upload-image", (req, res) => {
     const { base64, mimeType } = req.body;
     if (!base64 || !mimeType) return res.json({ success: false, error: "No image data" });
 
-    const ext = mimeType.split("/")[1] || "jpg";
-    const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const filepath = path.join(uploadsDir, filename);
-
     try {
+        const ext = (mimeType.split("/")[1] || "jpg").replace("jpeg", "jpg");
+        const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+        const filepath = path.join(uploadsDir, filename);
         fs.writeFileSync(filepath, Buffer.from(base64, "base64"));
         res.json({ success: true, url: `/uploads/${filename}` });
     } catch (err) {
@@ -31,8 +33,7 @@ app.post("/admin/upload-image", (req, res) => {
     }
 });
 
-// Serve the uploads folder statically
-app.use("/uploads", express.static(uploadsDir));
+app.use(express.static(path.join(__dirname)));
 
 // ================= DATABASE =================
 const db = new Database("./users.db");
@@ -48,7 +49,6 @@ db.exec(`
     )
 `);
 
-// Add missing columns if upgrading from old DB (ignore errors if already exist)
 ["shopName", "experience", "social"].forEach(col => {
     try { db.exec(`ALTER TABLE resellers ADD COLUMN ${col} TEXT`); } catch (e) {}
 });
@@ -64,6 +64,19 @@ db.exec(`
 app.post("/admin/delete-product", (req, res) => {
     const { id } = req.body;
     try {
+        // Also delete associated image files from disk
+        const row = db.prepare("SELECT data FROM products WHERE id = ?").get(id);
+        if (row) {
+            try {
+                const p = JSON.parse(row.data);
+                (p.images || []).forEach(url => {
+                    if (url && url.startsWith("/uploads/")) {
+                        const fp = path.join(__dirname, url);
+                        if (fs.existsSync(fp)) fs.unlinkSync(fp);
+                    }
+                });
+            } catch (e) {}
+        }
         db.prepare("DELETE FROM products WHERE id = ?").run(id);
         res.json({ success: true });
     } catch (err) {
@@ -74,11 +87,8 @@ app.post("/admin/delete-product", (req, res) => {
 // ================= APPLY =================
 app.post("/apply-reseller", (req, res) => {
     const { email, shopName, experience, social } = req.body;
-
-    if (!email || !shopName || !experience || !social) {
+    if (!email || !shopName || !experience || !social)
         return res.json({ success: false, error: "Missing fields" });
-    }
-
     try {
         db.prepare(
             "INSERT OR IGNORE INTO resellers (email, shopName, experience, social, approved) VALUES (?, ?, ?, ?, 0)"
@@ -128,7 +138,6 @@ app.get("/reseller-products", (req, res) => {
     try {
         const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
         if (!row) return res.json({ authorized: false });
-
         const rows = db.prepare("SELECT data FROM products").all();
         const products = rows
             .map(r => JSON.parse(r.data))
@@ -163,7 +172,6 @@ app.get("/admin/reseller-count", (req, res) => {
 app.post("/admin/save-products", (req, res) => {
     const { products } = req.body;
     if (!Array.isArray(products)) return res.json({ success: false });
-
     try {
         const stmt = db.prepare("INSERT OR REPLACE INTO products (id, data) VALUES (?, ?)");
         const insertMany = db.transaction((prods) => {
@@ -172,7 +180,7 @@ app.post("/admin/save-products", (req, res) => {
         insertMany(products);
         res.json({ success: true });
     } catch (err) {
-        res.json({ success: false });
+        res.json({ success: false, error: err.message });
     }
 });
 
@@ -191,7 +199,6 @@ app.get("/admin/products", (req, res) => {
 app.post("/admin/add-reseller", (req, res) => {
     const { email } = req.body;
     if (!email) return res.json({ success: false, error: "Email required" });
-
     try {
         db.prepare(
             "INSERT OR IGNORE INTO resellers (email, shopName, experience, social, approved) VALUES (?, ?, ?, ?, 1)"
@@ -205,5 +212,5 @@ app.post("/admin/add-reseller", (req, res) => {
 
 // ================= START SERVER =================
 app.listen(process.env.PORT || 3000, () => {
-    console.log("Server running");
+    console.log("Server running on port " + (process.env.PORT || 3000));
 });
