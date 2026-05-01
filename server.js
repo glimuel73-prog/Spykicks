@@ -4,21 +4,35 @@ const Database = require("better-sqlite3");
 
 const app = express();
 const path = require("path");
+const fs = require("fs");
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// ================= IMAGE UPLOAD =================
-// Accepts base64-encoded image sent as JSON { base64, mimeType }
-// No extra packages needed — the frontend converts the file to base64 before sending
+// Create uploads dir if it doesn't exist
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
 app.post("/admin/upload-image", (req, res) => {
     const { base64, mimeType } = req.body;
     if (!base64 || !mimeType) return res.json({ success: false, error: "No image data" });
-    const dataUrl = `data:${mimeType};base64,${base64}`;
-    res.json({ success: true, url: dataUrl });
+
+    const ext = mimeType.split("/")[1] || "jpg";
+    const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const filepath = path.join(uploadsDir, filename);
+
+    try {
+        fs.writeFileSync(filepath, Buffer.from(base64, "base64"));
+        res.json({ success: true, url: `/uploads/${filename}` });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
 });
 
-app.use(express.static(path.join(__dirname)));
+// Serve the uploads folder statically
+app.use("/uploads", express.static(uploadsDir));
 
 // ================= DATABASE =================
 const db = new Database("./users.db");
