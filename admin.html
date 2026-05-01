@@ -1039,12 +1039,22 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .card-table { display: flex; }
   /* Modal takes full screen, footer always visible */
   .modal-overlay { align-items: flex-end; }
-  .modal-drawer { width: 100%; height: 92vh; height: 92dvh; border-left: none; border-top: 1px solid var(--border); border-radius: 0; }
-  .modal-body { padding: 20px 16px; }
+  .modal-drawer { width: 100%; height: 95vh; height: 95dvh; border-left: none; border-top: 1px solid var(--border); border-radius: 0; }
+  .modal-body { padding: 20px 16px 8px; }
   .modal-header { padding: 18px 16px 14px; }
-  .modal-footer { padding: 14px 16px; gap: 8px; justify-content: stretch; }
-  .modal-footer .btn-cancel { flex: 1; }
-  .modal-footer .btn-save { flex: 2; }
+  .modal-footer {
+    padding: 14px 16px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+    gap: 8px;
+    justify-content: stretch;
+    /* Ensure footer is always above browser chrome */
+    min-height: 72px;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+  }
+  .modal-footer .btn-cancel { flex: 1; min-height: 48px; font-size: 13px; }
+  .modal-footer .btn-save { flex: 2; min-height: 48px; font-size: 13px; }
   .field-row, .field-row-3 { grid-template-columns: 1fr; }
   .login-box { width: calc(100vw - 32px); padding: 32px 24px; }
   .confirm-box { width: calc(100vw - 32px); padding: 28px 20px; }
@@ -2438,6 +2448,10 @@ document.addEventListener('keydown', e => {
 // ===== CLOSE OVERLAY ON BACKDROP CLICK =====
 document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+// Prevent taps inside the drawer from bubbling up to the overlay (mobile fix)
+document.getElementById('modalDrawer').addEventListener('click', e => {
+  e.stopPropagation();
 });
 
 // ===== SIDEBAR TOGGLE (MOBILE) =====
