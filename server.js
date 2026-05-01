@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const sqlite3 = require("sqlite3").verbose();
+const Database = require("better-sqlite3");
 
 const app = express();
 const path = require("path");
@@ -11,10 +11,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.static(path.join(__dirname)));
 
 // ================= DATABASE =================
-const db = new sqlite3.Database("/app/data/users.db");
+const db = new Database("/app/data/users.db");
 
-db.serialize(() => {
-    db.run(`
+db.exec(`
     CREATE TABLE IF NOT EXISTS resellers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE,
@@ -22,27 +21,30 @@ db.serialize(() => {
         experience TEXT,
         social TEXT,
         approved INTEGER DEFAULT 0
-    )`);
+    )
+`);
 
-    // Add missing columns if upgrading from old DB (ignore errors if already exist)
-    ["shopName", "experience", "social"].forEach(col => {
-        db.run(`ALTER TABLE resellers ADD COLUMN ${col} TEXT`, () => {});
-    });
+// Add missing columns if upgrading from old DB (ignore errors if already exist)
+["shopName", "experience", "social"].forEach(col => {
+    try { db.exec(`ALTER TABLE resellers ADD COLUMN ${col} TEXT`); } catch (e) {}
+});
 
-    db.run(`
+db.exec(`
     CREATE TABLE IF NOT EXISTS products (
         id TEXT PRIMARY KEY,
         data TEXT
-    )`);
-});
+    )
+`);
 
 // ================= DELETE PRODUCT =================
 app.post("/admin/delete-product", (req, res) => {
     const { id } = req.body;
-    db.run("DELETE FROM products WHERE id = ?", [id], function (err) {
-        if (err) return res.json({ success: false });
+    try {
+        db.prepare("DELETE FROM products WHERE id = ?").run(id);
         res.json({ success: true });
-    });
+    } catch (err) {
+        res.json({ success: false });
+    }
 });
 
 // ================= APPLY =================
@@ -53,84 +55,84 @@ app.post("/apply-reseller", (req, res) => {
         return res.json({ success: false, error: "Missing fields" });
     }
 
-    db.run(
-        "INSERT OR IGNORE INTO resellers (email, shopName, experience, social, approved) VALUES (?, ?, ?, ?, 0)",
-        [email, shopName, experience, social],
-        function (err) {
-            if (err) return res.json({ success: false, error: err.message });
-            res.json({ success: true });
-        }
-    );
+    try {
+        db.prepare(
+            "INSERT OR IGNORE INTO resellers (email, shopName, experience, social, approved) VALUES (?, ?, ?, ?, 0)"
+        ).run(email, shopName, experience, social);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
 });
 
 // ================= APPROVE =================
 app.post("/admin/approve-reseller", (req, res) => {
     const { email } = req.body;
-    db.run(
-        "UPDATE resellers SET approved = 1 WHERE email = ?",
-        [email],
-        function (err) {
-            if (err) return res.json({ success: false });
-            res.json({ success: true });
-        }
-    );
+    try {
+        db.prepare("UPDATE resellers SET approved = 1 WHERE email = ?").run(email);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
 });
 
 // ================= REJECT / REMOVE =================
 app.post("/admin/reject-reseller", (req, res) => {
     const { email } = req.body;
-    db.run("DELETE FROM resellers WHERE email = ?", [email], function (err) {
-        if (err) return res.json({ success: false });
+    try {
+        db.prepare("DELETE FROM resellers WHERE email = ?").run(email);
         res.json({ success: true });
-    });
+    } catch (err) {
+        res.json({ success: false });
+    }
 });
 
 // ================= CHECK USER =================
 app.post("/check-user", (req, res) => {
     const { email } = req.body;
-    db.get(
-        "SELECT * FROM resellers WHERE email = ? AND approved = 1",
-        [email],
-        (err, row) => {
-            res.json({ verified: !!row });
-        }
-    );
+    try {
+        const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
+        res.json({ verified: !!row });
+    } catch (err) {
+        res.json({ verified: false });
+    }
 });
 
 // ================= RESELLER PRODUCTS =================
 app.get("/reseller-products", (req, res) => {
     const { email } = req.query;
+    try {
+        const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
+        if (!row) return res.json({ authorized: false });
 
-    db.get(
-        "SELECT * FROM resellers WHERE email = ? AND approved = 1",
-        [email],
-        (err, row) => {
-            if (!row) return res.json({ authorized: false });
-
-            db.all("SELECT data FROM products", [], (err2, rows) => {
-                if (err2 || !rows) return res.json({ authorized: true, products: [] });
-                const products = rows
-                    .map(r => JSON.parse(r.data))
-                    .filter(p => !p.status || p.status === "active");
-                res.json({ authorized: true, products });
-            });
-        }
-    );
+        const rows = db.prepare("SELECT data FROM products").all();
+        const products = rows
+            .map(r => JSON.parse(r.data))
+            .filter(p => !p.status || p.status === "active");
+        res.json({ authorized: true, products });
+    } catch (err) {
+        res.json({ authorized: false });
+    }
 });
 
 // ================= ADMIN — RESELLERS LIST =================
 app.get("/admin/resellers", (req, res) => {
-    db.all("SELECT email, shopName, experience, social, approved FROM resellers ORDER BY id DESC", [], (err, rows) => {
-        if (err) return res.json({ resellers: [] });
+    try {
+        const rows = db.prepare("SELECT email, shopName, experience, social, approved FROM resellers ORDER BY id DESC").all();
         res.json({ resellers: rows || [] });
-    });
+    } catch (err) {
+        res.json({ resellers: [] });
+    }
 });
 
 // ================= ADMIN — RESELLER COUNT =================
 app.get("/admin/reseller-count", (req, res) => {
-    db.get("SELECT COUNT(*) as count FROM resellers WHERE approved = 1", [], (err, row) => {
+    try {
+        const row = db.prepare("SELECT COUNT(*) as count FROM resellers WHERE approved = 1").get();
         res.json({ count: row ? row.count : 0 });
-    });
+    } catch (err) {
+        res.json({ count: 0 });
+    }
 });
 
 // ================= ADMIN — SAVE PRODUCTS =================
@@ -138,19 +140,27 @@ app.post("/admin/save-products", (req, res) => {
     const { products } = req.body;
     if (!Array.isArray(products)) return res.json({ success: false });
 
-    const stmt = db.prepare("INSERT OR REPLACE INTO products (id, data) VALUES (?, ?)");
-    products.forEach(p => stmt.run(p.id, JSON.stringify(p)));
-    stmt.finalize();
-    res.json({ success: true });
+    try {
+        const stmt = db.prepare("INSERT OR REPLACE INTO products (id, data) VALUES (?, ?)");
+        const insertMany = db.transaction((prods) => {
+            for (const p of prods) stmt.run(p.id, JSON.stringify(p));
+        });
+        insertMany(products);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false });
+    }
 });
 
 // ================= ADMIN — GET PRODUCTS =================
 app.get("/admin/products", (req, res) => {
-    db.all("SELECT data FROM products", [], (err, rows) => {
-        if (err) return res.json({ products: [] });
+    try {
+        const rows = db.prepare("SELECT data FROM products").all();
         const products = rows.map(r => JSON.parse(r.data));
         res.json({ products });
-    });
+    } catch (err) {
+        res.json({ products: [] });
+    }
 });
 
 // ================= ADMIN — ADD RESELLER DIRECTLY =================
@@ -158,20 +168,18 @@ app.post("/admin/add-reseller", (req, res) => {
     const { email } = req.body;
     if (!email) return res.json({ success: false, error: "Email required" });
 
-    db.run(
-        "INSERT OR IGNORE INTO resellers (email, shopName, experience, social, approved) VALUES (?, ?, ?, ?, 1)",
-        [email, "", "", ""],
-        function (err) {
-            if (err) return res.json({ success: false, error: err.message });
-            // If it already existed, just approve it
-            db.run("UPDATE resellers SET approved = 1 WHERE email = ?", [email], () => {
-                res.json({ success: true });
-            });
-        }
-    );
+    try {
+        db.prepare(
+            "INSERT OR IGNORE INTO resellers (email, shopName, experience, social, approved) VALUES (?, ?, ?, ?, 1)"
+        ).run(email, "", "", "");
+        db.prepare("UPDATE resellers SET approved = 1 WHERE email = ?").run(email);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
 });
 
 // ================= START SERVER =================
 app.listen(process.env.PORT || 3000, () => {
-    console.log("Server running on port 3000");
+    console.log("Server running");
 });
