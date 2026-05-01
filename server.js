@@ -1,12 +1,27 @@
 const express = require("express");
 const cors = require("cors");
 const Database = require("better-sqlite3");
+const multer = require("multer");
 
 const app = express();
 const path = require("path");
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+// ================= IMAGE UPLOAD =================
+// Stores image as base64 data URL — no disk persistence needed
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB max per image
+});
+
+app.post("/admin/upload-image", upload.single("image"), (req, res) => {
+    if (!req.file) return res.json({ success: false, error: "No file received" });
+    const base64 = req.file.buffer.toString("base64");
+    const dataUrl = `data:${req.file.mimetype};base64,${base64}`;
+    res.json({ success: true, url: dataUrl });
+});
 
 app.use(express.static(path.join(__dirname)));
 
