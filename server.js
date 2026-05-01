@@ -11,7 +11,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.static(path.join(__dirname)));
 
 // ================= DATABASE =================
-const db = new sqlite3.Database("./users.db");
+const db = new sqlite3.Database("/app/data/users.db");
 
 db.serialize(() => {
     db.run(`
