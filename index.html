@@ -144,12 +144,14 @@
   .pd-thumb { width: 68px; height: 68px; background: #d4d4d4; border: 2px solid transparent; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .2s; }
   .pd-thumb:hover, .pd-thumb.active { border-color: #000; }
   .pd-thumb svg { width: 36px; height: 20px; opacity: .25; }
-  .pd-corner-badge { position: absolute; top: 20px; left: 20px; background: var(--red); color: #fff; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; }
+  .pd-corner-badge { position: absolute; top: 20px; left: 20px; background: #000; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; }
   .pd-right { width: 340px; flex-shrink: 0; background: #fff; padding: 36px 32px; display: flex; flex-direction: column; overflow-y: auto; }
   .pd-brand { font-family: 'Barlow Condensed',sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
   .pd-name { font-family: 'Barlow Condensed',sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 0; line-height: 1.1; color: #111; margin-bottom: 4px; }
   .pd-sub { font-size: 12px; color: #aaa; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
   .pd-men-tag { background: #eee; color: #666; font-family: 'Barlow Condensed',sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
+  .pd-new-tag { background: #000; color: #fff; font-family: 'Barlow Condensed',sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
+  .pd-stock-info { font-size: 12px; font-family: 'Barlow Condensed',sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
   .pd-wishlist { display: flex; align-items: center; gap: 4px; font-family: 'Barlow Condensed',sans-serif; font-size: 12px; color: #aaa; letter-spacing: 1px; cursor: pointer; }
   .pd-wishlist svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
   .pd-price { font-family: 'Barlow Condensed',sans-serif; font-weight: 900; font-size: 32px; color: #111; margin-bottom: 20px; letter-spacing: 1px; }
@@ -423,12 +425,11 @@
       <div class="pd-brand" id="pdBrand">Brand</div>
       <div class="pd-name" id="pdName">Product Name</div>
       <div class="pd-sub">
-        <span class="pd-men-tag" id="pdGenderTag">MEN'S</span>
-        <span class="pd-wishlist" onclick="pdToggleFav()">
-          <svg viewBox="0 0 24 24" id="pdFavIcon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        </span>
+        <span class="pd-new-tag" id="pdNewTag" style="display:none;"></span>
+        <span class="pd-men-tag" id="pdGenderTag" style="display:none;"></span>
       </div>
       <div class="pd-price" id="pdPrice">₱0</div>
+      <div class="pd-stock-info" id="pdStockInfo">✔ In Stock</div>
       <div class="pd-divider"></div>
       <div class="pd-desc-title">Description</div>
       <div class="pd-desc" id="pdDesc">—</div>
@@ -436,14 +437,9 @@
       <div class="pd-desc-title">Specs</div>
       <div class="pd-specs" id="pdSpecs"></div>
       <div class="pd-divider"></div>
-      <div id="pdStockRow" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#999;">Availability</span>
-        <span id="pdStockBadge" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border:1px solid;"></span>
-      </div>
       <div class="pd-size-label">Select your size — price updates</div>
       <div class="pd-sizes" id="pdSizes"></div>
       <div id="pdOrderSection" style="margin-top:4px;">
-        <div id="pdNoSizeMsg" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#aaa;margin-bottom:14px;display:none;">👆 Pick a size above to order</div>
         <div id="pdSocialBtns" style="display:flex;flex-direction:column;gap:8px;">
           <a id="pdFbBtn" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#1877F2;color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:3px;text-transform:uppercase;padding:14px;text-decoration:none;transition:opacity .2s;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -617,10 +613,16 @@ function openPD(id) {
   document.getElementById("pdBreadName").textContent = p.name;
   document.getElementById("pdTopRated").style.display = p.topRated ? "" : "none";
   const cb = document.getElementById("pdCornerBadge");
-  if (p.badge) { cb.textContent = p.badge; cb.style.display = ""; cb.style.background = p.badge === "Sale" ? "#000" : "var(--red)"; }
+  if (p.badge) { cb.textContent = p.badge; cb.style.display = ""; cb.style.background = "#000"; }
   else cb.style.display = "none";
   document.getElementById("pdBrand").textContent = p.brand;
   document.getElementById("pdName").textContent = p.name;
+
+  // New tag (badge pill under name)
+  const newTag = document.getElementById("pdNewTag");
+  if (p.badge) { newTag.textContent = p.badge; newTag.style.display = ""; }
+  else { newTag.style.display = "none"; }
+
   const genderTag = document.getElementById("pdGenderTag");
   if (p.gender && p.gender !== 'Unisex') {
     genderTag.textContent = p.gender;
@@ -632,20 +634,18 @@ function openPD(id) {
     genderTag.style.display = 'none';
   }
   document.getElementById("pdPrice").textContent = "₱" + p.basePrice;
-  // Stock badge
-  const stockBadge = document.getElementById("pdStockBadge");
+
+  // Stock info line (reseller style)
+  const stockInfo = document.getElementById("pdStockInfo");
   if (p.stock === 0) {
-    stockBadge.textContent = 'Out of Stock';
-    stockBadge.style.color = '#ff3b30';
-    stockBadge.style.borderColor = '#ff3b30';
+    stockInfo.textContent = '✖ Out of Stock';
+    stockInfo.style.color = '#ff3b30';
   } else if (p.stock <= 5) {
-    stockBadge.textContent = `Low Stock — ${p.stock} left`;
-    stockBadge.style.color = '#f59e0b';
-    stockBadge.style.borderColor = '#f59e0b';
+    stockInfo.textContent = `⚠ Low Stock — ${p.stock} left`;
+    stockInfo.style.color = '#f59e0b';
   } else {
-    stockBadge.textContent = `In Stock — ${p.stock} units`;
-    stockBadge.style.color = '#2ecc71';
-    stockBadge.style.borderColor = '#2ecc71';
+    stockInfo.textContent = `✔ ${p.stock} Units in Stock`;
+    stockInfo.style.color = '#27ae60';
   }
 
   document.getElementById("pdDesc").textContent = p.desc;
@@ -673,11 +673,6 @@ function openPD(id) {
   // Reset social buttons to no size state
   pdSelectedSize = null; pdSelectedPrice = null;
   updateSocialLinks(p);
-
-  // Fav sync
-  const favIcon = document.getElementById("pdFavIcon");
-  if (favorites.includes(id)) { favIcon.style.fill = "red"; favIcon.style.stroke = "red"; }
-  else { favIcon.style.fill = "none"; favIcon.style.stroke = "currentColor"; }
 
   document.getElementById("pdOverlay").classList.add("open");
   document.getElementById("pdDrawer").classList.add("open");
@@ -730,12 +725,8 @@ function updateSocialLinks(p) {
 
 function pdToggleFav() {
   if (!pdCurrentId) return;
-  const favIcon = document.getElementById("pdFavIcon");
-  // Find the card's fav button and toggle
   const card = document.querySelector(`#shopGrid .product-card[data-id="${pdCurrentId}"] .fav-btn`);
   if (card) { toggleFav({ stopPropagation:()=>{} }, card); }
-  if (favorites.includes(pdCurrentId)) { favIcon.style.fill = "red"; favIcon.style.stroke = "red"; }
-  else { favIcon.style.fill = "none"; favIcon.style.stroke = "currentColor"; }
 }
 
 document.addEventListener("keydown", e => { if (e.key === "Escape") closePD(); });
