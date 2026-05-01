@@ -952,13 +952,78 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .status-pill.approved { color: var(--green); border-color: var(--green); }
 .status-pill.pending { color: #f59e0b; border-color: #f59e0b; }
 
-/* RESPONSIVE */
+/* ══ HAMBURGER BUTTON ══ */
+.hamburger {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.hamburger:hover { border-color: var(--accent); color: var(--accent); }
+.hamburger svg { width: 18px; height: 18px; }
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 199;
+}
+.sidebar-backdrop.open { display: block; }
+
+/* ══ CARD TABLE (mobile product/reseller rows) ══ */
+.card-table { display: none; flex-direction: column; gap: 1px; background: var(--border); }
+.card-row { background: var(--surface); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.card-row:hover { background: var(--surface2); }
+.card-top { display: flex; align-items: center; gap: 12px; }
+.card-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.card-actions { display: flex; gap: 8px; }
+.card-field { font-size: 12px; color: var(--text-muted); }
+.card-field strong { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
+
+/* ══ RESPONSIVE ══ */
 @media (max-width: 900px) {
-  .sidebar { transform: translateX(-100%); }
+  .sidebar { transform: translateX(-100%); transition: transform .25s ease; z-index: 200; }
+  .sidebar.open { transform: translateX(0); }
   .main { margin-left: 0; }
+  .topbar { padding: 0 16px; gap: 10px; }
+  .hamburger { display: flex; }
+  .topbar-title { flex: 1; }
+  .page { padding: 20px 16px; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .stat-value { font-size: 36px; }
+  .section-hdr { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .filter-bar { width: 100%; flex-direction: column; }
+  .search-input { width: 100%; }
+  .select-filter { width: 100%; }
+  .products-table { display: none; }
+  .resellers-table { display: none; }
+  .card-table { display: flex; }
   .modal-drawer { width: 100%; }
+  .modal-body { padding: 20px 16px; }
+  .modal-header { padding: 20px 16px 16px; }
+  .modal-footer { padding: 16px; gap: 8px; }
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .login-box { width: calc(100vw - 32px); padding: 32px 24px; }
+  .confirm-box { width: calc(100vw - 32px); padding: 28px 20px; }
+  .size-price-table th, .size-price-table td { padding: 8px; }
+  .size-price-input { font-size: 13px; padding: 7px 8px; }
+}
+
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr 1fr; gap: 1px; }
+  .stat-card { padding: 16px; }
+  .stat-value { font-size: 30px; }
+  .stat-label { font-size: 8px; }
+  .btn-add { font-size: 11px; padding: 8px 12px; letter-spacing: 1px; }
+  .sizes-grid .size-check label { width: 48px; height: 48px; font-size: 11px; }
 }
 
 /* ===== LOGIN SCREEN ===== */
@@ -1060,10 +1125,14 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 </nav>
 
 <!-- MAIN -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 <div class="main">
 
   <!-- TOP BAR -->
   <div class="topbar">
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
     <div class="topbar-title" id="topbarTitle">Dashboard</div>
     <div class="topbar-actions">
       <button class="btn-add" id="addProductBtn" onclick="openModal()" style="display:none;">
@@ -1144,6 +1213,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>
       <p>No products found</p>
     </div>
+    <!-- MOBILE CARD TABLE (products) -->
+    <div class="card-table" id="productsCardTable"></div>
   </div>
 
   <!-- RESELLERS PAGE -->
@@ -1182,6 +1253,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </tr>
       </tbody>
     </table>
+    <!-- MOBILE CARD TABLE (resellers) -->
+    <div class="card-table" id="resellersCardTable"></div>
   </div>
 
 </div><!-- /main -->
@@ -2294,6 +2367,113 @@ document.addEventListener('keydown', e => {
 document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 });
+
+// ===== SIDEBAR TOGGLE (MOBILE) =====
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  sidebar.classList.toggle('open');
+  backdrop.classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('open');
+}
+
+// Close sidebar when a nav item is clicked on mobile
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 900) closeSidebar();
+  });
+});
+
+// ===== MOBILE CARD TABLE — PRODUCTS =====
+function renderProductsCards(filtered) {
+  const wrap = document.getElementById('productsCardTable');
+  if (!wrap) return;
+  if (!filtered || !filtered.length) {
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = filtered.map(p => {
+    const imgHTML = p.images && p.images[0]
+      ? `<img src="${p.images[0]}" style="width:44px;height:44px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;" alt="">`
+      : `<div style="width:44px;height:44px;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 20M6 8h.01"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg></div>`;
+    return `<div class="card-row">
+      <div class="card-top">
+        ${imgHTML}
+        <div style="flex:1;min-width:0;">
+          <div class="prod-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+          <div class="prod-sku">${p.brand ? p.brand + (p.sku ? ' — ' + p.sku : '') : (p.sku || '')}</div>
+        </div>
+        <div class="price-cell" style="font-size:16px;">₱${Number(p.price).toLocaleString()}</div>
+      </div>
+      <div class="card-meta">
+        ${stockPill(p.stock)}
+        <span class="cat-tag">${p.category || '—'}</span>
+        ${p.resellerPrice ? `<span style="font-size:11px;color:var(--text-dim);">Reseller ₱${Number(p.resellerPrice).toLocaleString()}</span>` : ''}
+      </div>
+      ${(p.sizes||[]).length ? `<div class="sizes-preview">${(p.sizes||[]).slice(0,6).map(s=>`<span class="size-tag">${typeof s === 'object' ? s.size : s}</span>`).join('')}${(p.sizes||[]).length>6?`<span class="size-tag">+${p.sizes.length-6}</span>`:''}</div>` : ''}
+      <div class="card-actions">
+        <button class="btn-edit" style="flex:1;" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn-delete" style="flex:1;" onclick="askDelete('${p.id}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== MOBILE CARD TABLE — RESELLERS =====
+function renderResellersCards(filtered) {
+  const wrap = document.getElementById('resellersCardTable');
+  if (!wrap) return;
+  if (!filtered || !filtered.length) {
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = filtered.map(r => `
+    <div class="card-row">
+      <div class="card-top" style="flex-wrap:wrap;gap:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${r.email}</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">${r.shopName || '—'}</div>
+        </div>
+        ${r.approved ? `<span class="status-pill approved">Approved</span>` : `<span class="status-pill pending">Pending</span>`}
+      </div>
+      ${r.experience ? `<div class="card-field"><strong>Experience</strong>${r.experience}</div>` : ''}
+      ${r.social ? `<div class="card-field"><strong>Social</strong>${r.social}</div>` : ''}
+      <div class="card-actions">
+        ${!r.approved ? `<button class="btn-edit" style="flex:1;" onclick="approveReseller('${r.email}')">✓ Approve</button>` : ''}
+        <button class="btn-delete" style="flex:1;" onclick="rejectReseller('${r.email}')">
+          ${r.approved ? 'Remove' : '✗ Reject'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== PATCH renderProductsTable to also render cards =====
+const _origRenderProductsTable = renderProductsTable;
+function renderProductsTable() {
+  _origRenderProductsTable();
+  // Replicate the same filter logic for cards
+  const q = (document.getElementById('prodSearch')?.value || '').toLowerCase();
+  const cat = document.getElementById('catFilter')?.value || '';
+  const filtered = products.filter(p => {
+    const matchQ = !q || p.name.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q);
+    const matchCat = !cat || p.category === cat;
+    return matchQ && matchCat;
+  });
+  renderProductsCards(filtered);
+}
+
+// ===== PATCH renderResellersTable to also render cards =====
+const _origRenderResellersTable = renderResellersTable;
+function renderResellersTable() {
+  _origRenderResellersTable();
+  const filtered = allResellers.filter(r => resellerTab === 'approved' ? r.approved : !r.approved);
+  renderResellersCards(filtered);
+}
 
 // ===== INIT =====
 renderSizeGrid();
