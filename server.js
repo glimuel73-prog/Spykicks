@@ -11,9 +11,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.static(path.join(__dirname)));
 
 // ================= DATABASE =================
-const fs = require("fs");
-fs.mkdirSync("/app/data", { recursive: true });
-const db = new Database("/app/data/users.db");
+const db = new Database("./users.db");
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS resellers (
