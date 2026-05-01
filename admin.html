@@ -2416,12 +2416,8 @@ async function submitAddReseller() {
 
 // ===== STORAGE =====
 function saveProducts() {
-  // Strip base64 image blobs before storing/sending — they're too large
-  // Keep only image URLs (strings that don't start with 'data:')
-  const productsForStorage = products.map(p => ({
-    ...p,
-    images: (p.images || []).filter(img => typeof img === 'string' && !img.startsWith('data:'))
-  }));
+  // Keep all images including base64 data URLs (upload endpoint returns base64)
+  const productsForStorage = products.map(p => ({ ...p }));
 
   try {
     localStorage.setItem('adminProducts', JSON.stringify(productsForStorage));
