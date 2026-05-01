@@ -12,9 +12,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "better-sqlite3": "^9.4.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "nodemailer": "^8.0.7",
-    "sqlite3": "^6.0.1"
+    "nodemailer": "^8.0.7"
   }
 }
