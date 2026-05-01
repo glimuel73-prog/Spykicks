@@ -899,7 +899,7 @@ async function applyReseller() {
       body: JSON.stringify({ email, shopName, experience, social })
     });
     const data = await res.json();
-    if (data.success) alert("Application sent! Check admin email."); else alert("Error: " + data.error);
+    if (data.success) alert("Application sent! Please wait for the approval. It might take a few minutes."); else alert("Error: " + data.error);
   } catch (err) { alert("Server not reachable!"); console.error(err); }
 }
 
