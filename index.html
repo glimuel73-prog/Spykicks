@@ -894,7 +894,7 @@ async function applyReseller() {
   const social = document.getElementById("social").value;
   if (!email || !shopName || !experience || !social) { alert("All fields required!"); return; }
   try {
-    const res = await fetch("http://localhost:3000/apply-reseller", {
+    const res = await fetch("https://spykicks-production.up.railway.app/apply-reseller", {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ email, shopName, experience, social })
     });
