@@ -455,6 +455,7 @@ body {
   width: 600px;
   max-width: 100%;
   height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   border-left: 1px solid var(--border);
   display: flex;
@@ -838,6 +839,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   position: sticky;
   bottom: 0;
   background: var(--surface);
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .btn-cancel {
@@ -988,6 +991,31 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .card-field { font-size: 12px; color: var(--text-muted); }
 .card-field strong { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
 
+/* ══ FLOATING ADD BUTTON (mobile) ══ */
+.fab-add {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  background: var(--accent);
+  color: var(--black);
+  border: none;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 300;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s, background .15s;
+}
+.fab-add:hover { transform: scale(1.08); background: var(--accent-dark); }
+.fab-add:active { transform: scale(0.95); }
+
 /* ══ RESPONSIVE ══ */
 @media (max-width: 900px) {
   .sidebar { transform: translateX(-100%); transition: transform .25s ease; z-index: 200; }
@@ -996,7 +1024,10 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .topbar { padding: 0 16px; gap: 10px; }
   .hamburger { display: flex; }
   .topbar-title { flex: 1; }
-  .page { padding: 20px 16px; }
+  /* Hide the inline "Add Product" button — replaced by FAB */
+  #addProductBtn { display: none !important; }
+  .fab-add { display: flex; }
+  .page { padding: 20px 16px 80px; /* bottom padding so FAB never covers content */ }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .stat-value { font-size: 36px; }
   .section-hdr { flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -1006,23 +1037,29 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .products-table { display: none; }
   .resellers-table { display: none; }
   .card-table { display: flex; }
-  .modal-drawer { width: 100%; }
+  /* Modal takes full screen, footer always visible */
+  .modal-overlay { align-items: flex-end; }
+  .modal-drawer { width: 100%; height: 92vh; height: 92dvh; border-left: none; border-top: 1px solid var(--border); border-radius: 0; }
   .modal-body { padding: 20px 16px; }
-  .modal-header { padding: 20px 16px 16px; }
-  .modal-footer { padding: 16px; gap: 8px; }
+  .modal-header { padding: 18px 16px 14px; }
+  .modal-footer { padding: 14px 16px; gap: 8px; justify-content: stretch; }
+  .modal-footer .btn-cancel { flex: 1; }
+  .modal-footer .btn-save { flex: 2; }
   .field-row, .field-row-3 { grid-template-columns: 1fr; }
   .login-box { width: calc(100vw - 32px); padding: 32px 24px; }
   .confirm-box { width: calc(100vw - 32px); padding: 28px 20px; }
   .size-price-table th, .size-price-table td { padding: 8px; }
   .size-price-input { font-size: 13px; padding: 7px 8px; }
+  /* Dashboard table hidden on mobile too */
+  #dashRecentTable { display: none; }
+  #dashRecentCards { display: flex; }
 }
 
 @media (max-width: 480px) {
   .stats-row { grid-template-columns: 1fr 1fr; gap: 1px; }
   .stat-card { padding: 16px; }
-  .stat-value { font-size: 30px; }
+  .stat-value { font-size: 28px; }
   .stat-label { font-size: 8px; }
-  .btn-add { font-size: 11px; padding: 8px 12px; letter-spacing: 1px; }
   .sizes-grid .size-check label { width: 48px; height: 48px; font-size: 11px; }
 }
 
@@ -1178,6 +1215,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </thead>
       <tbody id="dashRecentBody"></tbody>
     </table>
+    <!-- MOBILE CARD TABLE (dashboard recent) -->
+    <div class="card-table" id="dashRecentCards" style="display:none;"></div>
   </div>
 
   <!-- PRODUCTS PAGE -->
@@ -1257,6 +1296,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     <div class="card-table" id="resellersCardTable"></div>
   </div>
 
+<!-- FLOATING ADD BUTTON (mobile, products page only) -->
+<button class="fab-add" id="fabAddBtn" onclick="openModal()" style="display:none;" aria-label="Add Product">+</button>
 </div><!-- /main -->
 
 <!-- ===== PRODUCT MODAL ===== -->
@@ -1708,6 +1749,8 @@ function showPage(page, el) {
   el.classList.add('active');
   document.getElementById('topbarTitle').textContent = el.textContent.trim();
   document.getElementById('addProductBtn').style.display = page === 'products' ? '' : 'none';
+  const fab = document.getElementById('fabAddBtn');
+  if (fab) fab.style.display = page === 'products' ? 'flex' : 'none';
 
   if (page === 'products') renderProductsTable();
   if (page === 'dashboard') renderDashboard();
@@ -1724,8 +1767,10 @@ function renderDashboard() {
 
   const recent = [...products].slice(-5).reverse();
   const tbody = document.getElementById('dashRecentBody');
+  const dashCards = document.getElementById('dashRecentCards');
   if (!recent.length) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:48px; color:var(--text-dim); font-family:'Barlow Condensed',sans-serif; letter-spacing:3px; text-transform:uppercase; font-size:13px;">No products yet</td></tr>`;
+    if (dashCards) dashCards.innerHTML = `<div class="card-row" style="text-align:center;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:3px;text-transform:uppercase;font-size:12px;justify-content:center;">No products yet</div>`;
     return;
   }
   tbody.innerHTML = recent.map(p => `
@@ -1742,6 +1787,29 @@ function renderDashboard() {
       <td><div class="sizes-preview">${(p.sizes||[]).slice(0,4).map(s=>`<span class="size-tag">${typeof s === 'object' ? s.size : s}</span>`).join('')}${(p.sizes||[]).length>4?`<span class="size-tag">+${p.sizes.length-4}</span>`:''}</div></td>
     </tr>
   `).join('');
+
+  // Render dashboard mobile cards
+  if (dashCards) {
+    dashCards.innerHTML = recent.map(p => {
+      const imgHTML = p.images && p.images[0]
+        ? `<img src="${p.images[0]}" style="width:44px;height:44px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;" alt="">`
+        : `<div style="width:44px;height:44px;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 20M6 8h.01"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg></div>`;
+      return `<div class="card-row">
+        <div class="card-top">
+          ${imgHTML}
+          <div style="flex:1;min-width:0;">
+            <div class="prod-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+            <div class="prod-sku">${p.brand || ''}${p.sku ? ' — ' + p.sku : ''}</div>
+          </div>
+          <div class="price-cell" style="font-size:16px;">₱${Number(p.price).toLocaleString()}</div>
+        </div>
+        <div class="card-meta">
+          ${stockPill(p.stock)}
+          <span class="cat-tag">${p.category || '—'}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
 
   // try load reseller count
   loadResellerCount();
