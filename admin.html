@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Spykick's</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black: #0a0a0a;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --surface3: #222222;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #f0f0f0;
+  --text-muted: #888;
+  --text-dim: #444;
+  --accent: #808080;
+  --accent-dark: #c4d900;
+  --red: #ff3b30;
+  --green: #2ecc71;
+  --blue: #3b82f6;
+  --sidebar-w: 240px;
+}
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--black);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 200;
+}
+
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-logo .brand {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.sidebar-logo .brand span { color: var(--accent); }
+
+.sidebar-logo .tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.sidebar-nav { flex: 1; padding: 20px 0; overflow-y: auto; }
+
+.nav-section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 0 24px 8px;
+  margin-top: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+
+.nav-item:hover { color: var(--text); background: var(--surface2); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(232,255,0,0.04); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-footer .admin-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.sidebar-footer .admin-email {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-logout {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* ===== MAIN ===== */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ===== TOP BAR ===== */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: var(--black);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 9px 20px;
+  border: none;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.btn-add:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.btn-add svg { width: 14px; height: 14px; }
+
+/* ===== CONTENT PAGES ===== */
+.page { display: none; padding: 40px; }
+.page.active { display: block; }
+
+/* ===== STATS ROW ===== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  margin-bottom: 40px;
+  border: 1px solid var(--border);
+}
+
+.stat-card {
+  background: var(--surface);
+  padding: 24px;
+}
+
+.stat-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.stat-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 48px;
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -1px;
+}
+
+.stat-value.accent { color: var(--accent); }
+.stat-value.green { color: var(--green); }
+.stat-value.red { color: var(--red); }
+
+/* ===== SECTION HEADER ===== */
+.section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-hdr h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  outline: none;
+  width: 220px;
+  transition: border-color .2s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text-dim); }
+
+.select-filter {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  outline: none;
+  cursor: pointer;
+}
+.select-filter:focus { border-color: var(--accent); }
+
+/* ===== PRODUCTS TABLE ===== */
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.products-table th {
+  background: var(--surface2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.products-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.products-table tr:last-child td { border-bottom: none; }
+.products-table tbody tr { transition: background .15s; }
+.products-table tbody tr:hover { background: var(--surface2); }
+
+.prod-thumb {
+  width: 44px;
+  height: 44px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.prod-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prod-thumb-placeholder {
+  opacity: .2;
+  width: 22px;
+  height: 22px;
+}
+
+.prod-name-cell { display: flex; align-items: center; gap: 12px; }
+.prod-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 1px; text-transform: uppercase; color: var(--text); }
+.prod-sku { font-size: 11px; color: var(--text-dim); letter-spacing: .5px; margin-top: 2px; }
+
+.price-cell {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border: 1px solid;
+}
+
+.stock-pill.in-stock { color: var(--green); border-color: var(--green); }
+.stock-pill.low-stock { color: #f59e0b; border-color: #f59e0b; }
+.stock-pill.out-stock { color: var(--red); border-color: var(--red); }
+
+.cat-tag {
+  display: inline-block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+}
+
+.sizes-preview {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.size-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+}
+
+.action-btns { display: flex; gap: 6px; }
+
+.btn-edit, .btn-delete {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all .15s;
+  background: none;
+}
+
+.btn-edit { color: var(--text-muted); border-color: var(--border2); }
+.btn-edit:hover { border-color: var(--text-muted); color: var(--text); }
+
+.btn-delete { color: var(--red); border-color: rgba(255,59,48,0.3); }
+.btn-delete:hover { background: var(--red); color: white; border-color: var(--red); }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 80px 24px;
+}
+
+.empty-state svg { opacity: .1; width: 64px; height: 64px; margin: 0 auto 16px; display: block; }
+
+.empty-state p {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  display: none;
+  align-items: flex-start;
+  justify-content: flex-end;
+  backdrop-filter: blur(2px);
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal-drawer {
+  background: var(--surface);
+  width: 600px;
+  max-width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  animation: slideIn .25s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.modal-header {
+  padding: 28px 32px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+
+.modal-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.modal-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+
+.modal-body { padding: 32px; flex: 1; }
+
+.field-group { margin-bottom: 22px; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.field-group label {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.field-group input,
+.field-group textarea,
+.field-group select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.field-group input:focus,
+.field-group textarea:focus,
+.field-group select:focus { border-color: var(--accent); }
+
+.field-group textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.field-group select option { background: var(--surface2); }
+.field-group input::placeholder,
+.field-group textarea::placeholder { color: var(--text-dim); font-size: 13px; }
+
+/* SIZES */
+.sizes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.size-check {
+  position: relative;
+}
+
+.size-check input[type=checkbox] { display: none; }
+
+.size-check label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--text-muted);
+  margin-bottom: 0;
+  position: relative;
+}
+
+.size-check input[type=checkbox]:checked + label {
+  border-color: var(--accent);
+  background: rgba(232,255,0,0.10);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.size-check label:hover { border-color: var(--text-muted); color: var(--text); }
+
+.size-check .price-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  display: none;
+}
+.size-check input[type=checkbox]:checked + label .price-dot { display: block; }
+
+/* SIZE PRICE TABLE */
+.size-price-wrap {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  display: none;
+  animation: fadeSlideIn .2s ease;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.size-price-wrap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface3);
+  border-bottom: 1px solid var(--border);
+}
+.size-price-wrap-header span {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.size-price-wrap-header .count-badge {
+  background: var(--accent);
+  color: var(--black);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+}
+.size-price-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.size-price-table th {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface3);
+}
+.size-price-table th:nth-child(2) {
+  color: #3b82f6;
+  border-top: 2px solid #3b82f6;
+  background: rgba(59,130,246,0.04);
+}
+.size-price-table th:nth-child(3) {
+  color: var(--green);
+  border-top: 2px solid var(--green);
+  background: rgba(46,204,113,0.04);
+}
+.size-price-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.size-price-table tbody tr:last-child td { border-bottom: none; }
+.size-price-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.size-price-table .size-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  width: 64px;
+}
+.size-price-table td:nth-child(2) { background: rgba(59,130,246,0.03); }
+.size-price-table td:nth-child(3) { background: rgba(46,204,113,0.03); }
+.size-price-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color .2s, background .2s;
+}
+.size-price-input:focus { background: var(--surface3); }
+.size-price-input::placeholder { color: var(--text-dim); font-size: 12px; }
+td:nth-child(2) .size-price-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow: 0 0 0 2px rgba(46,204,113,0.15); }
+
+/* SPECS */
+.specs-list { display: flex; flex-direction: column; gap: 10px; }
+
+.spec-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.spec-row input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.spec-row input:focus { border-color: var(--accent); }
+.spec-row input::placeholder { color: var(--text-dim); font-size: 12px; }
+
+.spec-del {
+  background: none;
+  border: 1px solid rgba(255,59,48,.3);
+  color: var(--red);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+
+.spec-del:hover { background: var(--red); color: white; }
+
+.btn-add-spec {
+  background: none;
+  border: 1px dashed var(--border2);
+  color: var(--text-dim);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all .2s;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.btn-add-spec:hover { border-color: var(--accent); color: var(--accent); }
+
+/* IMAGE UPLOAD */
+.image-upload-zone {
+  border: 1px dashed var(--border2);
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+
+.image-upload-zone:hover { border-color: var(--accent); background: rgba(232,255,0,0.02); }
+.image-upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+.upload-icon { font-size: 28px; margin-bottom: 8px; opacity: .4; }
+.upload-text { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
+
+.image-previews {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.img-preview {
+  aspect-ratio: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  position: relative;
+}
+
+.img-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.img-preview-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.7);
+  border: none;
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background .15s;
+}
+
+.img-preview-del:hover { background: var(--red); }
+
+/* SECTION DIVIDER */
+.modal-section {
+  margin-bottom: 28px;
+}
+
+.modal-section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(232,255,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-section-label::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* FOOTER */
+.modal-footer {
+  padding: 20px 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+}
+
+.btn-cancel {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+
+.btn-save {
+  background: var(--accent);
+  border: none;
+  color: var(--black);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-save:hover { background: var(--accent-dark); transform: translateY(-1px); }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--accent);
+  color: var(--black);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  z-index: 9999;
+  opacity: 0;
+  transition: all .3s;
+  pointer-events: none;
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--red); color: white; }
+
+/* DELETE CONFIRM */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-overlay.open { display: flex; }
+
+.confirm-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 40px;
+  width: 380px;
+  text-align: center;
+}
+
+.confirm-box h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  color: var(--red);
+}
+
+.confirm-box p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+.confirm-box .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+
+/* RESELLERS PAGE */
+.resellers-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }
+.resellers-table th { background: var(--surface2); font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim); padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+.resellers-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.resellers-table tr:last-child td { border-bottom: none; }
+.resellers-table tbody tr:hover { background: var(--surface2); }
+
+.status-pill {
+  display: inline-block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border: 1px solid;
+}
+.status-pill.approved { color: var(--green); border-color: var(--green); }
+.status-pill.pending { color: #f59e0b; border-color: #f59e0b; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .main { margin-left: 0; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .modal-drawer { width: 100%; }
+}
+
+/* ===== LOGIN SCREEN ===== */
+#loginScreen {
+  position: fixed; inset: 0; background: var(--black);
+  z-index: 9999; display: flex; align-items: center; justify-content: center;
+}
+#loginScreen.hidden { display: none; }
+
+.login-box {
+  width: 400px; background: var(--surface);
+  border: 1px solid var(--border); padding: 48px 40px 40px;
+  animation: fadeUp .3s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.login-logo { font-family: 'Barlow Condensed',sans-serif; font-weight: 900; font-size: 22px; letter-spacing: 4px; text-transform: uppercase; color: var(--text); margin-bottom: 4px; }
+.login-logo span { color: var(--accent); }
+.login-subtitle { font-family: 'Barlow Condensed',sans-serif; font-size: 9px; letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 36px; }
+.login-field-label { font-family: 'Barlow Condensed',sans-serif; font-size: 9px; letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; display: block; }
+.login-input-wrap { position: relative; margin-bottom: 20px; }
+.login-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Barlow',sans-serif; font-size: 15px; padding: 13px 44px 13px 16px; outline: none; transition: border-color .2s; letter-spacing: 2px; }
+.login-input:focus { border-color: var(--accent); }
+.toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 0; display: flex; align-items: center; transition: color .15s; }
+.toggle-pw:hover { color: var(--text-muted); }
+.toggle-pw svg { width: 16px; height: 16px; }
+.login-btn { width: 100%; background: var(--accent); color: var(--black); font-family: 'Barlow Condensed',sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 14px; border: none; cursor: pointer; transition: background .15s, transform .1s; margin-top: 4px; }
+.login-btn:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.login-btn:disabled { background: var(--border2); color: var(--text-dim); cursor: not-allowed; transform: none; }
+.login-error { background: rgba(255,59,48,.1); border: 1px solid rgba(255,59,48,.3); color: var(--red); font-family: 'Barlow Condensed',sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 14px; margin-bottom: 16px; display: none; }
+.login-error.visible { display: block; }
+.login-lockout { text-align: center; margin-top: 16px; font-family: 'Barlow Condensed',sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); display: none; }
+.login-lockout.visible { display: block; }
+.login-lockout span { color: var(--red); }
+.login-attempts { text-align: right; font-family: 'Barlow Condensed',sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Spykick's <span>Admin</span></div>
+    <div class="login-subtitle">Restricted Access — Authorize to Continue</div>
+
+    <div class="login-error" id="loginError">Incorrect password</div>
+
+    <label class="login-field-label">Password</label>
+    <div class="login-input-wrap">
+      <input class="login-input" type="password" id="loginInput" placeholder="••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="toggle-pw" onclick="togglePw()" tabindex="-1" type="button">
+        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Enter Admin Panel</button>
+
+    <div class="login-lockout" id="loginLockout">
+      Too many attempts — locked for <span id="lockTimer">30</span>s
+    </div>
+    <div class="login-attempts" id="loginAttempts"></div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">Spykick's <span>Admin</span></div>
+    <div class="tag">Control Panel</div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item active" onclick="showPage('dashboard', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('products', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>
+      Products
+    </div>
+
+    <div class="nav-section-label" style="margin-top:16px;">Management</div>
+    <div class="nav-item" onclick="showPage('resellers', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Resellers
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="admin-label">Logged in as</div>
+    <div class="admin-email">Admin</div>
+    <button class="btn-logout" onclick="adminLogout()">← Back to Store</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <button class="btn-add" id="addProductBtn" onclick="openModal()" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div id="page-dashboard" class="page active">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Products</div>
+        <div class="stat-value accent" id="statProducts">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Resellers</div>
+        <div class="stat-value" id="statResellers">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Low Stock</div>
+        <div class="stat-value red" id="statLow">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Out of Stock</div>
+        <div class="stat-value red" id="statOut">0</div>
+      </div>
+    </div>
+
+    <div class="section-hdr">
+      <h2>Recent Products</h2>
+    </div>
+    <table class="products-table" id="dashRecentTable">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Category</th>
+          <th>Stock</th>
+          <th>Sizes</th>
+        </tr>
+      </thead>
+      <tbody id="dashRecentBody"></tbody>
+    </table>
+  </div>
+
+  <!-- PRODUCTS PAGE -->
+  <div id="page-products" class="page">
+    <div class="section-hdr">
+      <h2>All Products</h2>
+      <div class="filter-bar">
+        <input type="text" class="search-input" placeholder="Search products…" id="prodSearch" oninput="renderProductsTable()">
+        <select class="select-filter" id="catFilter" onchange="renderProductsTable()">
+          <option value="">All Categories</option>
+          <option value="sneakers">Sneakers</option>
+          <option value="apparel">Apparel</option>
+          <option value="accessories">Accessories</option>
+          <option value="bags">Bags</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Category</th>
+          <th>Sizes</th>
+          <th>Stock</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productsTableBody"></tbody>
+    </table>
+    <div id="productsEmpty" class="empty-state" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>
+      <p>No products found</p>
+    </div>
+  </div>
+
+  <!-- RESELLERS PAGE -->
+  <div id="page-resellers" class="page">
+    <div class="section-hdr">
+      <h2>Reseller Applications</h2>
+      <div class="filter-bar">
+        <button class="btn-add" onclick="openAddResellerModal()" style="background:var(--green);color:#000;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Reseller
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div style="display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);width:fit-content;">
+      <button id="tabPending" onclick="switchResellerTab('pending')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:10px 24px;border:none;cursor:pointer;background:var(--accent);color:var(--black);font-weight:700;transition:all .15s;">Pending</button>
+      <button id="tabApproved" onclick="switchResellerTab('approved')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:10px 24px;border:none;cursor:pointer;background:var(--surface2);color:var(--text-muted);font-weight:700;transition:all .15s;">Approved</button>
+    </div>
+
+    <table class="resellers-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Shop Name</th>
+          <th>Experience</th>
+          <th>Social / Contact</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="resellersTableBody">
+        <tr>
+          <td colspan="5" style="text-align:center; padding:48px; color:var(--text-dim); font-family:'Barlow Condensed',sans-serif; letter-spacing:3px; text-transform:uppercase; font-size:13px;">
+            Loading...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ===== PRODUCT MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-drawer" id="modalDrawer">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Product</h2>
+      <button class="modal-close" onclick="closeModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- BASIC INFO -->
+      <div class="modal-section">
+        <div class="modal-section-label">Basic Info</div>
+
+        <div class="field-group">
+          <label>Product Name *</label>
+          <input type="text" id="fName" placeholder="e.g. Air Max 90 OG">
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label>Brand</label>
+            <input type="text" id="fBrand" placeholder="e.g. Nike">
+          </div>
+          <div class="field-group">
+            <label>Category *</label>
+            <select id="fCategory">
+              <option value="">Select category</option>
+              <option value="sneakers">Sneakers</option>
+              <option value="apparel">Apparel</option>
+              <option value="accessories">Accessories</option>
+              <option value="bags">Bags</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Gender</label>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:10px 18px;transition:all .15s;flex:1;justify-content:center;" id="genderLabelMale">
+              <input type="radio" name="fGender" id="fGenderMale" value="male" onchange="updateGenderUI()" style="display:none;">
+              ♂ Male
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:10px 18px;transition:all .15s;flex:1;justify-content:center;" id="genderLabelFemale">
+              <input type="radio" name="fGender" id="fGenderFemale" value="female" onchange="updateGenderUI()" style="display:none;">
+              ♀ Female
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);border:1px solid var(--border);padding:10px 18px;transition:all .15s;flex:1;justify-content:center;" id="genderLabelUnisex">
+              <input type="radio" name="fGender" id="fGenderUnisex" value="unisex" onchange="updateGenderUI()" style="display:none;">
+              ⚥ Unisex
+            </label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Description</label>
+          <textarea id="fDescription" placeholder="Write a product description..."></textarea>
+        </div>
+      </div>
+
+      <!-- PRICING & STOCK -->
+      <div class="modal-section">
+        <div class="modal-section-label">Pricing & Stock</div>
+
+        <div class="field-row-3">
+          <div class="field-group">
+            <label>Default Retail Price (₱) *</label>
+            <input type="number" id="fPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
+          </div>
+          <div class="field-group">
+            <label>Default Reseller Price (₱)</label>
+            <input type="number" id="fResellerPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
+          </div>
+          <div class="field-group">
+            <label>Stock Qty *</label>
+            <input type="number" id="fStock" placeholder="0">
+          </div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:-10px;margin-bottom:16px;">
+          Set per-size prices below — these defaults are used when a size has no price set
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label>SKU / Model No.</label>
+            <input type="text" id="fSKU" placeholder="e.g. NK-AM90-001">
+          </div>
+          <div class="field-group">
+            <label>Colorway</label>
+            <input type="text" id="fColorway" placeholder="e.g. White/Black">
+          </div>
+        </div>
+      </div>
+
+      <!-- SIZES -->
+      <div class="modal-section">
+        <div class="modal-section-label">Sizes — Select to Set Buyer & Reseller Prices</div>
+
+        <div class="field-group" style="margin-bottom:10px;">
+          <label>Size Type</label>
+          <select id="fSizeType" onchange="renderSizeGrid()">
+            <option value="footwear">Footwear (US)</option>
+            <option value="apparel">Apparel (S–3XL)</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div id="sizeGridWrap" class="sizes-grid"></div>
+
+        <div id="customSizeWrap" style="display:none; margin-top:10px;">
+          <div class="field-group">
+            <label>Custom Sizes (comma-separated)</label>
+            <input type="text" id="fCustomSizes" placeholder="e.g. 28, 29, 30, 32" oninput="renderSizePriceTable()">
+          </div>
+        </div>
+
+        <!-- Per-size pricing table -->
+        <div class="size-price-wrap" id="sizePriceWrap">
+          <div class="size-price-wrap-header">
+            <span>💰 Set Prices Per Size</span>
+            <span class="count-badge" id="sizePriceCount">0 sizes</span>
+          </div>
+          <table class="size-price-table" id="sizePriceTable">
+            <thead>
+              <tr>
+                <th>Size</th>
+                <th>🛍 Buyer Price (₱)</th>
+                <th>🤝 Reseller Price (₱)</th>
+              </tr>
+            </thead>
+            <tbody id="sizePriceBody"></tbody>
+          </table>
+        </div>
+        <div id="sizePriceHint" style="margin-top:12px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);padding:12px;border:1px dashed var(--border);text-align:center;">
+          ☝ Select sizes above — buyer &amp; reseller prices will appear per size
+        </div>
+      </div>
+
+      <!-- SPECS -->
+      <div class="modal-section">
+        <div class="modal-section-label">Specifications</div>
+        <div class="specs-list" id="specsList"></div>
+        <button class="btn-add-spec" onclick="addSpec()">+ Add Specification</button>
+      </div>
+
+      <!-- IMAGES -->
+      <div class="modal-section">
+        <div class="modal-section-label">Product Images</div>
+
+        <div class="image-upload-zone" id="dropZone">
+          <input type="file" id="fImages" accept="image/*" multiple onchange="handleImages(this)">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">Click or drag images here</div>
+          <div style="font-size:11px; color:var(--text-dim); margin-top:6px; font-family:'Barlow Condensed',sans-serif; letter-spacing:2px;">JPG, PNG, WEBP — Max 5MB each</div>
+        </div>
+
+        <div class="image-previews" id="imagePreviews"></div>
+      </div>
+
+      <!-- EXTRA FLAGS -->
+      <div class="modal-section">
+        <div class="modal-section-label">Visibility</div>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Badge Label</label>
+            <input type="text" id="fBadge" placeholder="e.g. NEW, HOT, SALE">
+          </div>
+          <div class="field-group">
+            <label>Status</label>
+            <select id="fStatus">
+              <option value="active">Active</option>
+              <option value="hidden">Hidden</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>Delete Product?</h3>
+    <p>This action cannot be undone. The product will be permanently removed.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-save" style="background:var(--red);" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD RESELLER MODAL -->
+<div class="modal-overlay" id="addResellerOverlay">
+  <div class="modal-drawer" style="width:420px;">
+    <div class="modal-header">
+      <h2>Add Reseller</h2>
+      <button class="modal-close" onclick="closeAddResellerModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">Manually approve a reseller by email. They will immediately have access to the reseller dashboard.</p>
+      <div class="field-group">
+        <label>Email Address *</label>
+        <input type="email" id="addResellerEmail" placeholder="reseller@email.com" onkeydown="if(event.key==='Enter')submitAddReseller()">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddResellerModal()">Cancel</button>
+      <button class="btn-save" style="background:var(--green);" onclick="submitAddReseller()">Add & Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== AUTH =====
+// SHA-256 hash of "Spykick@Admin2026!" — change by hashing your own password at:
+// https://emn178.github.io/online-tools/sha256.html
+const ADMIN_HASH = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
+const SESSION_KEY = "spykick_admin_session";
+const SESSION_DURATION = 2 * 60 * 60 * 1000; // 2 hours
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_SECONDS = 30;
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+async function deleteProduct(id) {
+  await fetch("/admin/delete-product", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id })
+  });
+
+  // remove locally
+  products = products.filter(p => p.id !== id);
+
+  renderProducts();
+}
+
+function getAttemptData() {
+  try { return JSON.parse(sessionStorage.getItem("adminAttempts") || '{"count":0,"lockedUntil":0}'); }
+  catch { return { count: 0, lockedUntil: 0 }; }
+}
+
+function saveAttemptData(data) {
+  sessionStorage.setItem("adminAttempts", JSON.stringify(data));
+}
+
+function checkSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+    if (s && s.token && Date.now() < s.expires) {
+      document.getElementById("loginScreen").classList.add("hidden");
+      return true;
+    }
+  } catch {}
+  return false;
+}
+
+function createSession() {
+  const token = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ token, expires: Date.now() + SESSION_DURATION }));
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+async function doLogin() {
+  const attempts = getAttemptData();
+  const now = Date.now();
+
+  if (now < attempts.lockedUntil) {
+    showLockout(Math.ceil((attempts.lockedUntil - now) / 1000));
+    return;
+  }
+
+  const pw = document.getElementById("loginInput").value;
+  if (!pw) return;
+
+  const hash = await sha256(pw);
+
+  if (hash === ADMIN_HASH) {
+    // Correct — clear attempts, create session
+    saveAttemptData({ count: 0, lockedUntil: 0 });
+    createSession();
+    document.getElementById("loginScreen").classList.add("hidden");
+    document.getElementById("loginInput").value = "";
+    renderDashboard();
+  } else {
+    // Wrong password
+    attempts.count = (attempts.count || 0) + 1;
+    const remaining = MAX_ATTEMPTS - attempts.count;
+
+    if (attempts.count >= MAX_ATTEMPTS) {
+      attempts.lockedUntil = Date.now() + LOCKOUT_SECONDS * 1000;
+      attempts.count = 0;
+      saveAttemptData(attempts);
+      showLockout(LOCKOUT_SECONDS);
+    } else {
+      saveAttemptData(attempts);
+      const errEl = document.getElementById("loginError");
+      errEl.textContent = remaining === 1
+        ? "Incorrect password — 1 attempt left"
+        : `Incorrect password — ${remaining} attempts left`;
+      errEl.classList.add("visible");
+      document.getElementById("loginAttempts").textContent = "";
+      document.getElementById("loginInput").value = "";
+      document.getElementById("loginInput").focus();
+      // Shake animation
+      const box = document.querySelector(".login-box");
+      box.style.animation = "none";
+      box.offsetHeight;
+      box.style.animation = "shake .3s ease";
+    }
+  }
+}
+
+let lockInterval = null;
+function showLockout(seconds) {
+  const btn = document.getElementById("loginBtn");
+  const lockEl = document.getElementById("loginLockout");
+  const timerEl = document.getElementById("lockTimer");
+  const errEl = document.getElementById("loginError");
+  errEl.classList.remove("visible");
+  lockEl.classList.add("visible");
+  btn.disabled = true;
+  document.getElementById("loginInput").disabled = true;
+
+  let t = seconds;
+  timerEl.textContent = t;
+  if (lockInterval) clearInterval(lockInterval);
+  lockInterval = setInterval(() => {
+    t--;
+    timerEl.textContent = t;
+    if (t <= 0) {
+      clearInterval(lockInterval);
+      lockEl.classList.remove("visible");
+      btn.disabled = false;
+      document.getElementById("loginInput").disabled = false;
+      document.getElementById("loginInput").focus();
+    }
+  }, 1000);
+}
+
+function togglePw() {
+  const inp = document.getElementById("loginInput");
+  inp.type = inp.type === "password" ? "text" : "password";
+}
+
+// Add shake keyframe dynamically
+const shakeStyle = document.createElement("style");
+shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }`;
+document.head.appendChild(shakeStyle);
+
+// Session auto-logout watcher
+setInterval(() => {
+  try {
+    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+    if (!s || Date.now() >= s.expires) {
+      if (!document.getElementById("loginScreen").classList.contains("hidden")) return;
+      clearSession();
+      document.getElementById("loginScreen").classList.remove("hidden");
+      document.getElementById("loginInput").value = "";
+      document.getElementById("loginInput").focus();
+    }
+  } catch {}
+}, 30000); // check every 30s
+
+// Logout clears session
+const _origLogout = window.logout;
+function adminLogout() {
+  clearSession();
+  window.location.href = "/index.html";
+}
+
+// ===== DATA STORE =====
+let products = [];
+let editingId = null;
+let deleteId = null;
+let imageDataURLs = [];
+
+// ===== LOAD PRODUCTS FROM BACKEND =====
+async function loadProductsFromBackend() {
+  try {
+    const res = await fetch('/admin/products');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    if (data.products && data.products.length > 0) {
+      // DB has products — use them as the source of truth
+      products = data.products;
+      localStorage.setItem('adminProducts', JSON.stringify(products));
+    } else {
+      // DB is empty — check if localStorage has products from a previous session
+      // and push them up to the DB so index.html can find them
+      const local = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+      if (local.length > 0) {
+        const pushRes = await fetch('/admin/save-products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ products: local })
+        });
+        if (pushRes.ok) {
+          products = local;
+          console.log('Synced', local.length, 'products from localStorage to DB');
+        } else {
+          products = local; // use local even if push failed
+        }
+      } else {
+        products = [];
+      }
+    }
+  } catch (err) {
+    // Server unreachable — fall back to localStorage so admin still works offline
+    console.warn('Backend unreachable, using localStorage:', err.message);
+    products = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+  }
+  renderProductsTable();
+  renderDashboard();
+}
+
+// ===== NAVIGATION =====
+function showPage(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = el.textContent.trim();
+  document.getElementById('addProductBtn').style.display = page === 'products' ? '' : 'none';
+
+  if (page === 'products') renderProductsTable();
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'resellers') loadResellers();
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const low = products.filter(p => p.stock > 0 && p.stock <= 5).length;
+  const out = products.filter(p => !p.stock || p.stock === 0).length;
+  document.getElementById('statProducts').textContent = products.length;
+  document.getElementById('statLow').textContent = low;
+  document.getElementById('statOut').textContent = out;
+
+  const recent = [...products].slice(-5).reverse();
+  const tbody = document.getElementById('dashRecentBody');
+  if (!recent.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:48px; color:var(--text-dim); font-family:'Barlow Condensed',sans-serif; letter-spacing:3px; text-transform:uppercase; font-size:13px;">No products yet</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = recent.map(p => `
+    <tr>
+      <td><div class="prod-name-cell">
+        <div class="prod-thumb">${p.images && p.images[0]
+          ? `<img src="${p.images[0]}" alt="">`
+          : `<svg class="prod-thumb-placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 20M6 8h.01"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>`}</div>
+        <div><div class="prod-name">${p.name}</div><div class="prod-sku">${p.sku || '—'}</div></div>
+      </div></td>
+      <td class="price-cell">₱${Number(p.price).toLocaleString()}</td>
+      <td><span class="cat-tag">${p.category || '—'}</span></td>
+      <td>${stockPill(p.stock)}</td>
+      <td><div class="sizes-preview">${(p.sizes||[]).slice(0,4).map(s=>`<span class="size-tag">${typeof s === 'object' ? s.size : s}</span>`).join('')}${(p.sizes||[]).length>4?`<span class="size-tag">+${p.sizes.length-4}</span>`:''}</div></td>
+    </tr>
+  `).join('');
+
+  // try load reseller count
+  loadResellerCount();
+}
+
+async function loadResellerCount() {
+  try {
+    const res = await fetch('/admin/reseller-count');
+    const data = await res.json();
+    document.getElementById('statResellers').textContent = data.count || '—';
+  } catch { document.getElementById('statResellers').textContent = '—'; }
+}
+
+// ===== PRODUCTS TABLE =====
+function renderProductsTable() {
+  const q = (document.getElementById('prodSearch')?.value || '').toLowerCase();
+  const cat = document.getElementById('catFilter')?.value || '';
+
+  let filtered = products.filter(p => {
+    const matchQ = !q || p.name.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q);
+    const matchCat = !cat || p.category === cat;
+    return matchQ && matchCat;
+  });
+
+  const tbody = document.getElementById('productsTableBody');
+  const empty = document.getElementById('productsEmpty');
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(p => `
+    <tr>
+      <td><div class="prod-name-cell">
+        <div class="prod-thumb">${p.images && p.images[0]
+          ? `<img src="${p.images[0]}" alt="">`
+          : `<svg class="prod-thumb-placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 20M6 8h.01"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>`}</div>
+        <div>
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-sku">${p.brand ? p.brand + ' — ' : ''}${p.sku || ''}</div>
+        </div>
+      </div></td>
+      <td><div class="price-cell">₱${Number(p.price).toLocaleString()}</div>${p.resellerPrice ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Reseller ₱${Number(p.resellerPrice).toLocaleString()}</div>` : ''}</td>
+      <td><span class="cat-tag">${p.category || '—'}</span></td>
+      <td><div class="sizes-preview">${(p.sizes||[]).slice(0,5).map(s=>`<span class="size-tag">${typeof s === 'object' ? s.size : s}</span>`).join('')}${(p.sizes||[]).length>5?`<span class="size-tag">+${p.sizes.length-5}</span>`:''}</div></td>
+      <td>${stockPill(p.stock)}</td>
+      <td><div class="action-btns">
+        <button class="btn-edit" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn-delete" onclick="askDelete('${p.id}')">Delete</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function stockPill(stock) {
+  const n = Number(stock) || 0;
+  if (n === 0) return `<span class="stock-pill out-stock">Out of Stock</span>`;
+  if (n <= 5) return `<span class="stock-pill low-stock">Low — ${n}</span>`;
+  return `<span class="stock-pill in-stock">${n} units</span>`;
+}
+
+// ===== SIZE GRID =====
+const FOOTWEAR_SIZES = ['5','5.5','6','6.5','7','7.5','8','8.5','9','9.5','10','10.5','11','11.5','12','13','14'];
+const APPAREL_SIZES = ['XS','S','M','L','XL','2XL','3XL'];
+
+// Stores per-size prices: { '8': { retailPrice: 1500, resellerPrice: 1200 }, ... }
+let sizePrices = {};
+
+function renderSizeGrid() {
+  const type = document.getElementById('fSizeType').value;
+  const wrap = document.getElementById('sizeGridWrap');
+  const customWrap = document.getElementById('customSizeWrap');
+
+  if (type === 'custom') {
+    wrap.innerHTML = '';
+    customWrap.style.display = '';
+    renderSizePriceTable();
+    return;
+  }
+  customWrap.style.display = 'none';
+
+  const sizes = type === 'footwear' ? FOOTWEAR_SIZES : APPAREL_SIZES;
+
+  wrap.innerHTML = sizes.map(s => `
+    <div class="size-check">
+      <input type="checkbox" id="sz_${s}" value="${s}" onchange="renderSizePriceTable()">
+      <label for="sz_${s}">${s}<span class="price-dot"></span></label>
+    </div>
+  `).join('');
+
+  renderSizePriceTable();
+}
+
+function renderSizePriceTable() {
+  const sizes = getCheckedSizes();
+  const wrap = document.getElementById('sizePriceWrap');
+  const tbody = document.getElementById('sizePriceBody');
+  const hint = document.getElementById('sizePriceHint');
+  const countBadge = document.getElementById('sizePriceCount');
+
+  if (!sizes.length) {
+    wrap.style.display = 'none';
+    hint.style.display = 'block';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  hint.style.display = 'none';
+  countBadge.textContent = sizes.length + (sizes.length === 1 ? ' size' : ' sizes');
+
+  const defRetail = Number(document.getElementById('fPrice').value) || 0;
+  const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
+
+  const prevSizes = [...tbody.querySelectorAll('tr')].map(r => r.dataset.size);
+  const isNewSize = sizes.some(s => !prevSizes.includes(s));
+
+  tbody.innerHTML = sizes.map(s => {
+    const existing = sizePrices[s] || {};
+    const retailVal = existing.retailPrice != null ? existing.retailPrice : (defRetail || '');
+    const resellerVal = existing.resellerPrice != null ? existing.resellerPrice : (defReseller || '');
+    return `
+      <tr data-size="${s}">
+        <td class="size-label">${s}</td>
+        <td><input class="size-price-input" type="number" placeholder="Buyer ₱"
+          data-size="${s}" data-ptype="retailPrice"
+          value="${retailVal}"
+          oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
+        <td><input class="size-price-input" type="number" placeholder="Reseller ₱"
+          data-size="${s}" data-ptype="resellerPrice"
+          value="${resellerVal}"
+          oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
+      </tr>
+    `;
+  }).join('');
+
+  // Seed sizePrices with defaults for new rows
+  sizes.forEach(s => {
+    if (!sizePrices[s]) {
+      sizePrices[s] = { retailPrice: defRetail || 0, resellerPrice: defReseller || 0 };
+    }
+  });
+
+  // Scroll the price table into view if new sizes were added
+  if (isNewSize) {
+    setTimeout(() => {
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 80);
+  }
+}
+
+// Called when default price fields change — refreshes the table to show new defaults
+function refreshSizePriceDefaults() {
+  const defRetail = Number(document.getElementById('fPrice').value) || 0;
+  const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
+  // Only update rows that still have 0/blank (not manually set by user)
+  const sizes = getCheckedSizes();
+  sizes.forEach(s => {
+    const row = sizePrices[s];
+    if (!row || (!row._manualRetail && !row._manualReseller)) {
+      if (!sizePrices[s]) sizePrices[s] = {};
+      if (!sizePrices[s]._manualRetail) {
+        sizePrices[s].retailPrice = defRetail;
+        const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="retailPrice"]`);
+        if (input && !input._dirty) input.value = defRetail || '';
+      }
+      if (!sizePrices[s]._manualReseller) {
+        sizePrices[s].resellerPrice = defReseller;
+        const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="resellerPrice"]`);
+        if (input && !input._dirty) input.value = defReseller || '';
+      }
+    }
+  });
+}
+
+function updateSizePrice(size, priceType, value) {
+  if (!sizePrices[size]) sizePrices[size] = {};
+  sizePrices[size][priceType] = Number(value) || 0;
+  // Mark as manually set so default-refresh won't overwrite it
+  if (priceType === 'retailPrice') sizePrices[size]._manualRetail = true;
+  if (priceType === 'resellerPrice') sizePrices[size]._manualReseller = true;
+}
+
+function getCheckedSizes() {
+  const type = document.getElementById('fSizeType').value;
+  if (type === 'custom') {
+    return document.getElementById('fCustomSizes').value
+      .split(',').map(s => s.trim()).filter(Boolean);
+  }
+  return [...document.querySelectorAll('#sizeGridWrap input[type=checkbox]:checked')].map(cb => cb.value);
+}
+
+// Returns array of { size, retailPrice, resellerPrice }
+function getSelectedSizes() {
+  const baseRetail = Number(document.getElementById('fPrice').value) || 0;
+  const baseReseller = Number(document.getElementById('fResellerPrice').value) || 0;
+  return getCheckedSizes().map(s => ({
+    size: s,
+    retailPrice: (sizePrices[s]?.retailPrice) || baseRetail,
+    resellerPrice: (sizePrices[s]?.resellerPrice) || baseReseller
+  }));
+}
+
+function setSelectedSizes(sizes) {
+  if (!sizes || !sizes.length) return;
+
+  // Support both old format (array of strings) and new format (array of objects)
+  const isOldFormat = typeof sizes[0] === 'string';
+  const sizeLabels = isOldFormat ? sizes : sizes.map(s => s.size);
+
+  // Rebuild sizePrices from saved data
+  sizePrices = {};
+  if (!isOldFormat) {
+    sizes.forEach(s => {
+      sizePrices[s.size] = { retailPrice: s.retailPrice || 0, resellerPrice: s.resellerPrice || 0 };
+    });
+  }
+
+  const isApparel = APPAREL_SIZES.some(s => sizeLabels.includes(s));
+  const isFootwear = FOOTWEAR_SIZES.some(s => sizeLabels.includes(s));
+  const type = isApparel ? 'apparel' : isFootwear ? 'footwear' : 'custom';
+  document.getElementById('fSizeType').value = type;
+  renderSizeGrid();
+
+  if (type === 'custom') {
+    document.getElementById('fCustomSizes').value = sizeLabels.join(', ');
+    renderSizePriceTable();
+    return;
+  }
+
+  setTimeout(() => {
+    sizeLabels.forEach(s => {
+      const cb = document.getElementById('sz_' + s);
+      if (cb) cb.checked = true;
+    });
+    renderSizePriceTable();
+  }, 10);
+}
+
+// ===== SPECS =====
+function addSpec(key = '', val = '') {
+  const list = document.getElementById('specsList');
+  const row = document.createElement('div');
+  row.className = 'spec-row';
+  row.innerHTML = `
+    <input type="text" placeholder="Key (e.g. Material)" value="${key}">
+    <input type="text" placeholder="Value (e.g. Full-Grain Leather)" value="${val}">
+    <button class="spec-del" onclick="this.parentElement.remove()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  `;
+  list.appendChild(row);
+}
+
+function getSpecs() {
+  return [...document.querySelectorAll('#specsList .spec-row')].map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { key: inputs[0].value.trim(), val: inputs[1].value.trim() };
+  }).filter(s => s.key && s.val);
+}
+
+// ===== IMAGES =====
+function handleImages(input) {
+  const files = [...input.files];
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      imageDataURLs.push(e.target.result);
+      renderImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderImagePreviews() {
+  const wrap = document.getElementById('imagePreviews');
+  wrap.innerHTML = imageDataURLs.map((src, i) => `
+    <div class="img-preview">
+      <img src="${src}" alt="">
+      <button class="img-preview-del" onclick="removeImage(${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function removeImage(idx) {
+  imageDataURLs.splice(idx, 1);
+  renderImagePreviews();
+}
+
+// ===== MODAL OPEN/CLOSE =====
+function openModal(id = null) {
+  editingId = id;
+  imageDataURLs = [];
+  sizePrices = {};
+  document.getElementById('specsList').innerHTML = '';
+  document.getElementById('imagePreviews').innerHTML = '';
+
+  if (id) {
+    // Edit mode
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('modalTitle').textContent = 'Edit Product';
+    document.getElementById('fName').value = p.name || '';
+    document.getElementById('fBrand').value = p.brand || '';
+    document.getElementById('fCategory').value = p.category || '';
+    setGender(p.gender || '');
+    document.getElementById('fDescription').value = p.description || '';
+    document.getElementById('fPrice').value = p.price || '';
+    document.getElementById('fResellerPrice').value = p.resellerPrice || '';
+    document.getElementById('fStock').value = p.stock || '';
+    document.getElementById('fSKU').value = p.sku || '';
+    document.getElementById('fColorway').value = p.colorway || '';
+    document.getElementById('fBadge').value = p.badge || '';
+    document.getElementById('fStatus').value = p.status || 'active';
+
+    (p.specs || []).forEach(s => addSpec(s.key, s.val));
+    imageDataURLs = [...(p.images || [])];
+    renderImagePreviews();
+    setSelectedSizes(p.sizes || []);
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add Product';
+    document.getElementById('fName').value = '';
+    document.getElementById('fBrand').value = '';
+    document.getElementById('fCategory').value = '';
+    setGender('');
+    document.getElementById('fDescription').value = '';
+    document.getElementById('fPrice').value = '';
+    document.getElementById('fResellerPrice').value = '';
+    document.getElementById('fStock').value = '';
+    document.getElementById('fSKU').value = '';
+    document.getElementById('fColorway').value = '';
+    document.getElementById('fBadge').value = '';
+    document.getElementById('fStatus').value = 'active';
+    document.getElementById('fSizeType').value = 'footwear';
+    renderSizeGrid();
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+}
+
+// ===== SAVE =====
+function saveProduct() {
+  const name = document.getElementById('fName').value.trim();
+  const category = document.getElementById('fCategory').value;
+  const stock = document.getElementById('fStock').value;
+
+  const selectedSizes = getSelectedSizes();
+
+  // Derive price: use manual input, or auto-calculate from size prices
+  let price = Number(document.getElementById('fPrice').value) || 0;
+  let resellerPrice = Number(document.getElementById('fResellerPrice').value) || 0;
+
+  if (selectedSizes.length > 0) {
+    const retailPrices = selectedSizes.map(s => s.retailPrice).filter(p => p > 0);
+    const resellerPrices = selectedSizes.map(s => s.resellerPrice).filter(p => p > 0);
+    // Use min price for display (lowest available size price)
+    if (retailPrices.length > 0 && !price) price = Math.min(...retailPrices);
+    if (resellerPrices.length > 0 && !resellerPrice) resellerPrice = Math.min(...resellerPrices);
+    // If no manual global price, set from sizes
+    if (!document.getElementById('fPrice').value) price = retailPrices.length ? Math.min(...retailPrices) : 0;
+  }
+
+  if (!name || !price || !category) {
+    showToast('Please fill in required fields (name, category, and at least one price).', true);
+    return;
+  }
+
+  const product = {
+    id: editingId || 'p_' + Date.now(),
+    name,
+    brand: document.getElementById('fBrand').value.trim(),
+    gender: document.querySelector('input[name="fGender"]:checked')?.value || '',
+    category,
+    description: document.getElementById('fDescription').value.trim(),
+    price: Number(price),
+    resellerPrice: Number(resellerPrice) || 0,
+    stock: Number(stock) || 0,
+    sku: document.getElementById('fSKU').value.trim(),
+    colorway: document.getElementById('fColorway').value.trim(),
+    badge: document.getElementById('fBadge').value.trim(),
+    status: document.getElementById('fStatus').value,
+    sizes: selectedSizes,
+    specs: getSpecs(),
+    images: [...imageDataURLs],
+    updatedAt: new Date().toISOString()
+  };
+
+  if (editingId) {
+    const idx = products.findIndex(p => p.id === editingId);
+    if (idx !== -1) products[idx] = product;
+  } else {
+    product.createdAt = new Date().toISOString();
+    products.push(product);
+  }
+
+  saveProducts();
+  closeModal();
+  renderProductsTable();
+  renderDashboard();
+  showToast(editingId ? 'Product updated!' : 'Product added!');
+}
+
+function editProduct(id) {
+  openModal(id);
+}
+
+// ===== DELETE =====
+function askDelete(id) {
+  deleteId = id;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  deleteId = null;
+}
+
+async function confirmDelete() {
+  if (!deleteId) return;
+  const idToDelete = deleteId;
+  closeConfirm();
+
+  try {
+    await fetch('/admin/delete-product', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: idToDelete })
+    });
+  } catch (err) {
+    console.error('Delete failed on backend:', err);
+  }
+
+  products = products.filter(p => p.id !== idToDelete);
+  localStorage.setItem('adminProducts', JSON.stringify(products));
+  renderProductsTable();
+  renderDashboard();
+  showToast('Product deleted.');
+}
+
+// ===== RESELLERS =====
+let allResellers = [];
+let resellerTab = 'pending';
+
+function switchResellerTab(tab) {
+  resellerTab = tab;
+  document.getElementById('tabPending').style.background = tab === 'pending' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('tabPending').style.color = tab === 'pending' ? 'var(--black)' : 'var(--text-muted)';
+  document.getElementById('tabApproved').style.background = tab === 'approved' ? 'var(--green)' : 'var(--surface2)';
+  document.getElementById('tabApproved').style.color = tab === 'approved' ? '#000' : 'var(--text-muted)';
+  renderResellersTable();
+}
+
+function renderResellersTable() {
+  const tbody = document.getElementById('resellersTableBody');
+  const filtered = allResellers.filter(r => resellerTab === 'approved' ? r.approved : !r.approved);
+
+  if (!filtered.length) {
+    const msg = resellerTab === 'pending' ? 'No pending applications' : 'No approved resellers';
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:48px;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:3px;text-transform:uppercase;font-size:13px;">${msg}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td style="color:var(--text)">${r.email}</td>
+      <td style="color:var(--text-muted);font-size:13px;">${r.shopName || '—'}</td>
+      <td style="color:var(--text-muted);font-size:13px;max-width:200px;">${r.experience || '—'}</td>
+      <td style="color:var(--text-muted);font-size:13px;">${r.social || '—'}</td>
+      <td><div class="action-btns">
+        ${!r.approved ? `<button class="btn-edit" onclick="approveReseller('${r.email}')">✓ Approve</button>` : ''}
+        <button class="btn-delete" onclick="rejectReseller('${r.email}')">${r.approved ? 'Remove' : '✗ Reject'}</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+async function loadResellers() {
+  const tbody = document.getElementById('resellersTableBody');
+  tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:12px;">Loading...</td></tr>`;
+  try {
+    const res = await fetch('/admin/resellers');
+    const data = await res.json();
+    allResellers = data.resellers || [];
+    document.getElementById('statResellers').textContent = allResellers.filter(r => r.approved).length;
+    renderResellersTable();
+  } catch {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:48px;color:var(--text-dim);font-family:'Barlow Condensed',sans-serif;letter-spacing:3px;text-transform:uppercase;font-size:12px;">Could not connect to backend</td></tr>`;
+  }
+}
+
+async function approveReseller(email) {
+  try {
+    const res = await fetch('/admin/approve-reseller', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Reseller approved!');
+      loadResellers();
+    } else {
+      showToast('Failed to approve.', true);
+    }
+  } catch { showToast('Failed to approve.', true); }
+}
+
+async function rejectReseller(email) {
+  try {
+    const res = await fetch('/admin/reject-reseller', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Reseller removed.');
+      loadResellers();
+    } else {
+      showToast('Failed to remove.', true);
+    }
+  } catch { showToast('Failed to remove.', true); }
+}
+
+function openAddResellerModal() {
+  document.getElementById('addResellerEmail').value = '';
+  document.getElementById('addResellerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('addResellerEmail').focus(), 100);
+}
+
+function closeAddResellerModal() {
+  document.getElementById('addResellerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function submitAddReseller() {
+  const email = document.getElementById('addResellerEmail').value.trim();
+  if (!email) { showToast('Please enter an email.', true); return; }
+  try {
+    const res = await fetch('/admin/add-reseller', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (data.success) {
+      closeAddResellerModal();
+      showToast('Reseller added & approved!');
+      switchResellerTab('approved');
+      loadResellers();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown error'), true);
+    }
+  } catch { showToast('Failed to add reseller.', true); }
+}
+
+// ===== STORAGE =====
+function saveProducts() {
+  localStorage.setItem('adminProducts', JSON.stringify(products));
+  // Also push to backend if available
+  fetch('/admin/save-products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ products })
+  }).catch(() => {});
+}
+
+// ===== TOAST =====
+function showToast(msg, error = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ===== GENDER =====
+function updateGenderUI() {
+  ['Male','Female','Unisex'].forEach(g => {
+    const lbl = document.getElementById('genderLabel' + g);
+    const inp = document.getElementById('fGender' + g);
+    if (inp.checked) {
+      lbl.style.borderColor = 'var(--accent)';
+      lbl.style.color = 'var(--accent)';
+      lbl.style.background = 'rgba(232,255,0,0.08)';
+    } else {
+      lbl.style.borderColor = 'var(--border)';
+      lbl.style.color = 'var(--text-muted)';
+      lbl.style.background = '';
+    }
+  });
+}
+
+function setGender(val) {
+  document.querySelectorAll('input[name="fGender"]').forEach(r => r.checked = false);
+  if (val) {
+    const inp = document.getElementById('fGender' + val.charAt(0).toUpperCase() + val.slice(1));
+    if (inp) inp.checked = true;
+  }
+  updateGenderUI();
+}
+
+// ===== ESC KEY =====
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeConfirm();
+  }
+});
+
+// ===== CLOSE OVERLAY ON BACKDROP CLICK =====
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+// ===== INIT =====
+renderSizeGrid();
+checkSession(); // hide login screen if valid session exists
+loadProductsFromBackend(); // load from backend DB, fall back to localStorage
+</script>
+
+</body>
+</html>
