@@ -2086,17 +2086,35 @@ function getSpecs() {
 }
 
 // ===== IMAGES =====
-function handleImages(input) {
+async function handleImages(input) {
   const files = [...input.files];
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      imageDataURLs.push(e.target.result);
-      renderImagePreviews();
-    };
-    reader.readAsDataURL(file);
-  });
   input.value = '';
+
+  for (const file of files) {
+    const tempUrl = await new Promise(res => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result);
+      r.readAsDataURL(file);
+    });
+    const tempIdx = imageDataURLs.length;
+    imageDataURLs.push(tempUrl);
+    renderImagePreviews();
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/admin/upload-image', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('Upload failed');
+      const data = await res.json();
+      imageDataURLs[tempIdx] = data.url;
+      renderImagePreviews();
+    } catch (err) {
+      console.error('Image upload error:', err);
+      showToast('Image upload failed: ' + err.message, true);
+      imageDataURLs.splice(tempIdx, 1);
+      renderImagePreviews();
+    }
+  }
 }
 
 function renderImagePreviews() {
@@ -2415,9 +2433,11 @@ function saveProducts() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ products: productsForStorage })
+  }).then(res => {
+    if (!res.ok) showToast('Save failed - server error.', true);
   }).catch(err => {
     console.error('Save failed:', err);
-    showToast('Save failed — check connection.', true);
+    showToast('Save failed - check connection.', true);
   });
 }
 
