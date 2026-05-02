@@ -2563,7 +2563,7 @@ let resellerTab = 'pending';
 
 function switchResellerTab(tab) {
   resellerTab = tab;
-  document.getElementById('tabPending').style.background = tab === 'pending' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('tabPending').style.background = tab === 'pending' ? 'yellow' : 'var(--surface2)';
   document.getElementById('tabPending').style.color = tab === 'pending' ? 'var(--black)' : 'var(--text-muted)';
   document.getElementById('tabApproved').style.background = tab === 'approved' ? 'var(--green)' : 'var(--surface2)';
   document.getElementById('tabApproved').style.color = tab === 'approved' ? '#000' : 'var(--text-muted)';
