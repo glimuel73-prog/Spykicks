@@ -644,6 +644,10 @@ function buildProductsIndex(products) {
     }
     if (p.sku)      specsArr.unshift(['Model', p.sku]);
     if (p.colorway) specsArr.push(['Colorway', p.colorway]);
+    specsArr.push(['Stock', `${Number(p.stock) || 0} units`]);
+    const catLabel = (p.category || 'Other');
+    specsArr.push(['Category', catLabel.charAt(0).toUpperCase() + catLabel.slice(1)]);
+    specsArr.push(['Tier', 'Retail']);
 
     PRODUCTS_INDEX[String(p.id)] = {
       brand:     p.brand || '',
