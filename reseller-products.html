@@ -730,7 +730,7 @@
     if (product.specs && product.specs.length > 0) {
       specsArr = product.specs.map(s => [s.key, s.val]);
     }
-    if (product.sku)      specsArr.unshift(["SKU", product.sku]);
+    if (product.sku)      specsArr.unshift(["MODEL", product.sku]);
     if (product.colorway) specsArr.push(["Colorway", product.colorway]);
     specsArr.push(["Stock", `${product.stock} units`]);
     specsArr.push(["Category", category.charAt(0).toUpperCase() + category.slice(1)]);
