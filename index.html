@@ -584,14 +584,16 @@ function buildProductCard(p) {
   const hasImg = p.images && p.images.length > 0;
 
   const badgeHTML = badge ? `<div class="product-corner-badge">${badge}</div>` : '';
+  const newArrivalHTML = p.newArrival ? `<div style="position:absolute;top:${badge ? '44px' : '16px'};right:16px;background:#000;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;text-transform:uppercase;border-radius:3px;z-index:2;">✦ New Arrival</div>` : '';
 
   const imgHTML = hasImg
     ? `<div class="product-img-placeholder" style="padding:0;overflow:hidden;"><img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;" alt="${name}"></div>`
     : `<div class="product-img-placeholder">${SHOE_SVG}</div>`;
 
   return `
-    <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-gender="${(p.gender||'').toLowerCase()}" onclick="openPD('${id}')">
+    <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" onclick="openPD('${id}')">
       ${badgeHTML}
+      ${newArrivalHTML}
       ${imgHTML}
       <div class="product-category-tag">${catLabel}</div>
       <div class="product-brand">${brand}</div>
@@ -935,7 +937,7 @@ function applyFiltersAndSort() {
   const noResults = document.getElementById("shopNoResults");
   const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
   cards.forEach(c => {
-    const catMatch = activeCategory === "all" || c.dataset.category === activeCategory;
+    const catMatch = activeCategory === "all" || (activeCategory === "new-arrivals" ? c.dataset.newArrival === "1" : c.dataset.category === activeCategory);
     const genderMatch = activeGender === "all" || !c.dataset.gender || c.dataset.gender === activeGender;
     const nameMatch = !query || (c.dataset.name || "").toLowerCase().includes(query);
     c.style.display = (catMatch && genderMatch && nameMatch) ? "" : "none";
