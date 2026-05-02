@@ -48,7 +48,7 @@
   .fav-count-badge.bump { transform: scale(1.35); }
 
   /* HERO */
-  .hero { background: var(--black); border-bottom: 1px solid var(--border); padding: 70px 60px; max-width: 100%; margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 40px; position: relative; overflow: hidden; min-height: 420px; }
+  .hero { background: var(--black); border-bottom: 1px solid var(--border); padding: 70px 60px; max-width: 100%; margin: 0; display: flex; align-items: center; justify-content: flex-start; gap: 40px; position: relative; overflow: hidden; min-height: 320px; }
   .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, #111 0%, #1a1a1a 50%, #0d0d0d 100%); }
   .hero-text { position: relative; z-index: 2; }
   .hero-text p { color: var(--text-muted); font-family: 'Barlow Condensed',sans-serif; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 20px; }
@@ -58,15 +58,15 @@
   .hero-cta { display: inline-flex; align-items: center; gap: 12px; background: var(--white); color: #000; font-family: 'Barlow Condensed',sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 36px; border: 2px solid var(--white); cursor: pointer; transition: background .2s, color .2s, transform .15s; border-radius: 30px; }
   .hero-cta:hover { background: transparent; color: var(--white); transform: translateY(-2px); }
   .hero-cta svg { width: 16px; height: 16px; }
-  .hero-center { position: relative; z-index: 2; flex: 1; display: flex; justify-content: center; }
+  .hero-center { display: none; }
   .hero-shoe-img { width: 480px; max-width: 50vw; filter: drop-shadow(0 20px 60px rgba(0,0,0,0.8)); transform: rotate(-8deg) translateY(-10px); transition: transform .4s ease; }
   .hero-shoe-img:hover { transform: rotate(-6deg) translateY(-18px); }
-  .hero-stat { position: relative; z-index: 2; text-align: right; }
+  .hero-stat { display: none; }
   .hero-stat .big { font-family: 'Barlow Condensed',sans-serif; font-weight: 900; font-size: 80px; color: #555; line-height: 1; }
   .hero-stat .label { font-size: 11px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; font-family: 'Barlow Condensed',sans-serif; }
-  .hero-dots { position: absolute; bottom: 28px; left: 60px; display: flex; gap: 8px; z-index: 3; }
-  .hero-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); cursor: pointer; transition: background .2s, transform .2s; }
-  .hero-dot.active { background: var(--white); transform: scale(1.2); }
+  .hero-dots { display: none; }
+  .hero-dot { display: none; }
+  .hero-dot.active { display: none; }
 
   /* SECTION HEADER */
   .section-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px 18px; max-width: 100%; margin: 0 auto; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; gap: 12px; background: #f9f9f9; }
@@ -88,8 +88,8 @@
   .content.active { display: block; }
 
   /* PRODUCT GRID */
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: #e8e8e8; max-width: 100%; margin: 1px auto 0; }
-  .product-card { background: #fff; padding: 24px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: hidden; }
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: #e8e8e8; max-width: 100%; margin: 1px auto 0; align-items: start; }
+  .product-card { background: #fff; padding: 24px 24px 40px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; }
   .product-card:hover { background: #f5f5f5; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
   .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
   .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
@@ -341,40 +341,6 @@
         <span>Shop All Styles</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
-    </div>
-    <div class="hero-center">
-      <svg class="hero-shoe-img" viewBox="0 0 500 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Stylized sneaker silhouette -->
-        <ellipse cx="250" cy="270" rx="210" ry="20" fill="rgba(255,255,255,0.05)"/>
-        <!-- Sole -->
-        <path d="M60 230 Q80 245 250 248 Q420 245 440 230 L430 218 Q260 235 70 218 Z" fill="#333"/>
-        <!-- Upper body -->
-        <path d="M70 218 Q80 160 140 150 L240 145 Q340 140 390 170 Q420 185 430 218 Q260 235 70 218 Z" fill="#1a1a1a"/>
-        <!-- Toe cap -->
-        <path d="M70 218 Q72 185 100 168 L140 155 L130 200 Z" fill="#222"/>
-        <!-- Swoosh -->
-        <path d="M160 190 Q220 155 340 175 Q360 180 380 195 Q300 182 200 205 Z" fill="#fff" opacity="0.85"/>
-        <!-- Tongue -->
-        <path d="M200 148 L210 150 L215 200 L195 200 Z" fill="#252525"/>
-        <!-- Laces -->
-        <line x1="198" y1="158" x2="225" y2="155" stroke="#555" stroke-width="2"/>
-        <line x1="197" y1="165" x2="224" y2="162" stroke="#555" stroke-width="2"/>
-        <line x1="196" y1="172" x2="223" y2="169" stroke="#555" stroke-width="2"/>
-        <line x1="196" y1="179" x2="222" y2="177" stroke="#555" stroke-width="2"/>
-        <line x1="196" y1="186" x2="221" y2="185" stroke="#555" stroke-width="2"/>
-        <!-- Heel tab -->
-        <rect x="415" y="185" width="18" height="35" rx="3" fill="#1e1e1e"/>
-        <rect x="420" y="188" width="8" height="4" rx="1" fill="#333"/>
-      </svg>
-    </div>
-    <div class="hero-stat">
-      <div class="big">100+</div>
-      <div class="label">Exclusive Styles</div>
-    </div>
-    <div class="hero-dots">
-      <div class="hero-dot active"></div>
-      <div class="hero-dot"></div>
-      <div class="hero-dot"></div>
     </div>
   </div>
 
