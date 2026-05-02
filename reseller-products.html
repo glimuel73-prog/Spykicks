@@ -185,7 +185,7 @@
   }
 
   /* FOOTER TRUST BADGES */
-  .footer-trust { background: #111; border-top: 1px solid #1e1e1e; padding: 28px 60px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 100%; }
+  .footer-trust { background: #111; border-top: 1px solid #1e1e1e; padding: 28px 60px; display: flex; align-items: center; justify-content: center; gap: 60px; max-width: 100%; flex-wrap: wrap; }
   .trust-item { display: flex; align-items: center; gap: 16px; }
   .trust-item svg { width: 36px; height: 36px; stroke: #555; fill: none; stroke-width: 1.5; flex-shrink: 0; }
   .trust-item-text strong { display: block; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #fff; margin-bottom: 2px; }
@@ -240,7 +240,7 @@
     .fav-btn { top: 10px; left: 10px; width: 30px; height: 30px; }
 
     /* Footer */
-    .footer-trust { grid-template-columns: 1fr; padding: 24px 20px; }
+    .footer-trust { flex-direction: column; gap: 24px; padding: 24px 20px; }
     .footer { flex-direction: column; gap: 12px; padding: 24px 16px; text-align: center; margin-top: 0; }
 
     /* State box */
@@ -769,6 +769,13 @@
     document.getElementById("pdOverlay").classList.remove("open");
     document.getElementById("pdDrawer").classList.remove("open");
     document.body.style.overflow = "";
+  }
+
+  function pdSwitchImg(thumbEl, src) {
+    document.querySelectorAll(".pd-thumb").forEach(t => t.classList.remove("active"));
+    thumbEl.classList.add("active");
+    const mainImg = document.querySelector(".pd-main-img");
+    mainImg.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" alt="">`;
   }
 
   function pdPickSize(btn, size, price) {
