@@ -75,25 +75,31 @@
   .fav-count.visible { display: inline-flex; }
 
   /* PRODUCT GRID */
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); max-width: 1400px; margin: 1px auto 0; }
-  .product-card { background: var(--white); padding: 24px; transition: background .2s; cursor: pointer; position: relative; overflow: hidden; }
-  .product-card:hover { background: var(--bg2); }
-  .product-img-placeholder { height: 220px; background: var(--bg2); border-radius: 2px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); max-width: 1400px; margin: 1px auto 0; align-items: start; }
+  .product-card { background: var(--white); padding: 24px 24px 40px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; }
+  .product-card:hover { background: var(--bg2); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+  .product-img-placeholder { height: 200px; background: var(--bg2); border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
   .product-img-placeholder svg { opacity: .15; width: 80px; height: 80px; }
-  .product-corner-badge { position: absolute; top: 24px; right: 24px; background: var(--black); color: var(--white); font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; z-index: 2; }
-  .product-cat-label { position: absolute; bottom: 16px; left: 24px; font-family: Arial,sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); border: 1px solid var(--border); padding: 2px 8px; pointer-events: none; background: var(--white); }
-  .product-brand { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
-  .product-name { font-family: Arial,sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 1px; text-transform: uppercase; color: var(--text); margin-bottom: 8px; }
-  .product-footer { display: flex; align-items: center; justify-content: space-between; padding-bottom: 42px; }
-  .product-price { font-family: Arial,sans-serif; font-weight: 900; font-size: 26px; color: var(--black); letter-spacing: 1px; }
-  .product-tag { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--green); border: 1px solid var(--green); padding: 3px 10px; border-radius: 20px; opacity: .9; }
-  .product-stock { font-family: 'Barlow',sans-serif; font-size: 12px; color: var(--text-dim); margin-top: 6px; letter-spacing: .5px; }
+  .product-corner-badge { position: absolute; top: 16px; right: 16px; background: var(--red); color: var(--white); font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
+  .product-new-arrival-badge { position: absolute; top: 56px; left: 16px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 10px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
+  .product-cat-label { position: absolute; bottom: 16px; left: 24px; font-family: Arial,sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); border: 1px solid var(--border); padding: 2px 8px; pointer-events: none; border-radius: 3px; }
+  .product-brand { font-family: Arial,sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
+  .product-name { font-family: Arial,sans-serif; font-weight: 700; font-size: 16px; color: #111; margin-bottom: 12px; letter-spacing: .5px; line-height: 1.3; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 22px; color: #111; }
+  .product-tag { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #666; border: 1px solid #ddd; padding: 3px 10px; border-radius: 3px; }
+  .product-stock { font-family: Arial,sans-serif; font-size: 11px; color: #aaa; letter-spacing: .5px; margin-bottom: 8px; }
+  /* VIEW DETAILS BUTTON */
+  .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: #111; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 12px; border: none; cursor: pointer; transition: background .2s; margin-top: 8px; border-radius: 4px; }
+  .product-view-btn:hover { background: #333; }
+  .product-view-btn svg { width: 14px; height: 14px; }
 
   /* FAV BUTTON */
-  .fav-btn { position: absolute; bottom: 14px; right: 24px; background: none; border: 1px solid var(--border-dark); color: var(--text-dim); width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; z-index: 2; border-radius: 50%; }
+  .fav-btn { position: absolute; top: 14px; left: 14px; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; z-index: 2; padding: 0; border-radius: 50%; }
   .fav-btn:hover { border-color: var(--red); color: var(--red); }
   .fav-btn.active { background: var(--red); border-color: var(--red); color: var(--white); }
-  .fav-btn svg { width: 16px; height: 16px; fill: currentColor; transition: transform .15s; }
+  .fav-btn svg { width: 14px; height: 14px; fill: currentColor; transition: transform .15s; }
   .fav-btn.active svg { transform: scale(1.15); }
 
   /* FAVORITES EMPTY */
@@ -121,17 +127,17 @@
   /* PRODUCT DETAIL MODAL */
   .pd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 500; opacity: 0; pointer-events: none; transition: opacity .3s; }
   .pd-overlay.open { opacity: 1; pointer-events: all; }
-  .pd-drawer { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: 860px; background: #f4f4f4; z-index: 501; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow: hidden; border-radius: 20px 0 0 20px; box-shadow: -8px 0 48px rgba(0,0,0,0.18); }
+  .pd-drawer { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: 860px; background: #f4f4f4; z-index: 501; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow: hidden; }
   .pd-drawer.open { transform: translateX(0); }
   .pd-inner { display: flex; flex: 1; overflow: hidden; }
   .pd-left { flex: 1; background: #e8e8e8; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; gap: 12px; position: relative; min-width: 0; }
-  .pd-main-img { width: 100%; max-width: 320px; aspect-ratio: 1; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 16px; overflow: hidden; }
+  .pd-main-img { width: 100%; max-width: 320px; aspect-ratio: 1; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
   .pd-main-img svg { width: 120px; height: 60px; opacity: .2; }
   .pd-thumbs { display: flex; gap: 10px; }
-  .pd-thumb { width: 68px; height: 68px; background: #d4d4d4; border: 2px solid transparent; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .2s; overflow: hidden; }
+  .pd-thumb { width: 68px; height: 68px; background: #d4d4d4; border: 2px solid transparent; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .2s; }
   .pd-thumb:hover, .pd-thumb.active { border-color: #000; }
   .pd-thumb svg { width: 36px; height: 20px; opacity: .25; }
-  .pd-corner-badge { position: absolute; top: 20px; left: 20px; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
+  .pd-corner-badge { position: absolute; top: 20px; left: 20px; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; }
   .pd-right { width: 340px; flex-shrink: 0; background: #fff; padding: 36px 32px; display: flex; flex-direction: column; overflow-y: auto; }
   .pd-brand { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
   .pd-name { font-family: Arial,sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 0; line-height: 1.1; color: #111; margin-bottom: 4px; }
@@ -145,39 +151,24 @@
   .pd-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-bottom: 8px; }
   .pd-spec { font-size: 11px; color: #888; letter-spacing: .5px; }
   .pd-spec strong { display: block; font-family: Arial,sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #333; font-weight: 700; }
-  .pd-stock-info { font-size: 12px; font-family: Arial,sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
-  .pd-wishlist { display: flex; align-items: center; gap: 4px; font-family: Arial,sans-serif; font-size: 12px; color: #aaa; letter-spacing: 1px; cursor: pointer; margin-bottom: 4px; }
-  .pd-wishlist svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .pd-stock-info { font-size: 12px; color: #27ae60; font-family: Arial,sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
   .pd-size-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 10px; }
   .pd-sizes { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-  .pd-size { width: 44px; height: 36px; border: 1px solid #ddd; background: none; font-family: Arial,sans-serif; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: all .15s; border-radius: 8px; }
+  .pd-size { width: 44px; height: 36px; border: 1px solid #ddd; background: none; font-family: Arial,sans-serif; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: all .15s; }
   .pd-size:hover { border-color: #000; color: #000; }
   .pd-size.selected { background: #000; color: #fff; border-color: #000; }
-  .pd-btn-select { width: 100%; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 16px; border: none; cursor: pointer; transition: background .2s; margin-bottom: 10px; border-radius: 12px; }
+  .pd-btn-select { width: 100%; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 16px; border: none; cursor: pointer; transition: background .2s; margin-bottom: 10px; }
   .pd-btn-select:hover { background: #333; }
   .pd-instant { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
   .pd-instant::before { content: '⚡'; font-size: 13px; }
-  .pd-close { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid #ddd; color: #888; font-size: 18px; width: 36px; height: 36px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; font-family: Arial,sans-serif; border-radius: 50%; }
+  .pd-close { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid #ddd; color: #888; font-size: 18px; width: 36px; height: 36px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; font-family: Arial,sans-serif; }
   .pd-close:hover { border-color: #000; color: #000; }
   .pd-top-bar { background: #fff; border-bottom: 1px solid #eee; padding: 14px 32px 14px 40px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .pd-breadcrumb { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #aaa; display: flex; align-items: center; gap: 8px; }
   .pd-breadcrumb span { color: #666; }
   .pd-top-rated { background: #f5c518; color: #333; font-family: Arial,sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
-  /* Social order buttons wrapper */
-  #pdOrderSection > div { display: flex; flex-direction: column; gap: 8px; }
-  #pdOrderSection a { border-radius: 12px; }
-  @media (max-width: 768px) {
-    .pd-drawer {
-      max-width: 100%;
-      top: auto;
-      bottom: 0;
-      height: 92dvh;
-      border-radius: 24px 24px 0 0;
-      transform: translateY(100%);
-    }
-    .pd-drawer.open { transform: translateY(0); }
-  }
   @media (max-width: 640px) {
+    .pd-drawer { max-width: 100%; }
     .pd-inner { flex-direction: column; }
     .pd-right { width: 100%; }
     .pd-left { min-height: 240px; }
@@ -226,11 +217,11 @@
     .product-card { padding: 14px; }
     .product-img-placeholder { height: 150px; }
     .product-name { font-size: 14px; }
-    .product-price { font-size: 20px; }
+    .product-price { font-size: 18px; }
     .product-tag { font-size: 9px; padding: 2px 6px; }
     .product-stock { font-size: 11px; }
     .product-cat-label { display: none; }
-    .fav-btn { bottom: 14px; right: 14px; width: 30px; height: 30px; }
+    .fav-btn { top: 10px; left: 10px; width: 30px; height: 30px; }
 
     /* Footer */
     .footer { flex-direction: column; gap: 12px; padding: 24px 16px; text-align: center; margin-top: 40px; }
@@ -390,8 +381,12 @@
         <span class="pd-reseller-tag">Reseller Exclusive</span>
         <span class="pd-men-tag" id="pdGenderTag" style="display:none;"></span>
       </div>
-      <div class="pd-price" id="pdPrice">₱0</div>
       <div class="pd-stock-info" id="pdStock">✔ In Stock</div>
+      <div class="pd-wishlist" id="pdWishlist">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span id="pdWishCount">0</span> people wishlisted this
+      </div>
+      <div class="pd-price" id="pdPrice">₱0</div>
       <div class="pd-divider"></div>
       <div class="pd-desc-title">Description</div>
       <div class="pd-desc" id="pdDesc">—</div>
@@ -571,21 +566,31 @@
 
         card.innerHTML = `
           ${badge ? `<div class="product-corner-badge">${badge}</div>` : ""}
-          ${p.newArrival ? `<div style="position:absolute;top:${badge ? '44px' : '24px'};right:24px;background:#000;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;text-transform:uppercase;border-radius:3px;z-index:2;">✦ New Arrival</div>` : ""}
+          ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ""}
           ${imgHTML}
           <div class="product-cat-label">${catLabel}</div>
           <div class="product-brand">${p.brand || "Reseller Collection"}</div>
           <div class="product-name">${p.name}</div>
           <div class="product-footer">
-            <div class="product-price">₱${displayPrice}</div>
+            <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
             <div class="product-tag">${stockLabel}</div>
           </div>
+          <div class="product-stock">Stock: ${stockNum} units</div>
+          <button class="product-view-btn js-view-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View Details
+          </button>
           <button class="fav-btn ${isFav ? "active" : ""}" title="${isFav ? "Remove from favorites" : "Add to favorites"}">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
         `;
+
+        card.querySelector(".js-view-btn").addEventListener("click", function(e) {
+          e.stopPropagation();
+          openPD(p, String(productId), category, badge, displayPrice);
+        });
 
         card.addEventListener("click", function() {
           openPD(p, String(productId), category, badge, displayPrice);
@@ -638,6 +643,7 @@
     document.getElementById("pdName").textContent = product.name;
     document.getElementById("pdPrice").textContent = `₱${displayPrice}`;
     document.getElementById("pdStock").textContent = `✔ ${product.stock} units in stock`;
+    document.getElementById("pdWishCount").textContent = Math.floor(Math.random()*2000 + 300);
     const gTag = document.getElementById("pdGenderTag");
     if (product.gender) {
       const gLabel = product.gender === 'male' ? "♂ Men's" : product.gender === 'female' ? "♀ Women's" : "⚥ Unisex";
