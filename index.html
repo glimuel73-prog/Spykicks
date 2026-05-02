@@ -247,7 +247,7 @@
   .footer-logo span { color: #fff; opacity: 1; }
   .footer-copy { font-size: 11px; color: #555; letter-spacing: 2px; text-transform: uppercase; font-family: Arial, sans-serif; }
   /* FOOTER TRUST BADGES */
-  .footer-trust { background: #111; border-top: 1px solid #1e1e1e; padding: 28px 60px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 100%; }
+  .footer-trust { background: #111; border-top: 1px solid #1e1e1e; padding: 28px 60px; display: flex; align-items: center; justify-content: center; gap: 60px; max-width: 100%; flex-wrap: wrap; }
   .trust-item { display: flex; align-items: center; gap: 16px; }
   .trust-item svg { width: 36px; height: 36px; stroke: #555; fill: none; stroke-width: 1.5; flex-shrink: 0; }
   .trust-item-text strong { display: block; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #fff; margin-bottom: 2px; }
@@ -323,14 +323,14 @@
     .reseller-right { padding: 32px 20px; }
 
     /* Footer */
-    .footer-trust { grid-template-columns: repeat(2, 1fr); padding: 24px 20px; }
+    .footer-trust { gap: 32px; padding: 24px 20px; }
     .footer { flex-direction: column; gap: 12px; padding: 24px 16px; text-align: center; }
   }
 
   @media (max-width: 400px) {
     .product-grid { grid-template-columns: 1fr; }
     .hero-text h1 { font-size: 56px; }
-    .footer-trust { grid-template-columns: 1fr; }
+    .footer-trust { flex-direction: column; gap: 24px; }
   }
 </style>
 </head>
