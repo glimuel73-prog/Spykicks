@@ -127,17 +127,17 @@
   /* PRODUCT DETAIL MODAL */
   .pd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 500; opacity: 0; pointer-events: none; transition: opacity .3s; }
   .pd-overlay.open { opacity: 1; pointer-events: all; }
-  .pd-drawer { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: 860px; background: #f4f4f4; z-index: 501; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow: hidden; }
+  .pd-drawer { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: 860px; background: #f4f4f4; z-index: 501; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow: hidden; border-radius: 20px 0 0 20px; box-shadow: -8px 0 48px rgba(0,0,0,0.18); }
   .pd-drawer.open { transform: translateX(0); }
   .pd-inner { display: flex; flex: 1; overflow: hidden; }
   .pd-left { flex: 1; background: #e8e8e8; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; gap: 12px; position: relative; min-width: 0; }
-  .pd-main-img { width: 100%; max-width: 320px; aspect-ratio: 1; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+  .pd-main-img { width: 100%; max-width: 320px; aspect-ratio: 1; background: #ddd; display: flex; align-items: center; justify-content: center; border-radius: 16px; overflow: hidden; }
   .pd-main-img svg { width: 120px; height: 60px; opacity: .2; }
   .pd-thumbs { display: flex; gap: 10px; }
-  .pd-thumb { width: 68px; height: 68px; background: #d4d4d4; border: 2px solid transparent; border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .2s; }
+  .pd-thumb { width: 68px; height: 68px; background: #d4d4d4; border: 2px solid transparent; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .2s; overflow: hidden; }
   .pd-thumb:hover, .pd-thumb.active { border-color: #000; }
   .pd-thumb svg { width: 36px; height: 20px; opacity: .25; }
-  .pd-corner-badge { position: absolute; top: 20px; left: 20px; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; }
+  .pd-corner-badge { position: absolute; top: 20px; left: 20px; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
   .pd-right { width: 340px; flex-shrink: 0; background: #fff; padding: 36px 32px; display: flex; flex-direction: column; overflow-y: auto; }
   .pd-brand { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
   .pd-name { font-family: Arial,sans-serif; font-weight: 900; font-size: 26px; letter-spacing: 0; line-height: 1.1; color: #111; margin-bottom: 4px; }
@@ -154,24 +154,40 @@
   .pd-stock-info { font-size: 12px; color: #27ae60; font-family: Arial,sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
   .pd-size-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 10px; }
   .pd-sizes { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-  .pd-size { width: 44px; height: 36px; border: 1px solid #ddd; background: none; font-family: Arial,sans-serif; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: all .15s; }
+  .pd-size { width: 44px; height: 36px; border: 1px solid #ddd; background: none; font-family: Arial,sans-serif; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: all .15s; border-radius: 8px; }
   .pd-size:hover { border-color: #000; color: #000; }
   .pd-size.selected { background: #000; color: #fff; border-color: #000; }
-  .pd-btn-select { width: 100%; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 16px; border: none; cursor: pointer; transition: background .2s; margin-bottom: 10px; }
+  .pd-btn-select { width: 100%; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 16px; border: none; cursor: pointer; transition: background .2s; margin-bottom: 10px; border-radius: 12px; }
   .pd-btn-select:hover { background: #333; }
   .pd-instant { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
   .pd-instant::before { content: '⚡'; font-size: 13px; }
-  .pd-close { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid #ddd; color: #888; font-size: 18px; width: 36px; height: 36px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; font-family: Arial,sans-serif; }
+  .pd-close { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid #ddd; color: #888; font-size: 18px; width: 36px; height: 36px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; font-family: Arial,sans-serif; border-radius: 50%; }
   .pd-close:hover { border-color: #000; color: #000; }
   .pd-top-bar { background: #fff; border-bottom: 1px solid #eee; padding: 14px 32px 14px 40px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .pd-breadcrumb { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #aaa; display: flex; align-items: center; gap: 8px; }
   .pd-breadcrumb span { color: #666; }
   .pd-top-rated { background: #f5c518; color: #333; font-family: Arial,sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
-  @media (max-width: 640px) {
-    .pd-drawer { max-width: 100%; }
-    .pd-inner { flex-direction: column; }
-    .pd-right { width: 100%; }
-    .pd-left { min-height: 240px; }
+  @media (max-width: 768px) {
+    .pd-drawer {
+      max-width: 100%;
+      top: auto;
+      bottom: 0;
+      height: 92dvh;
+      border-radius: 24px 24px 0 0;
+      transform: translateY(100%);
+    }
+    .pd-drawer.open { transform: translateY(0); }
+    .pd-inner { flex-direction: column; overflow-y: auto; }
+    .pd-left { min-height: 220px; padding: 24px; flex-shrink: 0; border-radius: 0; }
+    .pd-main-img { max-width: 200px; }
+    .pd-right { width: 100%; padding: 20px 20px 32px; flex-shrink: 0; overflow-y: visible; }
+    .pd-top-bar { padding: 12px 20px; border-radius: 24px 24px 0 0; }
+    .pd-close { top: 12px; right: 12px; }
+    .pd-name { font-size: 22px; }
+    .pd-price { font-size: 26px; }
+    .pd-specs { grid-template-columns: 1fr; }
+    .pd-thumbs { gap: 8px; }
+    .pd-thumb { width: 52px; height: 52px; }
   }
 
   /* FOOTER */
@@ -642,7 +658,18 @@
     document.getElementById("pdBrand").textContent = product.brand || "Reseller Collection";
     document.getElementById("pdName").textContent = product.name;
     document.getElementById("pdPrice").textContent = `₱${displayPrice}`;
-    document.getElementById("pdStock").textContent = `✔ ${product.stock} units in stock`;
+    const stockEl = document.getElementById("pdStock");
+    const stockNum2 = Number(product.stock) || 0;
+    if (stockNum2 === 0) {
+      stockEl.textContent = '✖ Out of Stock';
+      stockEl.style.color = '#ff3b30';
+    } else if (stockNum2 <= 5) {
+      stockEl.textContent = `⚠ Low Stock — ${stockNum2} left`;
+      stockEl.style.color = '#f59e0b';
+    } else {
+      stockEl.textContent = `✔ ${stockNum2} Units in Stock`;
+      stockEl.style.color = '#27ae60';
+    }
     document.getElementById("pdWishCount").textContent = Math.floor(Math.random()*2000 + 300);
     const gTag = document.getElementById("pdGenderTag");
     if (product.gender) {
