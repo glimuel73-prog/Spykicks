@@ -1562,8 +1562,9 @@ async function deleteProduct(id) {
     body: JSON.stringify({ id })
   });
 
-  // remove locally
+  // remove locally and sync localStorage so stale data can't be re-pushed to DB
   products = products.filter(p => p.id !== id);
+  try { localStorage.setItem('adminProducts', JSON.stringify(products)); } catch(e) {}
 
   renderProducts();
 }
@@ -1718,30 +1719,9 @@ async function loadProductsFromBackend() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
-    if (data.products && data.products.length > 0) {
-      // DB has products — use them as the source of truth
-      products = data.products;
-      localStorage.setItem('adminProducts', JSON.stringify(products));
-    } else {
-      // DB is empty — check if localStorage has products from a previous session
-      // and push them up to the DB so index.html can find them
-      const local = JSON.parse(localStorage.getItem('adminProducts') || '[]');
-      if (local.length > 0) {
-        const pushRes = await fetch('/admin/save-products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ products: local })
-        });
-        if (pushRes.ok) {
-          products = local;
-          console.log('Synced', local.length, 'products from localStorage to DB');
-        } else {
-          products = local; // use local even if push failed
-        }
-      } else {
-        products = [];
-      }
-    }
+    // DB is always the source of truth — use whatever it returns (including empty)
+    products = (data.products && data.products.length > 0) ? data.products : [];
+    localStorage.setItem('adminProducts', JSON.stringify(products));
   } catch (err) {
     // Server unreachable — fall back to localStorage so admin still works offline
     console.warn('Backend unreachable, using localStorage:', err.message);
