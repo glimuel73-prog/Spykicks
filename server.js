@@ -10,9 +10,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // ================= UPLOADS DIR =================
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
-app.use("/uploads", express.static(uploadsDir));
+const uploadsDir = "/data/uploads";
 
 // ================= IMAGE UPLOAD =================
 // Saves image to disk and returns a real URL — NOT a base64 data URL.
@@ -36,7 +34,7 @@ app.post("/admin/upload-image", (req, res) => {
 app.use(express.static(path.join(__dirname)));
 
 // ================= DATABASE =================
-const db = new Database("./users.db");
+const db = new Database("/data/users.db");
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS resellers (
