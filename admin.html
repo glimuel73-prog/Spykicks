@@ -1156,6 +1156,24 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .sizes-grid .size-check label { width: 48px; height: 48px; font-size: 11px; }
 }
 
+
+.new-arrival-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid #000;
+  border-radius: 10px;
+  background: #000;
+  color: #fff;
+  margin-left: 6px;
+}
+
 /* ===== LOGIN SCREEN ===== */
 #loginScreen {
   position: fixed; inset: 0; background: var(--bg);
@@ -1755,6 +1773,20 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             </select>
           </div>
         </div>
+        <div class="field-group" style="margin-top:14px;">
+          <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;display:block;">New Arrival</label>
+          <label style="display:flex;align-items:center;gap:14px;cursor:pointer;" onclick="toggleNewArrival()">
+            <div id="newArrivalToggle" style="position:relative;width:44px;height:24px;background:var(--border2);border-radius:12px;cursor:pointer;transition:background .2s;flex-shrink:0;">
+              <div id="newArrivalKnob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.25);"></div>
+            </div>
+            <div>
+              <div style="font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);" id="newArrivalLabel">Mark as New Arrival</div>
+              <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:2px;">Appears in the \u2728 New Arrivals section for buyers &amp; resellers</div>
+            </div>
+            <span id="newArrivalBadge" style="display:none;background:#000;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 10px;border-radius:10px;margin-left:auto;">\u2726 NEW ARRIVAL</span>
+          </label>
+          <input type="hidden" id="fNewArrival" value="0">
+        </div>
       </div>
 
     </div><!-- /modal-body -->
@@ -2084,7 +2116,7 @@ function renderProductsTable() {
           ? `<img src="${p.images[0]}" alt="">`
           : `<svg class="prod-thumb-placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 20M6 8h.01"/><rect x="2" y="2" width="20" height="20" rx="2"/></svg>`}</div>
         <div>
-          <div class="prod-name">${p.name}</div>
+          <div class="prod-name">${p.name}${p.newArrival ? '<span class="new-arrival-pill">✦ New</span>' : ''}</div>
           <div class="prod-sku">${p.brand ? p.brand + ' — ' : ''}${p.sku || ''}</div>
         </div>
       </div></td>
@@ -2385,6 +2417,7 @@ function openModal(id = null) {
     document.getElementById('fColorway').value = p.colorway || '';
     document.getElementById('fBadge').value = p.badge || '';
     document.getElementById('fStatus').value = p.status || 'active';
+    setNewArrival(!!p.newArrival);
 
     (p.specs || []).forEach(s => addSpec(s.key, s.val));
     imageDataURLs = [...(p.images || [])];
@@ -2404,6 +2437,7 @@ function openModal(id = null) {
     document.getElementById('fColorway').value = '';
     document.getElementById('fBadge').value = '';
     document.getElementById('fStatus').value = 'active';
+    setNewArrival(false);
     document.getElementById('fSizeType').value = 'footwear';
     renderSizeGrid();
   }
@@ -2459,6 +2493,7 @@ function saveProduct() {
     colorway: document.getElementById('fColorway').value.trim(),
     badge: document.getElementById('fBadge').value.trim(),
     status: document.getElementById('fStatus').value,
+    newArrival: document.getElementById('fNewArrival').value === '1',
     sizes: selectedSizes,
     specs: getSpecs(),
     images: [...imageDataURLs],
@@ -2674,6 +2709,42 @@ function showToast(msg, error = false) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
+
+// ===== NEW ARRIVAL TOGGLE =====
+function toggleNewArrival() {
+  const current = document.getElementById('fNewArrival').value === '1';
+  const newVal = !current;
+  document.getElementById('fNewArrival').value = newVal ? '1' : '0';
+  const toggle = document.getElementById('newArrivalToggle');
+  const knob = document.getElementById('newArrivalKnob');
+  const badge = document.getElementById('newArrivalBadge');
+  if (newVal) {
+    toggle.style.background = 'var(--accent)';
+    knob.style.left = '23px';
+    badge.style.display = 'inline-block';
+  } else {
+    toggle.style.background = 'var(--border2)';
+    knob.style.left = '3px';
+    badge.style.display = 'none';
+  }
+}
+
+function setNewArrival(val) {
+  document.getElementById('fNewArrival').value = val ? '1' : '0';
+  const toggle = document.getElementById('newArrivalToggle');
+  const knob = document.getElementById('newArrivalKnob');
+  const badge = document.getElementById('newArrivalBadge');
+  if (val) {
+    toggle.style.background = 'var(--accent)';
+    knob.style.left = '23px';
+    badge.style.display = 'inline-block';
+  } else {
+    toggle.style.background = 'var(--border2)';
+    knob.style.left = '3px';
+    badge.style.display = 'none';
+  }
+}
+
 // ===== GENDER =====
 function updateGenderUI() {
   ['Male','Female','Unisex'].forEach(g => {
@@ -2753,7 +2824,7 @@ function renderProductsCards(filtered) {
       <div class="card-top">
         ${imgHTML}
         <div style="flex:1;min-width:0;">
-          <div class="prod-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+          <div class="prod-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}${p.newArrival ? '<span class="new-arrival-pill">✦ New</span>' : ''}</div>
           <div class="prod-sku">${p.brand ? p.brand + (p.sku ? ' — ' + p.sku : '') : (p.sku || '')}</div>
         </div>
         <div class="price-cell" style="font-size:16px;">₱${Number(p.price).toLocaleString()}</div>
