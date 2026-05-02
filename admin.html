@@ -1359,18 +1359,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Product
       </button>
-      <div style="position:relative;cursor:pointer;" title="Notifications">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <span style="position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-family:var(--font);font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;">3</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;padding-left:12px;border-left:1px solid var(--border);cursor:pointer;">
-        <div style="width:36px;height:36px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-weight:700;font-size:14px;color:#fff;">A</div>
-        <div>
-          <div style="font-family:var(--font);font-weight:700;font-size:13px;color:var(--text);">Admin</div>
-          <div style="font-family:var(--font);font-size:10px;color:var(--text-dim);">Administrator</div>
-        </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-      </div>
+
     </div>
   </div>
   <div style="display:none;" id="topbarTitle"></div>
@@ -1438,30 +1427,13 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </div>
         <div class="quick-action-label">Add Product</div>
       </div>
-      <div class="quick-action-item">
-        <div class="quick-action-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-        </div>
-        <div class="quick-action-label">Restocks</div>
-      </div>
-      <div class="quick-action-item">
-        <div class="quick-action-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-        </div>
-        <div class="quick-action-label">New Stocks</div>
-      </div>
       <div class="quick-action-item" onclick="showPage('products', document.querySelector('.nav-item[onclick*=products]'))">
         <div class="quick-action-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 20"/></svg>
         </div>
         <div class="quick-action-label">Edit Product</div>
       </div>
-      <div class="quick-action-item">
-        <div class="quick-action-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </div>
-        <div class="quick-action-label">Sizes</div>
-      </div>
+
       <div class="quick-action-item" onclick="showPage('resellers', document.querySelector('.nav-item[onclick*=resellers]'))">
         <div class="quick-action-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>
@@ -1505,30 +1477,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </div>
         <div class="mgmt-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
       </div>
-      <div class="management-item">
-        <div class="mgmt-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-        <div class="mgmt-info">
-          <div class="mgmt-title">Sizes</div>
-          <div class="mgmt-desc">Add, edit and manage product sizes</div>
-        </div>
-        <div class="mgmt-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
-      </div>
-      <div class="management-item">
-        <div class="mgmt-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-        <div class="mgmt-info">
-          <div class="mgmt-title">Price Management</div>
-          <div class="mgmt-desc">Change and update product prices</div>
-        </div>
-        <div class="mgmt-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
-      </div>
-      <div class="management-item">
-        <div class="mgmt-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-        <div class="mgmt-info">
-          <div class="mgmt-title">Change Password</div>
-          <div class="mgmt-desc">Update your account password</div>
-        </div>
-        <div class="mgmt-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
-      </div>
+
       <div class="management-item" onclick="adminLogout()">
         <div class="mgmt-icon" style="background:#fff;border:2px solid var(--border);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
         <div class="mgmt-info">
