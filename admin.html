@@ -1213,8 +1213,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 /* ===== QUICK ACTIONS ===== */
 .quick-actions-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  justify-content: center;
   gap: 0;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1228,7 +1228,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 24px 12px;
+  padding: 24px 40px;
   gap: 10px;
   cursor: pointer;
   border-right: 1px solid var(--border);
@@ -1495,7 +1495,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </div>
 
       <div class="management-item" onclick="adminLogout()">
-        <div class="mgmt-icon" style="background:#fff;border:2px solid var(--border);"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+        <div class="mgmt-icon" style="background:#000;border:2px solid #000;font-family:Arial,sans-serif;font-weight:900;font-size:11px;letter-spacing:2px;color:#fff;text-transform:uppercase;">SK'S</div>
         <div class="mgmt-info">
           <div class="mgmt-title">Logout</div>
           <div class="mgmt-desc">Sign out from your account</div>
