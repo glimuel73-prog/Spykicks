@@ -299,6 +299,7 @@
   <div class="filter-row">
     <div class="cat-chips" id="catChips">
       <button class="cat-chip active" onclick="filterCat('all',this)">All</button>
+      <button class="cat-chip" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
       <button class="cat-chip" onclick="filterCat('sneakers',this)">Sneakers</button>
       <button class="cat-chip" onclick="filterCat('apparel',this)">Apparel</button>
       <button class="cat-chip" onclick="filterCat('accessories',this)">Accessories</button>
@@ -491,6 +492,7 @@
       const name = (card.querySelector(".product-name")?.textContent || "").toLowerCase();
       let show = true;
       if (showingFavs) { show = favorites.includes(id); }
+      else if (currentCat === 'new-arrivals') { show = card.dataset.newArrival === '1'; }
       else { show = currentCat === "all" || cat === currentCat; }
       if (show && activeGender !== "all") show = !gender || gender === activeGender;
       if (show && query) show = name.includes(query);
@@ -548,9 +550,11 @@
         card.dataset.id = String(productId);
         card.dataset.cat = category;
         card.dataset.gender = (p.gender || '').toLowerCase();
+        card.dataset.newArrival = p.newArrival ? '1' : '0';
 
         card.innerHTML = `
           ${badge ? `<div class="product-corner-badge">${badge}</div>` : ""}
+          ${p.newArrival ? `<div style="position:absolute;top:${badge ? '44px' : '24px'};right:24px;background:#000;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 8px;text-transform:uppercase;border-radius:3px;z-index:2;">✦ New Arrival</div>` : ""}
           ${imgHTML}
           <div class="product-cat-label">${catLabel}</div>
           <div class="product-brand">${p.brand || "Reseller Collection"}</div>
