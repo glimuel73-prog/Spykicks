@@ -1625,21 +1625,18 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <input type="text" id="fName" placeholder="e.g. Air Max 90 OG">
         </div>
 
-        <!-- BRAND CASCADE -->
+        <!-- BRAND 3-LEVEL TEXT INPUTS -->
         <div class="field-group">
-          <label>Brand</label>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <select id="fBrand" onchange="onBrandChange()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;">
-              <option value="">Select brand…</option>
-            </select>
-            <select id="fBrandLine" onchange="onLineChange()" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;display:none;">
-              <option value="">All lines…</option>
-            </select>
-            <select id="fBrandModel" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;display:none;">
-              <option value="">All models…</option>
-            </select>
-            <input type="text" id="fBrandCustom" placeholder="Or type a custom brand name…" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" oninput="syncBrandCustom()">
-          </div>
+          <label>Brand <span style="font-weight:400;color:var(--text-dim);letter-spacing:0;text-transform:none;font-size:10px;">(optional)</span></label>
+          <input type="text" id="fBrand" placeholder="e.g. Nike" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div class="field-group">
+          <label>Brand Line <span style="font-weight:400;color:var(--text-dim);letter-spacing:0;text-transform:none;font-size:10px;">(optional — e.g. Air Max)</span></label>
+          <input type="text" id="fBrandLine" placeholder="e.g. Air Max" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div class="field-group">
+          <label>Model / Type <span style="font-weight:400;color:var(--text-dim);letter-spacing:0;text-transform:none;font-size:10px;">(optional — e.g. Air Max 90)</span></label>
+          <input type="text" id="fBrandModel" placeholder="e.g. Air Max 90" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
         </div>
 
         <div class="field-group">
@@ -2559,7 +2556,9 @@ function openModal(id = null) {
     if (!p) return;
     document.getElementById('modalTitle').textContent = 'Edit Product';
     document.getElementById('fName').value = p.name || '';
-    setBrandCascade(p.brand || '', p.brandLine || '', p.brandModel || '', '');
+    document.getElementById('fBrand').value = p.brand || '';
+    document.getElementById('fBrandLine').value = p.brandLine || '';
+    document.getElementById('fBrandModel').value = p.brandModel || '';
     setCategory(p.category || '');
     setGender(p.gender || '');
     document.getElementById('fDescription').value = p.description || '';
@@ -2579,8 +2578,10 @@ function openModal(id = null) {
   } else {
     document.getElementById('modalTitle').textContent = 'Add Product';
     document.getElementById('fName').value = '';
-    setBrandCascade('', '', '', '');
-    document.getElementById('fBrandCustom').value = '';
+    document.getElementById('fBrand').value = '';
+    document.getElementById('fBrandLine').value = '';
+    document.getElementById('fBrandModel').value = '';
+    document.getElementById('fBrandCustom') && (document.getElementById('fBrandCustom').value = '');
     setCategory('');
     document.getElementById('fCategoryCustom').style.display = 'none';
     setGender('');
@@ -2687,9 +2688,9 @@ function saveProduct() {
   const product = {
     id: editingId || 'p_' + Date.now(),
     name,
-    brand: getSelectedBrand(),
-    brandLine: getSelectedBrandLine(),
-    brandModel: getSelectedBrandModel(),
+    brand: document.getElementById('fBrand').value.trim(),
+    brandLine: document.getElementById('fBrandLine').value.trim(),
+    brandModel: document.getElementById('fBrandModel').value.trim(),
     gender: document.querySelector('input[name="fGender"]:checked')?.value || '',
     category,
     description: document.getElementById('fDescription').value.trim(),
@@ -3217,150 +3218,17 @@ function addModel(btn) {
 }
 
 // ===== BRAND CASCADE DROPDOWNS (product modal) =====
-function populateBrandDropdown() {
-  const sel = document.getElementById('fBrand');
-  if (!sel) return;
-  const prev = sel.value;
-  // Keep only first "Select brand…" option + append taxonomy brands
-  while (sel.options.length > 1) sel.remove(1);
-  brandTaxonomy.forEach(b => {
-    const opt = document.createElement('option');
-    opt.value = b.brand;
-    opt.textContent = b.brand;
-    sel.appendChild(opt);
-  });
-  // Restore if still valid
-  if (prev) sel.value = prev;
-  onBrandChange();
-}
-
-function onBrandChange() {
-  const brand = document.getElementById('fBrand').value;
-  const lineSel = document.getElementById('fBrandLine');
-  const modelSel = document.getElementById('fBrandModel');
-  const customInp = document.getElementById('fBrandCustom');
-
-  lineSel.innerHTML = '<option value="">All lines…</option>';
-  modelSel.innerHTML = '<option value="">All models…</option>';
-  modelSel.style.display = 'none';
-
-  if (!brand) {
-    lineSel.style.display = 'none';
-    return;
-  }
-
-  const entry = brandTaxonomy.find(b => b.brand === brand);
-  if (!entry || !entry.lines || !entry.lines.length) {
-    lineSel.style.display = 'none';
-    return;
-  }
-
-  entry.lines.forEach(l => {
-    const opt = document.createElement('option');
-    opt.value = l.name;
-    opt.textContent = l.name;
-    lineSel.appendChild(opt);
-  });
-  lineSel.style.display = '';
-  customInp.value = ''; // clear custom input when using taxonomy
-}
-
-function onLineChange() {
-  const brand = document.getElementById('fBrand').value;
-  const line = document.getElementById('fBrandLine').value;
-  const modelSel = document.getElementById('fBrandModel');
-
-  modelSel.innerHTML = '<option value="">All models…</option>';
-
-  if (!line) { modelSel.style.display = 'none'; return; }
-
-  const entry = brandTaxonomy.find(b => b.brand === brand);
-  const lineEntry = entry && entry.lines.find(l => l.name === line);
-  if (!lineEntry || !lineEntry.models || !lineEntry.models.length) {
-    modelSel.style.display = 'none';
-    return;
-  }
-
-  lineEntry.models.forEach(m => {
-    const opt = document.createElement('option');
-    opt.value = m;
-    opt.textContent = m;
-    modelSel.appendChild(opt);
-  });
-  modelSel.style.display = '';
-}
-
-function syncBrandCustom() {
-  // When user types a custom brand, clear the selects
-  const v = document.getElementById('fBrandCustom').value;
-  if (v) {
-    document.getElementById('fBrand').value = '';
-    document.getElementById('fBrandLine').style.display = 'none';
-    document.getElementById('fBrandModel').style.display = 'none';
-  }
-}
-
-// Returns the effective brand string (taxonomy or custom)
-function getSelectedBrand() {
-  const custom = document.getElementById('fBrandCustom').value.trim();
-  if (custom) return custom;
-  const model = document.getElementById('fBrandModel').value.trim();
-  const line = document.getElementById('fBrandLine').value.trim();
-  const brand = document.getElementById('fBrand').value.trim();
-  // Build composite: "Nike > Air Max > Air Max 90" style sub-tagging stored separately
-  return brand; // primary brand for filtering
-}
-
-function getSelectedBrandLine() {
-  const custom = document.getElementById('fBrandCustom').value.trim();
-  if (custom) return '';
-  return document.getElementById('fBrandLine').value.trim();
-}
-
-function getSelectedBrandModel() {
-  const custom = document.getElementById('fBrandCustom').value.trim();
-  if (custom) return '';
-  return document.getElementById('fBrandModel').value.trim();
-}
-
-// Restore brand+line+model selects when editing a product
-function setBrandCascade(brand, line, model, custom) {
-  const fBrand = document.getElementById('fBrand');
-  const fBrandLine = document.getElementById('fBrandLine');
-  const fBrandModel = document.getElementById('fBrandModel');
-  const fBrandCustom = document.getElementById('fBrandCustom');
-
-  fBrandCustom.value = '';
-  fBrand.value = '';
-  fBrandLine.innerHTML = '<option value="">All lines…</option>';
-  fBrandLine.style.display = 'none';
-  fBrandModel.innerHTML = '<option value="">All models…</option>';
-  fBrandModel.style.display = 'none';
-
-  if (custom) {
-    fBrandCustom.value = custom;
-    return;
-  }
-
-  if (!brand) return;
-
-  // Set brand
-  const entry = brandTaxonomy.find(b => b.brand === brand);
-  if (!entry) {
-    // Not in taxonomy — treat as custom
-    fBrandCustom.value = brand;
-    return;
-  }
-  fBrand.value = brand;
-  onBrandChange();
-
-  if (line) {
-    fBrandLine.value = line;
-    onLineChange();
-    if (model) {
-      fBrandModel.value = model;
-    }
-  }
+function populateBrandDropdown() { /* no-op — brand is a plain text input now */ }
+function onBrandChange() {}
+function onLineChange() {}
+function syncBrandCustom() {}
+function getSelectedBrand() { return document.getElementById('fBrand').value.trim(); }
+function getSelectedBrandLine() { return document.getElementById('fBrandLine').value.trim(); }
+function getSelectedBrandModel() { return document.getElementById('fBrandModel').value.trim(); }
+function setBrandCascade(brand, line, model) {
+  document.getElementById('fBrand').value = brand || '';
+  document.getElementById('fBrandLine').value = line || '';
+  document.getElementById('fBrandModel').value = model || '';
 }
 
 // ===== SOCIAL LINKS SETTINGS =====
