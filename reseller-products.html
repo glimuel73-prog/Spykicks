@@ -115,6 +115,17 @@
   .search-input:focus { border-color: var(--black); width: 255px; background: var(--white); }
   .search-input::placeholder { color: var(--text-dim); letter-spacing: 2px; }
 
+  /* SORT BAR */
+  .sort-bar { display: flex; align-items: center; gap: 12px; padding: 12px 40px; max-width: 1400px; margin: 0 auto; border-bottom: 1px solid var(--border); background: var(--white); flex-wrap: wrap; }
+  .sort-label { font-family: Arial,sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; flex-shrink: 0; }
+  .sort-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .sort-chip { padding: 6px 16px; border: 1px solid var(--border-dark); background: none; color: var(--text-muted); font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
+  .sort-chip.active, .sort-chip:hover { border-color: var(--black); color: var(--white); background: var(--black); }
+  .visible-count-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; flex-shrink: 0; }
+
+  /* BRAND BAR */
+  .brand-bar { display: none; align-items: center; gap: 8px; padding: 10px 40px; max-width: 1400px; margin: 0 auto; border-bottom: 1px solid var(--border); background: var(--bg2); flex-wrap: wrap; }
+
   /* STATES */
   #loading, #unauthorized, #mainContent { display: none; }
   .state-box { max-width: 1400px; margin: 80px auto; padding: 0 40px; text-align: center; }
@@ -214,6 +225,13 @@
 
     /* Section header */
     .section-header { padding: 14px 16px 12px; flex-direction: column; align-items: flex-start; gap: 8px; }
+
+    /* Sort bar */
+    .sort-bar { padding: 10px 16px; gap: 8px; }
+    .sort-chips { gap: 4px; }
+    .sort-chip { padding: 4px 10px; font-size: 10px; letter-spacing: 1px; }
+    .visible-count-label { display: none; }
+    .brand-bar { padding: 10px 16px !important; }
 
     /* Filter row */
     .filter-row { padding: 12px 16px; flex-direction: column; align-items: flex-start; gap: 10px; }
@@ -318,6 +336,26 @@
     <span class="badge-pill" id="visibleCount">— Items</span>
   </div>
 
+  <!-- SORT BAR -->
+  <div class="sort-bar">
+    <span class="sort-label">Sort by</span>
+    <div class="sort-chips" id="sortChips">
+      <button class="sort-chip active" onclick="sortProducts('default',this)">Featured</button>
+      <button class="sort-chip" onclick="sortProducts('price-asc',this)">Price: Low → High</button>
+      <button class="sort-chip" onclick="sortProducts('price-desc',this)">Price: High → Low</button>
+      <button class="sort-chip" onclick="sortProducts('name',this)">Name A–Z</button>
+    </div>
+    <span class="visible-count-label" id="sortBarCount"></span>
+  </div>
+
+  <!-- BRAND BAR -->
+  <div class="brand-bar" id="brandBar" style="display:none;">
+    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
+    <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
+    </div>
+  </div>
+
   <!-- CATEGORY + FAVORITES FILTER ROW -->
   <div class="filter-row">
     <div class="cat-chips" id="catChips">
@@ -327,6 +365,7 @@
       <button class="cat-chip" onclick="filterCat('apparel',this)">Apparel</button>
       <button class="cat-chip" onclick="filterCat('accessories',this)">Accessories</button>
       <button class="cat-chip" onclick="filterCat('bags',this)">Bags</button>
+      <button class="cat-chip" onclick="filterCat('caps',this)">Caps</button>
       <button class="cat-chip" onclick="filterCat('other',this)">Other</button>
     </div>
     <div class="view-toggles">
@@ -462,6 +501,8 @@
   let currentCat = "all";
   let showingFavs = false;
   let activeGender = "all";
+  let activeSort = "default";
+  let activeBrand = "all";
 
   // Categories assigned to products (cycle through for demo)
   // The server provides products without categories, so we assign them here
@@ -495,6 +536,20 @@
     applyView();
   }
 
+  function sortProducts(sort, btn) {
+    activeSort = sort;
+    document.querySelectorAll("#sortChips .sort-chip").forEach(c => c.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    applyView();
+  }
+
+  function filterBrand(brand, btn) {
+    activeBrand = brand;
+    document.querySelectorAll("#brandChips .sort-chip").forEach(c => c.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    applyView();
+  }
+
   function filterCat(cat, chipEl) {
     currentCat = cat;
     showingFavs = false;
@@ -522,31 +577,45 @@
   }
 
   function applyView() {
-    const cards = document.querySelectorAll(".product-card[data-id]");
+    const cards = Array.from(document.querySelectorAll(".product-card[data-id]"));
     const favEmpty = document.getElementById("favEmpty");
     const noResults = document.getElementById("noResults");
     const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
-    let visible = 0;
 
+    // Filter
     cards.forEach(card => {
       const id = card.dataset.id;
       const cat = card.dataset.cat;
       const gender = card.dataset.gender || '';
+      const brand = (card.dataset.brand || '').toLowerCase();
       const name = (card.querySelector(".product-name")?.textContent || "").toLowerCase();
       let show = true;
       if (showingFavs) { show = favorites.includes(id); }
       else if (currentCat === 'new-arrivals') { show = card.dataset.newArrival === '1'; }
       else { show = currentCat === "all" || cat === currentCat; }
       if (show && activeGender !== "all") show = !gender || gender === activeGender;
+      if (show && activeBrand !== "all") show = brand === activeBrand.toLowerCase();
       if (show && query) show = name.includes(query);
       card.style.display = show ? "" : "none";
-      if (show) visible++;
     });
 
-    favEmpty.style.display = (showingFavs && visible === 0) ? "block" : "none";
-    noResults.style.display = (!showingFavs && visible === 0) ? "block" : "none";
+    // Sort visible cards
+    const grid = document.getElementById("productGrid");
+    const visible = cards.filter(c => c.style.display !== "none");
+    visible.sort((a, b) => {
+      if (activeSort === "price-asc")  return +a.dataset.priceRaw - +b.dataset.priceRaw;
+      if (activeSort === "price-desc") return +b.dataset.priceRaw - +a.dataset.priceRaw;
+      if (activeSort === "name")       return (a.dataset.name||"").localeCompare(b.dataset.name||"");
+      return +a.dataset.sortIdx - +b.dataset.sortIdx;
+    });
+    visible.forEach(c => grid.appendChild(c));
 
-    document.getElementById("visibleCount").textContent = visible + " Item" + (visible !== 1 ? "s" : "");
+    const visibleCount = visible.length;
+    favEmpty.style.display = (showingFavs && visibleCount === 0) ? "block" : "none";
+    noResults.style.display = (!showingFavs && visibleCount === 0) ? "block" : "none";
+
+    document.getElementById("visibleCount").textContent = visibleCount + " Item" + (visibleCount !== 1 ? "s" : "");
+    document.getElementById("sortBarCount").textContent = visibleCount + " item" + (visibleCount !== 1 ? "s" : "");
   }
 
   window.onload = async () => {
@@ -594,6 +663,10 @@
         card.dataset.cat = category;
         card.dataset.gender = (p.gender || '').toLowerCase();
         card.dataset.newArrival = p.newArrival ? '1' : '0';
+        card.dataset.brand = (p.brand || '').toLowerCase();
+        card.dataset.name = (p.name || '').toLowerCase();
+        card.dataset.priceRaw = String(Number(displayPrice) || 0);
+        card.dataset.sortIdx = String(i);
 
         card.innerHTML = `
           ${badge ? `<div class="product-corner-badge">${badge}</div>` : ""}
@@ -634,6 +707,21 @@
 
         grid.appendChild(card);
       });
+
+      // Build brand filter chips dynamically
+      const brandSet = new Set();
+      data.products.forEach(p => { if (p.brand) brandSet.add(p.brand); });
+      if (brandSet.size > 1) {
+        const brandChips = document.getElementById("brandChips");
+        brandSet.forEach(brand => {
+          const btn = document.createElement("button");
+          btn.className = "sort-chip";
+          btn.textContent = brand;
+          btn.onclick = function() { filterBrand(brand, this); };
+          brandChips.appendChild(btn);
+        });
+        document.getElementById("brandBar").style.display = "flex";
+      }
 
       updateFavCount();
       applyView();
