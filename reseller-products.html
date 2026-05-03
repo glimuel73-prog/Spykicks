@@ -56,12 +56,12 @@
   .hero-stat .label { font-size: 11px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; font-family: Arial,sans-serif; }
 
   /* SECTION HEADER */
-  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 40px 20px; max-width: 1400px; margin: 0 auto; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 40px 20px; width: 100%; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; background: var(--bg2); }
   .section-title { font-family: Arial,sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: var(--text); }
   .badge-pill { background: var(--black); color: var(--white); font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
 
   /* CATEGORY + FILTER ROW */
-  .filter-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; max-width: 1400px; margin: 0 auto; border-bottom: 1px solid var(--border); background: var(--white); flex-wrap: wrap; gap: 12px; }
+  .filter-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; width: 100%; border-bottom: 1px solid var(--border); background: var(--white); flex-wrap: wrap; gap: 12px; }
   .cat-chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .cat-chip { padding: 6px 18px; border: 1px solid var(--border-dark); background: none; color: var(--text-muted); font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
   .cat-chip.active { border-color: var(--black); color: var(--white); background: var(--black); }
@@ -116,7 +116,7 @@
   .search-input::placeholder { color: var(--text-dim); letter-spacing: 2px; }
 
   /* SORT BAR */
-  .sort-bar { display: flex; align-items: center; gap: 12px; padding: 12px 40px; max-width: 1400px; margin: 0 auto; border-bottom: 1px solid var(--border); background: var(--white); flex-wrap: wrap; }
+  .sort-bar { display: flex; align-items: center; gap: 12px; padding: 12px 40px; border-bottom: 1px solid var(--border); background: var(--white); flex-wrap: wrap; width: 100%; }
   .sort-label { font-family: Arial,sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; flex-shrink: 0; }
   .sort-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
   .sort-chip { padding: 6px 16px; border: 1px solid var(--border-dark); background: none; color: var(--text-muted); font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
@@ -124,7 +124,7 @@
   .visible-count-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; flex-shrink: 0; }
 
   /* BRAND BAR */
-  .brand-bar { display: none; align-items: center; gap: 8px; padding: 10px 40px; max-width: 1400px; margin: 0 auto; border-bottom: 1px solid var(--border); background: var(--bg2); flex-wrap: wrap; }
+  .brand-bar { align-items: center; gap: 8px; padding: 10px 40px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-wrap: wrap; width: 100%; }
 
   /* STATES */
   #loading, #unauthorized, #mainContent { display: none; }
