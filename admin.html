@@ -1530,6 +1530,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <option value="apparel">Apparel</option>
           <option value="accessories">Accessories</option>
           <option value="bags">Bags</option>
+          <option value="caps">Caps</option>
           <option value="other">Other</option>
         </select>
       </div>
@@ -1627,14 +1628,17 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
           <div class="field-group">
             <label>Category *</label>
-            <select id="fCategory">
+            <select id="fCategory" onchange="toggleCustomCategory()">
               <option value="">Select category</option>
               <option value="sneakers">Sneakers</option>
               <option value="apparel">Apparel</option>
               <option value="accessories">Accessories</option>
               <option value="bags">Bags</option>
+              <option value="caps">Caps</option>
               <option value="other">Other</option>
+              <option value="__custom__">+ Custom Category…</option>
             </select>
+            <input type="text" id="fCategoryCustom" placeholder="Enter custom category name…" style="display:none;margin-top:8px;width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" oninput="syncCustomCategory()">
           </div>
         </div>
 
@@ -2101,6 +2105,23 @@ async function loadResellerCount() {
 
 // ===== PRODUCTS TABLE =====
 function renderProductsTable() {
+  // Rebuild category filter to include any custom categories from products
+  const KNOWN_CATS = ['sneakers','apparel','accessories','bags','caps','other'];
+  const customCats = [...new Set(products.map(p => p.category).filter(c => c && !KNOWN_CATS.includes(c)))];
+  const catFilter = document.getElementById('catFilter');
+  const currentCat = catFilter.value;
+  // Remove old custom options (those not in KNOWN_CATS)
+  [...catFilter.options].forEach(o => {
+    if (o.value && !KNOWN_CATS.includes(o.value) && o.value !== '') catFilter.removeChild(o);
+  });
+  // Add custom ones before last option
+  customCats.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c.charAt(0).toUpperCase() + c.slice(1);
+    catFilter.appendChild(opt);
+  });
+  catFilter.value = currentCat;
   const q = (document.getElementById('prodSearch')?.value || '').toLowerCase();
   const cat = document.getElementById('catFilter')?.value || '';
 
@@ -2436,7 +2457,7 @@ function openModal(id = null) {
     document.getElementById('modalTitle').textContent = 'Edit Product';
     document.getElementById('fName').value = p.name || '';
     document.getElementById('fBrand').value = p.brand || '';
-    document.getElementById('fCategory').value = p.category || '';
+    setCategory(p.category || '');
     setGender(p.gender || '');
     document.getElementById('fDescription').value = p.description || '';
     document.getElementById('fPrice').value = p.price || '';
@@ -2456,7 +2477,8 @@ function openModal(id = null) {
     document.getElementById('modalTitle').textContent = 'Add Product';
     document.getElementById('fName').value = '';
     document.getElementById('fBrand').value = '';
-    document.getElementById('fCategory').value = '';
+    setCategory('');
+    document.getElementById('fCategoryCustom').style.display = 'none';
     setGender('');
     document.getElementById('fDescription').value = '';
     document.getElementById('fPrice').value = '';
@@ -2481,10 +2503,60 @@ function closeModal() {
   editingId = null;
 }
 
+// ===== CUSTOM CATEGORY =====
+function toggleCustomCategory() {
+  const sel = document.getElementById('fCategory');
+  const inp = document.getElementById('fCategoryCustom');
+  if (sel.value === '__custom__') {
+    inp.style.display = 'block';
+    inp.focus();
+  } else {
+    inp.style.display = 'none';
+    inp.value = '';
+  }
+}
+
+function syncCustomCategory() {
+  // keep the custom input value live; actual category read at save time
+}
+
+function getSelectedCategory() {
+  const sel = document.getElementById('fCategory');
+  if (sel.value === '__custom__') {
+    return document.getElementById('fCategoryCustom').value.trim().toLowerCase();
+  }
+  return sel.value;
+}
+
+function setCategory(val) {
+  const KNOWN = ['sneakers','apparel','accessories','bags','caps','other'];
+  const sel = document.getElementById('fCategory');
+  const inp = document.getElementById('fCategoryCustom');
+  if (!val || KNOWN.includes(val)) {
+    sel.value = val || '';
+    inp.style.display = 'none';
+    inp.value = '';
+  } else {
+    // It's a custom value — add as option if missing, then select it
+    let opt = sel.querySelector(`option[value="${CSS.escape(val)}"]`);
+    if (!opt) {
+      opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = val.charAt(0).toUpperCase() + val.slice(1);
+      // Insert before the "Custom…" option
+      const customOpt = sel.querySelector('option[value="__custom__"]');
+      sel.insertBefore(opt, customOpt);
+    }
+    sel.value = val;
+    inp.style.display = 'none';
+    inp.value = '';
+  }
+}
+
 // ===== SAVE =====
 function saveProduct() {
   const name = document.getElementById('fName').value.trim();
-  const category = document.getElementById('fCategory').value;
+  const category = getSelectedCategory();
   const stock = document.getElementById('fStock').value;
 
   const selectedSizes = getSelectedSizes();
