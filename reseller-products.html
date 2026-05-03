@@ -75,7 +75,7 @@
   .fav-count.visible { display: inline-flex; }
 
   /* PRODUCT GRID */
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); max-width: 1400px; margin: 1px auto 0; align-items: start; }
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); width: 100%; margin: 1px 0 0; align-items: start; }
   .product-card { background: var(--white); padding: 24px 24px 40px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; }
   .product-card:hover { background: var(--bg2); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
   .product-img-placeholder { height: 200px; background: var(--bg2); border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -382,7 +382,7 @@
   </div>
 
   <!-- GENDER FILTER ROW -->
-  <div style="display:flex;align-items:center;gap:8px;padding:12px 40px;max-width:1400px;margin:0 auto;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;" class="gender-bar-reseller">
+  <div style="display:flex;align-items:center;gap:8px;padding:12px 40px;width:100%;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;" class="gender-bar-reseller">
     <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#aaa;flex-shrink:0;">Gender</span>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
       <button class="cat-chip active" id="rGenderAll"    onclick="filterGender('all',this)">All</button>
