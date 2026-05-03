@@ -265,7 +265,7 @@
 
 <!-- LEFT PANEL -->
 <div class="left-panel">
-  <a href="https://spykicks-production.up.railway.app/index.html" class="logo">Spykick's</a>
+  <a href="https://spykicks-catalog.up.railway.app/index.html" class="logo">Spykick's</a>
 
   <div class="left-content">
     <div class="eyebrow">Reseller Access</div>
@@ -287,19 +287,19 @@
   </div>
   <button class="btn-primary" id="loginBtn" onclick="login()">Access Dashboard</button>
 
-  <a href="https://spykicks-production.up.railway.app/index.html" class="back-link">← Back to store</a>
+  <a href="https://spykicks-catalog.up.railway.app/index.html" class="back-link">← Back to store</a>
 </div>
 
 <script>
 if (window.location.protocol === 'file:') {
-  window.location.replace('https://spykicks-production.up.railway.app/vip-login.html' + window.location.search);
+  window.location.replace('https://spykicks-catalog.up.railway.app/vip-login.html' + window.location.search);
 }
 
 window.onload = async () => {
   // If already logged in, go straight to dashboard
   const saved = localStorage.getItem("resellerEmail");
   if (saved) {
-    window.location.href = "https://spykicks-production.up.railway.app/reseller-products.html";
+    window.location.href = "https://spykicks-catalog.up.railway.app/reseller-products.html";
     return;
   }
 
@@ -335,7 +335,7 @@ async function login() {
 
     if (data.verified) {
       localStorage.setItem("resellerEmail", email);
-      window.location.href = "https://spykicks-production.up.railway.app/reseller-products.html";
+      window.location.href = "https://spykicks-catalog.up.railway.app/reseller-products.html";
     } else {
       showError("This email is not approved as a reseller. Please apply first or contact admin.");
       btn.disabled = false;
