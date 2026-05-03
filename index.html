@@ -362,7 +362,7 @@
     </nav>
     <div class="header-actions">
       <span style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-muted);">PH</span>
-      <button onclick="window.location.href='https://spykicks-catalog.up.railway.app/admin.html'" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;border-radius:20px;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">
+      <button onclick="window.location.href='https://spykicks-production.up.railway.app/admin.html'" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;border-radius:20px;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Admin
       </button>
@@ -397,7 +397,9 @@
       <button class="chip" onclick="filterProducts('apparel',this)">Apparel</button>
       <button class="chip" onclick="filterProducts('accessories',this)">Accessories</button>
       <button class="chip" onclick="filterProducts('bags',this)">Bags</button>
+      <button class="chip" onclick="filterProducts('caps',this)">Caps</button>
       <button class="chip" onclick="filterProducts('other',this)">Other</button>
+      <!-- dynamic custom category chips injected here by JS -->
     </div>
   </div>
 
@@ -455,7 +457,7 @@
   <div class="reseller-split">
     <div class="reseller-left">
       <h2>Become a<span> Partner.</span></h2>
-      <div class="reseller-login-link">Already a reseller? <a href="https://spykicks-catalog.up.railway.app/vip-login.html">Login to your account →</a></div>
+      <div class="reseller-login-link">Already a reseller? <a href="https://spykicks-production.up.railway.app/vip-login.html">Login to your account →</a></div>
     </div>
     <div class="reseller-right">
       <div class="form-title">Apply for Partnership</div>
@@ -698,6 +700,26 @@ async function loadAdminProducts() {
 
     // Build index for PD drawer
     buildProductsIndex(products);
+
+    // Inject custom category chips (categories not in the static list)
+    const STATIC_CATS = ['all','new-arrivals','sneakers','apparel','accessories','bags','caps','other'];
+    const customCats = [...new Set(
+      products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c))
+    )];
+    const chipsContainer = document.getElementById('categoryChips');
+    // Remove any previously injected custom chips (in case of re-load)
+    chipsContainer.querySelectorAll('.chip[data-custom]').forEach(el => el.remove());
+    // Insert before the "Other" chip so custom cats appear in the middle
+    const otherChip = [...chipsContainer.querySelectorAll('.chip')].find(b => b.textContent.trim() === 'Other');
+    customCats.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.dataset.custom = '1';
+      btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      btn.onclick = function() { filterProducts(cat, this); };
+      if (otherChip) chipsContainer.insertBefore(btn, otherChip);
+      else chipsContainer.appendChild(btn);
+    });
 
     // Render cards
     const cardsHTML = products.map(buildProductCard).join('');
@@ -1000,7 +1022,7 @@ async function applyReseller() {
   const social = document.getElementById("social").value;
   if (!email || !shopName || !experience || !social) { alert("All fields required!"); return; }
   try {
-    const res = await fetch("https://spykicks-catalog.up.railway.app/apply-reseller", {
+    const res = await fetch("https://spykicks-production.up.railway.app/apply-reseller", {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ email, shopName, experience, social })
     });
