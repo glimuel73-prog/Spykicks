@@ -838,18 +838,6 @@
     const descEl = document.getElementById("pdDesc");
     if (descEl) descEl.textContent = product.description || RESELLER_DESCS[0];
 
-    // Specs
-    let specsArr = [];
-    if (product.specs && product.specs.length > 0) {
-      specsArr = product.specs.map(s => [s.key, s.val]);
-    }
-    if (product.sku)      specsArr.unshift(["MODEL", product.sku]);
-    if (product.colorway) specsArr.push(["Colorway", product.colorway]);
-    specsArr.push(["Stock", `${totalStock} units`]);
-    specsArr.push(["Category", category.charAt(0).toUpperCase() + category.slice(1)]);
-    specsArr.push(["Tier", "Reseller Exclusive"]);
-    document.getElementById("pdSpecs").innerHTML = specsArr.map(([k,v]) => `<div class="pd-spec"><strong>${k}</strong>${v}</div>`).join("");
-
     // Sizes — carry per-size stock, use resellerPrice
     let sizes;
     if (product.sizes && product.sizes.length > 0) {
@@ -875,6 +863,18 @@
     const totalStock = hasPerSizeStock
       ? sizes.reduce((sum, s) => sum + (s.stock || 0), 0)
       : Number(product.stock) || 0;
+
+    // Specs (after totalStock is known)
+    let specsArr = [];
+    if (product.specs && product.specs.length > 0) {
+      specsArr = product.specs.map(s => [s.key, s.val]);
+    }
+    if (product.sku)      specsArr.unshift(["MODEL", product.sku]);
+    if (product.colorway) specsArr.push(["Colorway", product.colorway]);
+    specsArr.push(["Stock", `${totalStock} units`]);
+    specsArr.push(["Category", category.charAt(0).toUpperCase() + category.slice(1)]);
+    specsArr.push(["Tier", "Reseller Exclusive"]);
+    document.getElementById("pdSpecs").innerHTML = specsArr.map(([k,v]) => `<div class="pd-spec"><strong>${k}</strong>${v}</div>`).join("");
 
     // Update overall stock info line with total
     const stockEl = document.getElementById("pdStock");
