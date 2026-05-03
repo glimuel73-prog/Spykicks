@@ -166,9 +166,14 @@
   .pd-spec strong { display: block; font-family: Arial,sans-serif; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #333; font-weight: 700; }
   .pd-size-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 10px; }
   .pd-sizes { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-  .pd-size { width: 44px; height: 36px; border: 1px solid #ddd; background: none; font-family: Arial,sans-serif; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: all .15s; border-radius: 8px; }
-  .pd-size:hover { border-color: #000; color: #000; }
+  .pd-size { position: relative; width: 52px; height: 44px; border: 1px solid #ddd; background: none; font-family: Arial,sans-serif; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: all .15s; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+  .pd-size:hover:not(:disabled) { border-color: #000; color: #000; }
   .pd-size.selected { background: #000; color: #fff; border-color: #000; }
+  .pd-size.selected .pd-size-stock-hint { color: #aaa; }
+  .pd-size-out { opacity: .4; cursor: not-allowed; border-color: #ffcccc; background: #fff8f8; color: #ccc; text-decoration: line-through; }
+  .pd-size-low { border-color: #fbbf24; color: #92400e; background: #fffbeb; }
+  .pd-size-low:hover:not(:disabled) { border-color: #f59e0b; background: #fef3c7; }
+  .pd-size-stock-hint { font-size: 9px; font-weight: 700; line-height: 1; color: #f59e0b; letter-spacing: 0; }
   .pd-btn-select { width: 100%; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 16px; border: none; cursor: pointer; transition: background .2s; margin-bottom: 10px; border-radius: 12px; }
   .pd-btn-select:hover { background: #333; }
   .pd-instant { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
@@ -807,20 +812,6 @@
     document.getElementById("pdBrand").textContent = product.brand || "Reseller Collection";
     document.getElementById("pdName").textContent = product.name;
     document.getElementById("pdPrice").textContent = `₱${displayPrice}`;
-    // Stock info — color-coded like index
-    const stockEl = document.getElementById("pdStock");
-    const stockNum = Number(product.stock) || 0;
-    if (stockNum === 0) {
-      stockEl.textContent = '✖ Out of Stock';
-      stockEl.style.color = '#ff3b30';
-    } else if (stockNum <= 5) {
-      stockEl.textContent = `⚠ Low Stock — ${stockNum} left`;
-      stockEl.style.color = '#f59e0b';
-    } else {
-      stockEl.textContent = `✔ ${stockNum} Units in Stock`;
-      stockEl.style.color = '#27ae60';
-    }
-
     const gTag = document.getElementById("pdGenderTag");
     if (product.gender) {
       const gLabel = product.gender === 'male' ? "♂ Men's" : product.gender === 'female' ? "♀ Women's" : "⚥ Unisex";
@@ -854,31 +845,68 @@
     }
     if (product.sku)      specsArr.unshift(["MODEL", product.sku]);
     if (product.colorway) specsArr.push(["Colorway", product.colorway]);
-    specsArr.push(["Stock", `${product.stock} units`]);
+    specsArr.push(["Stock", `${totalStock} units`]);
     specsArr.push(["Category", category.charAt(0).toUpperCase() + category.slice(1)]);
     specsArr.push(["Tier", "Reseller Exclusive"]);
     document.getElementById("pdSpecs").innerHTML = specsArr.map(([k,v]) => `<div class="pd-spec"><strong>${k}</strong>${v}</div>`).join("");
 
-    // Sizes — use admin sizes resellerPrice, else fall back to category defaults
+    // Sizes — carry per-size stock, use resellerPrice
     let sizes;
     if (product.sizes && product.sizes.length > 0) {
       if (typeof product.sizes[0] === 'object') {
-        // New format: { size, retailPrice, resellerPrice }
         sizes = product.sizes.map(s => ({
           s: String(s.size),
-          p: s.resellerPrice || product.resellerPrice || product.price
+          p: s.resellerPrice || product.resellerPrice || product.price,
+          stock: s.stock != null ? Number(s.stock) : null
         }));
       } else {
-        // Old format: plain strings
-        sizes = product.sizes.map(s => ({ s: String(s), p: product.resellerPrice || product.price }));
+        sizes = product.sizes.map(s => ({ s: String(s), p: product.resellerPrice || product.price, stock: null }));
       }
     } else {
       sizes = (SIZES_BY_CAT[category] || SIZES_BY_CAT.sneakers).map(s => ({
         s: s.s,
-        p: (product.resellerPrice || product.price) + s.p
+        p: (product.resellerPrice || product.price) + s.p,
+        stock: null
       }));
     }
-    document.getElementById("pdSizes").innerHTML = sizes.map(s => `<button class="pd-size" onclick="pdPickSize(this,'${s.s}',${s.p})">${s.s}</button>`).join("");
+
+    // Compute total stock: sum per-size if available, else use product.stock
+    const hasPerSizeStock = sizes.some(s => s.stock !== null);
+    const totalStock = hasPerSizeStock
+      ? sizes.reduce((sum, s) => sum + (s.stock || 0), 0)
+      : Number(product.stock) || 0;
+
+    // Update overall stock info line with total
+    const stockEl = document.getElementById("pdStock");
+    if (totalStock === 0) {
+      stockEl.textContent = '✖ Out of Stock';
+      stockEl.style.color = '#ff3b30';
+    } else if (totalStock <= 5) {
+      stockEl.textContent = `⚠ Low Stock — ${totalStock} left`;
+      stockEl.style.color = '#f59e0b';
+    } else {
+      stockEl.textContent = `✔ ${totalStock} Units in Stock`;
+      stockEl.style.color = '#27ae60';
+    }
+
+    // Render size buttons with per-size stock states
+    document.getElementById("pdSizes").innerHTML = sizes.map(s => {
+      const outOfStock = s.stock !== null && s.stock === 0;
+      const lowStock   = s.stock !== null && s.stock > 0 && s.stock <= 3;
+      let btnClass = 'pd-size';
+      if (outOfStock) btnClass += ' pd-size-out';
+      else if (lowStock) btnClass += ' pd-size-low';
+      const stockHint = outOfStock
+        ? `<span class="pd-size-stock-hint">✕</span>`
+        : lowStock
+          ? `<span class="pd-size-stock-hint">${s.stock}</span>`
+          : '';
+      const disabled = outOfStock ? 'disabled' : '';
+      const title = outOfStock ? `Size ${s.s} — Out of Stock`
+                  : lowStock   ? `Size ${s.s} — Only ${s.stock} left`
+                  : `Size ${s.s}`;
+      return `<button class="${btnClass}" ${disabled} title="${title}" onclick="pdPickSize(this,'${s.s}',${s.p},${s.stock ?? 'null'})">${s.s}${stockHint}</button>`;
+    }).join("");
 
     updateSocialLinks();
 
@@ -900,12 +928,28 @@
     mainImg.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" alt="">`;
   }
 
-  function pdPickSize(btn, size, price) {
+  function pdPickSize(btn, size, price, stockQty) {
     document.querySelectorAll(".pd-size").forEach(b => b.classList.remove("selected"));
     btn.classList.add("selected");
     pdSelectedSize = size;
     pdSelectedPrice = price;
-    document.getElementById("pdPrice").textContent = `₱${price}`;
+    document.getElementById("pdPrice").textContent = `₱${Number(price).toLocaleString()}`;
+
+    // Update stock info to reflect this specific size's stock
+    const stockEl = document.getElementById("pdStock");
+    if (stockQty === null || stockQty === undefined) {
+      // No per-size data — leave overall stock as-is
+    } else if (stockQty === 0) {
+      stockEl.textContent = `✖ Size ${size} — Out of Stock`;
+      stockEl.style.color = '#ff3b30';
+    } else if (stockQty <= 3) {
+      stockEl.textContent = `⚠ Size ${size} — Only ${stockQty} left!`;
+      stockEl.style.color = '#f59e0b';
+    } else {
+      stockEl.textContent = `✔ Size ${size} — ${stockQty} in Stock`;
+      stockEl.style.color = '#27ae60';
+    }
+
     updateSocialLinks();
   }
 
