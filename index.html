@@ -433,10 +433,23 @@
     </div>
   </div>
 
-  <div id="brandBar" style="display:none;align-items:center;gap:8px;padding:10px 40px;max-width:100%;margin:0 auto;border-bottom:1px solid #e8e8e8;background:#fafafa;flex-wrap:wrap;">
-    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
-    <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
+  <div id="brandBar" style="display:none;background:#fff;border-bottom:1px solid #e8e8e8;">
+    <!-- Level 1: Brands -->
+    <div id="brandLevel1" style="display:flex;align-items:center;gap:8px;padding:10px 40px;flex-wrap:wrap;border-bottom:1px solid #f0f0f0;">
+      <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
+      <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
+      </div>
+    </div>
+    <!-- Level 2: Lines (shown when a brand is selected and has lines) -->
+    <div id="brandLevel2" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 56px;flex-wrap:wrap;background:#fafafa;border-bottom:1px solid #f0f0f0;">
+      <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#bbb;flex-shrink:0;">Line</span>
+      <div id="lineChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <!-- Level 3: Models (shown when a line is selected and has models) -->
+    <div id="brandLevel3" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 72px;flex-wrap:wrap;background:#f5f5f5;">
+      <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#ccc;flex-shrink:0;">Model</span>
+      <div id="modelChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
   </div>
 
@@ -606,7 +619,7 @@ function buildProductCard(p) {
     : `<div class="product-img-placeholder">${SHOE_SVG}</div>`;
 
   return `
-    <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-brand="${brand.toLowerCase()}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" onclick="openPD('${id}')">
+    <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-brand="${brand.toLowerCase()}" data-brand-line="${(p.brandLine||'').toLowerCase()}" data-brand-model="${(p.brandModel||'').toLowerCase()}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" onclick="openPD('${id}')">
       ${badgeHTML}
       ${newArrivalBadge}
       ${imgHTML}
@@ -729,21 +742,28 @@ async function loadAdminProducts() {
     const cardsHTML = products.map(buildProductCard).join('');
     grid.insertAdjacentHTML('afterbegin', cardsHTML);
 
-    // Inject brand filter chips dynamically
-    const brands = [...new Set(products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+    // Inject brand filter chips dynamically from taxonomy + any products brands
     const brandBar = document.getElementById('brandBar');
     const brandChips = document.getElementById('brandChips');
     // Remove old brand chips (keep "All")
     [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
-    if (brands.length > 0) {
-      brands.forEach(brand => {
+
+    // Get brands from products
+    const productBrands = [...new Set(products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+
+    // Merge taxonomy brands with product brands (taxonomy takes precedence for order)
+    const taxBrands = BRAND_TAXONOMY.map(b => b.brand);
+    const allBrands = [...new Set([...taxBrands, ...productBrands])].filter(Boolean);
+
+    if (allBrands.length > 0) {
+      allBrands.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'sort-chip';
         btn.textContent = brand;
         btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
         brandChips.appendChild(btn);
       });
-      brandBar.style.display = 'flex';
+      brandBar.style.display = 'block';
     } else {
       brandBar.style.display = 'none';
     }
@@ -1099,7 +1119,8 @@ function showTab(tabId, btn) {
 }
 
 // ════ FILTER + SORT ════
-let activeCategory = "all", activeSort = "default", activeGender = "all", activeBrand = "all";
+let activeCategory = "all", activeSort = "default", activeGender = "all", activeBrand = "all", activeLine = "all", activeModel = "all";
+let BRAND_TAXONOMY = []; // loaded from server
 
 function applyFiltersAndSort() {
   const grid = document.getElementById("shopGrid");
@@ -1110,8 +1131,10 @@ function applyFiltersAndSort() {
     const catMatch = activeCategory === "all" || (activeCategory === "new-arrivals" ? c.dataset.newArrival === "1" : c.dataset.category === activeCategory);
     const genderMatch = activeGender === "all" || !c.dataset.gender || c.dataset.gender === activeGender;
     const brandMatch = activeBrand === "all" || (c.dataset.brand || "") === activeBrand;
+    const lineMatch = activeLine === "all" || (c.dataset.brandLine || "") === activeLine;
+    const modelMatch = activeModel === "all" || (c.dataset.brandModel || "") === activeModel;
     const nameMatch = !query || (c.dataset.name || "").toLowerCase().includes(query);
-    c.style.display = (catMatch && genderMatch && brandMatch && nameMatch) ? "" : "none";
+    c.style.display = (catMatch && genderMatch && brandMatch && lineMatch && modelMatch && nameMatch) ? "" : "none";
   });
   const visible = cards.filter(c => c.style.display !== "none");
   visible.sort((a, b) => {
@@ -1142,9 +1165,81 @@ function filterGender(gender, btn) {
 
 function filterBrand(brand, btn) {
   activeBrand = brand;
+  activeLine = "all";
+  activeModel = "all";
   document.querySelectorAll("#brandChips .sort-chip").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  // Show/hide line level
+  updateLineChips();
   applyFiltersAndSort();
+}
+
+function filterLine(line, btn) {
+  activeLine = line;
+  activeModel = "all";
+  document.querySelectorAll("#lineChips .sort-chip").forEach(c => c.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  updateModelChips();
+  applyFiltersAndSort();
+}
+
+function filterModel(model, btn) {
+  activeModel = model;
+  document.querySelectorAll("#modelChips .sort-chip").forEach(c => c.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  applyFiltersAndSort();
+}
+
+function updateLineChips() {
+  const level2 = document.getElementById("brandLevel2");
+  const lineChips = document.getElementById("lineChips");
+  const level3 = document.getElementById("brandLevel3");
+  level3.style.display = "none";
+  document.getElementById("modelChips").innerHTML = "";
+
+  if (activeBrand === "all") {
+    level2.style.display = "none";
+    return;
+  }
+  const entry = BRAND_TAXONOMY.find(b => b.brand.toLowerCase() === activeBrand);
+  if (!entry || !entry.lines || !entry.lines.length) {
+    level2.style.display = "none";
+    return;
+  }
+  lineChips.innerHTML = `<button class="sort-chip active" onclick="filterLine('all',this)">All ${entry.brand}</button>`;
+  entry.lines.forEach(l => {
+    const btn = document.createElement("button");
+    btn.className = "sort-chip";
+    btn.textContent = l.name;
+    btn.onclick = function() { filterLine(l.name, this); };
+    lineChips.appendChild(btn);
+  });
+  level2.style.display = "flex";
+}
+
+function updateModelChips() {
+  const level3 = document.getElementById("brandLevel3");
+  const modelChips = document.getElementById("modelChips");
+
+  if (activeLine === "all") {
+    level3.style.display = "none";
+    return;
+  }
+  const entry = BRAND_TAXONOMY.find(b => b.brand.toLowerCase() === activeBrand);
+  const lineEntry = entry && entry.lines.find(l => l.name === activeLine);
+  if (!lineEntry || !lineEntry.models || !lineEntry.models.length) {
+    level3.style.display = "none";
+    return;
+  }
+  modelChips.innerHTML = `<button class="sort-chip active" onclick="filterModel('all',this)">All ${activeLine}</button>`;
+  lineEntry.models.forEach(m => {
+    const btn = document.createElement("button");
+    btn.className = "sort-chip";
+    btn.textContent = m;
+    btn.onclick = function() { filterModel(m, this); };
+    modelChips.appendChild(btn);
+  });
+  level3.style.display = "flex";
 }
 
 function sortProducts(sort, btn) {
@@ -1174,7 +1269,15 @@ async function applyReseller() {
 // ════ INIT ════
 updateFavUI();
 loadSocialLinks(); // loads social links from backend, then renders footer socials
-loadAdminProducts(); // loads products from backend, then calls applyFiltersAndSort & updateFavUI
+// Load brand taxonomy first, then products (so brand nav is aware of taxonomy)
+(async () => {
+  try {
+    const res = await fetch('/brand-taxonomy');
+    const data = await res.json();
+    BRAND_TAXONOMY = data.taxonomy || [];
+  } catch(e) { BRAND_TAXONOMY = []; }
+  loadAdminProducts(); // loads products from backend, then calls applyFiltersAndSort & updateFavUI
+})();
 </script>
 </body>
 </html>
