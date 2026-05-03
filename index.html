@@ -428,6 +428,13 @@
     </div>
   </div>
 
+  <div id="brandBar" style="display:none;align-items:center;gap:8px;padding:10px 40px;max-width:100%;margin:0 auto;border-bottom:1px solid #e8e8e8;background:#fafafa;flex-wrap:wrap;">
+    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
+    <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
+    </div>
+  </div>
+
   <div class="product-grid" id="shopGrid">
     <div class="no-results" id="shopNoResults">No products found in this category.</div>
   </div>
@@ -606,7 +613,7 @@ function buildProductCard(p) {
     : `<div class="product-img-placeholder">${SHOE_SVG}</div>`;
 
   return `
-    <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" onclick="openPD('${id}')">
+    <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-brand="${brand.toLowerCase()}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" onclick="openPD('${id}')">
       ${badgeHTML}
       ${newArrivalBadge}
       ${imgHTML}
@@ -725,7 +732,24 @@ async function loadAdminProducts() {
     const cardsHTML = products.map(buildProductCard).join('');
     grid.insertAdjacentHTML('afterbegin', cardsHTML);
 
-    // Re-sync favorites + filters after cards are in DOM
+    // Inject brand filter chips dynamically
+    const brands = [...new Set(products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+    const brandBar = document.getElementById('brandBar');
+    const brandChips = document.getElementById('brandChips');
+    // Remove old brand chips (keep "All")
+    [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
+    if (brands.length > 0) {
+      brands.forEach(brand => {
+        const btn = document.createElement('button');
+        btn.className = 'sort-chip';
+        btn.textContent = brand;
+        btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
+        brandChips.appendChild(btn);
+      });
+      brandBar.style.display = 'flex';
+    } else {
+      brandBar.style.display = 'none';
+    }
     updateFavUI();
     applyFiltersAndSort();
   } catch (err) {
@@ -967,7 +991,7 @@ function showTab(tabId, btn) {
 }
 
 // ════ FILTER + SORT ════
-let activeCategory = "all", activeSort = "default", activeGender = "all";
+let activeCategory = "all", activeSort = "default", activeGender = "all", activeBrand = "all";
 
 function applyFiltersAndSort() {
   const grid = document.getElementById("shopGrid");
@@ -977,8 +1001,9 @@ function applyFiltersAndSort() {
   cards.forEach(c => {
     const catMatch = activeCategory === "all" || (activeCategory === "new-arrivals" ? c.dataset.newArrival === "1" : c.dataset.category === activeCategory);
     const genderMatch = activeGender === "all" || !c.dataset.gender || c.dataset.gender === activeGender;
+    const brandMatch = activeBrand === "all" || (c.dataset.brand || "") === activeBrand;
     const nameMatch = !query || (c.dataset.name || "").toLowerCase().includes(query);
-    c.style.display = (catMatch && genderMatch && nameMatch) ? "" : "none";
+    c.style.display = (catMatch && genderMatch && brandMatch && nameMatch) ? "" : "none";
   });
   const visible = cards.filter(c => c.style.display !== "none");
   visible.sort((a, b) => {
@@ -1007,9 +1032,16 @@ function filterGender(gender, btn) {
   applyFiltersAndSort();
 }
 
+function filterBrand(brand, btn) {
+  activeBrand = brand;
+  document.querySelectorAll("#brandChips .sort-chip").forEach(c => c.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  applyFiltersAndSort();
+}
+
 function sortProducts(sort, btn) {
   activeSort = sort;
-  document.querySelectorAll(".sort-chip").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".sort-chips .sort-chip").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
   applyFiltersAndSort();
 }
