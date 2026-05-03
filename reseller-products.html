@@ -291,7 +291,7 @@
 <div id="unauthorized" class="state-box">
   <h2 style="color:var(--red);">Access<span style="display:block;">Denied.</span></h2>
   <p>You are not an approved reseller.</p>
-  <a href="https://spykicks-production.up.railway.app/index.html">← Back to Store</a>
+  <a href="https://spykicks-catalog.up.railway.app/index.html">← Back to Store</a>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -467,7 +467,7 @@
 
 <script>
   const email = localStorage.getItem("resellerEmail");
-  if (!email) window.location.href = "https://spykicks-production.up.railway.app/vip-login.html";
+  if (!email) window.location.href = "https://spykicks-catalog.up.railway.app/vip-login.html";
 
   const FAV_KEY = `spykick_favs_${email}`;
   let favorites = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
@@ -809,7 +809,7 @@
 
   function logout() {
     localStorage.removeItem("resellerEmail");
-    window.location.href = "https://spykicks-production.up.railway.app/index.html";
+    window.location.href = "https://spykicks-catalog.up.railway.app/index.html";
   }
 
   // ════ PRODUCT MODAL ════
