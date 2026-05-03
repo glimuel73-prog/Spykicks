@@ -69,7 +69,7 @@
   .view-toggles { display: flex; gap: 8px; align-items: center; }
   .fav-chip { display: flex; align-items: center; gap: 6px; padding: 6px 16px; border: 1px solid var(--border-dark); background: none; color: var(--text-muted); font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
   .fav-chip.active { border-color: var(--red); color: var(--red); background: rgba(255,59,48,.06); }
-  .fav-chip:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+  .fav-chip:hover:not(.active) { border-color: var(--black); color: var(--black); }
   .fav-chip svg { width: 13px; height: 13px; fill: currentColor; }
   .fav-count { background: var(--red); color: var(--white); font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
   .fav-count.visible { display: inline-flex; }
@@ -294,6 +294,11 @@
     <a class="logo">Spykick<span>'s</span></a>
     <div class="header-actions">
       <span class="reseller-badge">Reseller Page</span>
+      <button class="fav-chip" id="favToggleBtn" onclick="toggleFavView()">
+        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        Favorites
+        <span class="fav-count" id="favCount">0</span>
+      </button>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </div>
@@ -378,15 +383,6 @@
     <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
       <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
     </div>
-  </div>
-
-  <!-- FAVORITES TOGGLE (moved out of filter row, now a standalone fav chip above grid) -->
-  <div style="display:flex;align-items:center;justify-content:flex-end;padding:8px 40px;width:100%;border-bottom:1px solid var(--border);background:var(--bg2);">
-    <button class="fav-chip" id="favToggleBtn" onclick="toggleFavView()">
-      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-      Favorites
-      <span class="fav-count" id="favCount">0</span>
-    </button>
   </div>
 
   <!-- PRODUCT GRID -->
