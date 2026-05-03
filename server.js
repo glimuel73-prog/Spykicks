@@ -64,7 +64,68 @@ db.exec(`
     )
 `);
 
-// ================= DELETE PRODUCT =================
+db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+    )
+`);
+
+// Seed default social links if not present
+const defaultSocials = {
+    facebook:  "https://www.facebook.com/profile.php?id=61565876271368",
+    instagram: "https://www.instagram.com/spykicksph/?utm_source=qr",
+    twitter:   "",
+    tiktok:    "",
+    shopee:    "",
+    lazada:    ""
+};
+Object.entries(defaultSocials).forEach(([k, v]) => {
+    const existing = db.prepare("SELECT value FROM settings WHERE key = ?").get("social_" + k);
+    if (!existing) db.prepare("INSERT INTO settings (key, value) VALUES (?, ?)").run("social_" + k, v);
+});
+
+// ================= ADMIN — GET SOCIAL LINKS =================
+app.get("/admin/social-links", (req, res) => {
+    try {
+        const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'social_%'").all();
+        const links = {};
+        rows.forEach(r => { links[r.key.replace("social_", "")] = r.value; });
+        res.json({ links });
+    } catch (err) {
+        res.json({ links: {} });
+    }
+});
+
+// ================= ADMIN — SAVE SOCIAL LINKS =================
+app.post("/admin/social-links", (req, res) => {
+    const { links } = req.body;
+    if (!links || typeof links !== "object") return res.json({ success: false });
+    try {
+        const stmt = db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)");
+        const save = db.transaction((obj) => {
+            for (const [k, v] of Object.entries(obj)) stmt.run("social_" + k, v || "");
+        });
+        save(links);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= PUBLIC — GET SOCIAL LINKS =================
+app.get("/social-links", (req, res) => {
+    try {
+        const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'social_%'").all();
+        const links = {};
+        rows.forEach(r => { links[r.key.replace("social_", "")] = r.value; });
+        res.json({ links });
+    } catch (err) {
+        res.json({ links: {} });
+    }
+});
+
+
 app.post("/admin/delete-product", (req, res) => {
     const { id } = req.body;
     try {
