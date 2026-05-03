@@ -742,21 +742,31 @@ async function loadAdminProducts() {
     const cardsHTML = products.map(buildProductCard).join('');
     grid.insertAdjacentHTML('afterbegin', cardsHTML);
 
-    // Inject brand filter chips dynamically from taxonomy + any products brands
+    // Build brand/line/model maps from actual product data
     const brandBar = document.getElementById('brandBar');
     const brandChips = document.getElementById('brandChips');
-    // Remove old brand chips (keep "All")
     [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
 
-    // Get brands from products
-    const productBrands = [...new Set(products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+    // Map: brand → { lines: Set, models: Map<line, Set<model>> }
+    window._brandMap = {};
+    products.forEach(p => {
+      const b = (p.brand || '').trim();
+      if (!b) return;
+      if (!window._brandMap[b]) window._brandMap[b] = { lines: new Set(), models: {} };
+      const l = (p.brandLine || '').trim();
+      if (l) {
+        window._brandMap[b].lines.add(l);
+        const m = (p.brandModel || '').trim();
+        if (m) {
+          if (!window._brandMap[b].models[l]) window._brandMap[b].models[l] = new Set();
+          window._brandMap[b].models[l].add(m);
+        }
+      }
+    });
 
-    // Merge taxonomy brands with product brands (taxonomy takes precedence for order)
-    const taxBrands = BRAND_TAXONOMY.map(b => b.brand);
-    const allBrands = [...new Set([...taxBrands, ...productBrands])].filter(Boolean);
-
-    if (allBrands.length > 0) {
-      allBrands.forEach(brand => {
+    const brandNames = Object.keys(window._brandMap).sort();
+    if (brandNames.length > 0) {
+      brandNames.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'sort-chip';
         btn.textContent = brand;
@@ -1120,7 +1130,7 @@ function showTab(tabId, btn) {
 
 // ════ FILTER + SORT ════
 let activeCategory = "all", activeSort = "default", activeGender = "all", activeBrand = "all", activeLine = "all", activeModel = "all";
-let BRAND_TAXONOMY = []; // loaded from server
+let BRAND_TAXONOMY = []; // kept for compatibility but not required
 
 function applyFiltersAndSort() {
   const grid = document.getElementById("shopGrid");
@@ -1131,8 +1141,8 @@ function applyFiltersAndSort() {
     const catMatch = activeCategory === "all" || (activeCategory === "new-arrivals" ? c.dataset.newArrival === "1" : c.dataset.category === activeCategory);
     const genderMatch = activeGender === "all" || !c.dataset.gender || c.dataset.gender === activeGender;
     const brandMatch = activeBrand === "all" || (c.dataset.brand || "") === activeBrand;
-    const lineMatch = activeLine === "all" || (c.dataset.brandLine || "") === activeLine;
-    const modelMatch = activeModel === "all" || (c.dataset.brandModel || "") === activeModel;
+    const lineMatch = activeLine === "all" || (c.dataset.brandLine || "") === activeLine.toLowerCase();
+    const modelMatch = activeModel === "all" || (c.dataset.brandModel || "") === activeModel.toLowerCase();
     const nameMatch = !query || (c.dataset.name || "").toLowerCase().includes(query);
     c.style.display = (catMatch && genderMatch && brandMatch && lineMatch && modelMatch && nameMatch) ? "" : "none";
   });
@@ -1169,7 +1179,6 @@ function filterBrand(brand, btn) {
   activeModel = "all";
   document.querySelectorAll("#brandChips .sort-chip").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
-  // Show/hide line level
   updateLineChips();
   applyFiltersAndSort();
 }
@@ -1197,21 +1206,22 @@ function updateLineChips() {
   level3.style.display = "none";
   document.getElementById("modelChips").innerHTML = "";
 
-  if (activeBrand === "all") {
-    level2.style.display = "none";
-    return;
+  if (activeBrand === "all") { level2.style.display = "none"; return; }
+
+  // Find the real brand name (case-insensitive match)
+  const brandMap = window._brandMap || {};
+  const realBrand = Object.keys(brandMap).find(b => b.toLowerCase() === activeBrand);
+  if (!realBrand || !brandMap[realBrand] || !brandMap[realBrand].lines.size) {
+    level2.style.display = "none"; return;
   }
-  const entry = BRAND_TAXONOMY.find(b => b.brand.toLowerCase() === activeBrand);
-  if (!entry || !entry.lines || !entry.lines.length) {
-    level2.style.display = "none";
-    return;
-  }
-  lineChips.innerHTML = `<button class="sort-chip active" onclick="filterLine('all',this)">All ${entry.brand}</button>`;
-  entry.lines.forEach(l => {
+
+  const lines = [...brandMap[realBrand].lines].sort();
+  lineChips.innerHTML = `<button class="sort-chip active" onclick="filterLine('all',this)">All ${realBrand}</button>`;
+  lines.forEach(l => {
     const btn = document.createElement("button");
     btn.className = "sort-chip";
-    btn.textContent = l.name;
-    btn.onclick = function() { filterLine(l.name, this); };
+    btn.textContent = l;
+    btn.onclick = function() { filterLine(l, this); };
     lineChips.appendChild(btn);
   });
   level2.style.display = "flex";
@@ -1221,18 +1231,18 @@ function updateModelChips() {
   const level3 = document.getElementById("brandLevel3");
   const modelChips = document.getElementById("modelChips");
 
-  if (activeLine === "all") {
-    level3.style.display = "none";
-    return;
-  }
-  const entry = BRAND_TAXONOMY.find(b => b.brand.toLowerCase() === activeBrand);
-  const lineEntry = entry && entry.lines.find(l => l.name === activeLine);
-  if (!lineEntry || !lineEntry.models || !lineEntry.models.length) {
-    level3.style.display = "none";
-    return;
-  }
+  if (activeLine === "all") { level3.style.display = "none"; return; }
+
+  const brandMap = window._brandMap || {};
+  const realBrand = Object.keys(brandMap).find(b => b.toLowerCase() === activeBrand);
+  if (!realBrand) { level3.style.display = "none"; return; }
+
+  const modelsSet = brandMap[realBrand].models[activeLine];
+  if (!modelsSet || !modelsSet.size) { level3.style.display = "none"; return; }
+
+  const models = [...modelsSet].sort();
   modelChips.innerHTML = `<button class="sort-chip active" onclick="filterModel('all',this)">All ${activeLine}</button>`;
-  lineEntry.models.forEach(m => {
+  models.forEach(m => {
     const btn = document.createElement("button");
     btn.className = "sort-chip";
     btn.textContent = m;
