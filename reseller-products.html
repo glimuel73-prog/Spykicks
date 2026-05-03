@@ -56,8 +56,8 @@
   .hero-stat .label { font-size: 11px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; font-family: Arial,sans-serif; }
 
   /* SECTION HEADER */
-  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 40px 20px; width: 100%; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; background: var(--bg2); }
-  .section-title { font-family: Arial,sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: var(--text); }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px 18px; width: 100%; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; background: var(--bg2); }
+  .section-title { font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: var(--text); }
   .badge-pill { background: var(--black); color: var(--white); font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
 
   /* CATEGORY + FILTER ROW */
@@ -330,10 +330,19 @@
     </div>
   </div>
 
-  <!-- SECTION HEADER -->
+  <!-- SECTION HEADER: title + category chips (matches index.html layout) -->
   <div class="section-header">
     <span class="section-title">Reseller Catalog</span>
-    <span class="badge-pill" id="visibleCount">— Items</span>
+    <div class="cat-chips" id="catChips">
+      <button class="cat-chip active" onclick="filterCat('all',this)">All</button>
+      <button class="cat-chip" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
+      <button class="cat-chip" onclick="filterCat('sneakers',this)">Sneakers</button>
+      <button class="cat-chip" onclick="filterCat('apparel',this)">Apparel</button>
+      <button class="cat-chip" onclick="filterCat('accessories',this)">Accessories</button>
+      <button class="cat-chip" onclick="filterCat('bags',this)">Bags</button>
+      <button class="cat-chip" onclick="filterCat('caps',this)">Caps</button>
+      <button class="cat-chip" onclick="filterCat('other',this)">Other</button>
+    </div>
   </div>
 
   <!-- SORT BAR -->
@@ -345,10 +354,25 @@
       <button class="sort-chip" onclick="sortProducts('price-desc',this)">Price: High → Low</button>
       <button class="sort-chip" onclick="sortProducts('name',this)">Name A–Z</button>
     </div>
-    <span class="visible-count-label" id="sortBarCount"></span>
+    <span class="visible-count-label" id="visibleCount"></span>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="applyView()">
+    </div>
   </div>
 
-  <!-- BRAND BAR -->
+  <!-- GENDER FILTER ROW -->
+  <div style="display:flex;align-items:center;gap:8px;padding:10px 40px;width:100%;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;" class="gender-bar-reseller">
+    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Gender</span>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="cat-chip active" id="rGenderAll"    onclick="filterGender('all',this)">All</button>
+      <button class="cat-chip"        id="rGenderMale"   onclick="filterGender('male',this)">♂ Men's</button>
+      <button class="cat-chip"        id="rGenderFemale" onclick="filterGender('female',this)">♀ Women's</button>
+      <button class="cat-chip"        id="rGenderUnisex" onclick="filterGender('unisex',this)">⚥ Unisex</button>
+    </div>
+  </div>
+
+  <!-- BRAND BAR (shown dynamically if 2+ brands exist) -->
   <div class="brand-bar" id="brandBar" style="display:none;">
     <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
     <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -356,40 +380,13 @@
     </div>
   </div>
 
-  <!-- CATEGORY + FAVORITES FILTER ROW -->
-  <div class="filter-row">
-    <div class="cat-chips" id="catChips">
-      <button class="cat-chip active" onclick="filterCat('all',this)">All</button>
-      <button class="cat-chip" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
-      <button class="cat-chip" onclick="filterCat('sneakers',this)">Sneakers</button>
-      <button class="cat-chip" onclick="filterCat('apparel',this)">Apparel</button>
-      <button class="cat-chip" onclick="filterCat('accessories',this)">Accessories</button>
-      <button class="cat-chip" onclick="filterCat('bags',this)">Bags</button>
-      <button class="cat-chip" onclick="filterCat('caps',this)">Caps</button>
-      <button class="cat-chip" onclick="filterCat('other',this)">Other</button>
-    </div>
-    <div class="view-toggles">
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="applyView()">
-      </div>
-      <button class="fav-chip" id="favToggleBtn" onclick="toggleFavView()">
-        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        Favorites
-        <span class="fav-count" id="favCount">0</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- GENDER FILTER ROW -->
-  <div style="display:flex;align-items:center;gap:8px;padding:12px 40px;width:100%;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;" class="gender-bar-reseller">
-    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#aaa;flex-shrink:0;">Gender</span>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="cat-chip active" id="rGenderAll"    onclick="filterGender('all',this)">All</button>
-      <button class="cat-chip"        id="rGenderMale"   onclick="filterGender('male',this)">♂ Men's</button>
-      <button class="cat-chip"        id="rGenderFemale" onclick="filterGender('female',this)">♀ Women's</button>
-      <button class="cat-chip"        id="rGenderUnisex" onclick="filterGender('unisex',this)">⚥ Unisex</button>
-    </div>
+  <!-- FAVORITES TOGGLE (moved out of filter row, now a standalone fav chip above grid) -->
+  <div style="display:flex;align-items:center;justify-content:flex-end;padding:8px 40px;width:100%;border-bottom:1px solid var(--border);background:var(--bg2);">
+    <button class="fav-chip" id="favToggleBtn" onclick="toggleFavView()">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Favorites
+      <span class="fav-count" id="favCount">0</span>
+    </button>
   </div>
 
   <!-- PRODUCT GRID -->
@@ -614,8 +611,8 @@
     favEmpty.style.display = (showingFavs && visibleCount === 0) ? "block" : "none";
     noResults.style.display = (!showingFavs && visibleCount === 0) ? "block" : "none";
 
-    document.getElementById("visibleCount").textContent = visibleCount + " Item" + (visibleCount !== 1 ? "s" : "");
-    document.getElementById("sortBarCount").textContent = visibleCount + " item" + (visibleCount !== 1 ? "s" : "");
+    document.getElementById("visibleCount").textContent = visibleCount + " item" + (visibleCount !== 1 ? "s" : "");
+    const sc = document.getElementById("sortBarCount"); if (sc) sc.textContent = '';
   }
 
   window.onload = async () => {
@@ -633,7 +630,7 @@
       document.getElementById("mainContent").style.display = "block";
       document.getElementById("welcomeMsg").innerHTML = `Welcome back, <strong>${email}</strong> 🎉`;
       document.getElementById("productCount").textContent = data.products.length + "+";
-      document.getElementById("visibleCount").textContent = data.products.length + " Items";
+      document.getElementById("visibleCount").textContent = data.products.length + " items";
 
       const grid = document.getElementById("productGrid");
 
@@ -708,19 +705,40 @@
         grid.appendChild(card);
       });
 
-      // Build brand filter chips dynamically
-      const brandSet = new Set();
-      data.products.forEach(p => { if (p.brand) brandSet.add(p.brand); });
-      if (brandSet.size > 1) {
-        const brandChips = document.getElementById("brandChips");
-        brandSet.forEach(brand => {
-          const btn = document.createElement("button");
-          btn.className = "sort-chip";
+      // ── Inject custom category chips (not in the static list) ──
+      const STATIC_CATS = ['all', 'new-arrivals', 'sneakers', 'apparel', 'accessories', 'bags', 'caps', 'other'];
+      const customCats = [...new Set(
+        data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c))
+      )];
+      const chipsContainer = document.getElementById('catChips');
+      chipsContainer.querySelectorAll('.cat-chip[data-custom]').forEach(el => el.remove());
+      const otherChip = [...chipsContainer.querySelectorAll('.cat-chip')].find(b => b.textContent.trim() === 'Other');
+      customCats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'cat-chip';
+        btn.dataset.custom = '1';
+        btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+        btn.onclick = function() { filterCat(cat, this); };
+        if (otherChip) chipsContainer.insertBefore(btn, otherChip);
+        else chipsContainer.appendChild(btn);
+      });
+
+      // ── Inject brand filter chips ──
+      const brands = [...new Set(data.products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+      const brandBar = document.getElementById('brandBar');
+      const brandChips = document.getElementById('brandChips');
+      brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)').forEach(el => el.remove());
+      if (brands.length > 0) {
+        brands.forEach(brand => {
+          const btn = document.createElement('button');
+          btn.className = 'sort-chip';
           btn.textContent = brand;
-          btn.onclick = function() { filterBrand(brand, this); };
+          btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
           brandChips.appendChild(btn);
         });
-        document.getElementById("brandBar").style.display = "flex";
+        brandBar.style.display = 'flex';
+      } else {
+        brandBar.style.display = 'none';
       }
 
       updateFavCount();
