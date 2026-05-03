@@ -113,6 +113,38 @@ app.post("/admin/social-links", (req, res) => {
     }
 });
 
+// ================= ADMIN — GET BRAND TAXONOMY =================
+app.get("/admin/brand-taxonomy", (req, res) => {
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'brand_taxonomy'").get();
+        res.json({ taxonomy: row ? JSON.parse(row.value) : [] });
+    } catch (err) {
+        res.json({ taxonomy: [] });
+    }
+});
+
+// ================= ADMIN — SAVE BRAND TAXONOMY =================
+app.post("/admin/brand-taxonomy", (req, res) => {
+    const { taxonomy } = req.body;
+    if (!Array.isArray(taxonomy)) return res.json({ success: false });
+    try {
+        db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").run("brand_taxonomy", JSON.stringify(taxonomy));
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= PUBLIC — GET BRAND TAXONOMY =================
+app.get("/brand-taxonomy", (req, res) => {
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'brand_taxonomy'").get();
+        res.json({ taxonomy: row ? JSON.parse(row.value) : [] });
+    } catch (err) {
+        res.json({ taxonomy: [] });
+    }
+});
+
 // ================= PUBLIC — GET SOCIAL LINKS =================
 app.get("/social-links", (req, res) => {
     try {
