@@ -2115,19 +2115,19 @@ async function sha256(msg) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
 }
 
+// deleteProduct is handled by confirmDelete() below — this stub is kept for safety
 async function deleteProduct(id) {
   await fetch("/admin/delete-product", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id })
   });
-
-  // remove locally
   products = products.filter(p => p.id !== id);
-
-  renderProducts();
+  try {
+    const local = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+    localStorage.setItem('adminProducts', JSON.stringify(local.filter(p => p.id !== id)));
+  } catch(e) {}
+  renderProductsTable();
 }
 
 function getAttemptData() {
@@ -2788,7 +2788,7 @@ function removeImage(idx) {
 }
 
 // ===== MODAL OPEN/CLOSE =====
-function openModal(id = null) {
+async function openModal(id = null) {
   editingId = id;
   imageDataURLs = [];
   sizePrices = {};
@@ -2796,8 +2796,21 @@ function openModal(id = null) {
   document.getElementById('imagePreviews').innerHTML = '';
 
   if (id) {
-    // Edit mode
-    const p = products.find(x => x.id === id);
+    // Edit mode — always fetch a fresh copy from DB so stock is current
+    // (order approvals may have deducted stock since the page last loaded)
+    let p = products.find(x => x.id === id);
+    try {
+      const freshRes = await fetch('/admin/product/' + id);
+      const freshData = await freshRes.json();
+      if (freshData.product) {
+        p = freshData.product;
+        // Update local copy too so the table reflects it
+        const idx = products.findIndex(x => x.id === id);
+        if (idx !== -1) products[idx] = p;
+      }
+    } catch (e) {
+      console.warn('Could not refresh product from DB, using cached copy:', e.message);
+    }
     if (!p) return;
     document.getElementById('modalTitle').textContent = 'Edit Product';
     document.getElementById('fName').value = p.name || '';
@@ -2901,7 +2914,7 @@ function setCategory(val) {
 }
 
 // ===== SAVE =====
-function saveProduct() {
+async function saveProduct() {
   const name = document.getElementById('fName').value.trim();
   const category = getSelectedCategory();
   const stock = document.getElementById('fStock').value;
@@ -2960,7 +2973,8 @@ function saveProduct() {
   }
 
   try {
-    saveProducts();
+    // Use single-product save so stock on OTHER products is never overwritten
+    await saveOneProduct(product);
     closeModal();
     renderProductsTable();
     renderDashboard();
@@ -3129,16 +3143,14 @@ async function submitAddReseller() {
 }
 
 // ===== STORAGE =====
+// saveProducts() — bulk save the whole local array (used for initial sync only)
 function saveProducts() {
-  // Keep all images including base64 data URLs (upload endpoint returns base64)
   const productsForStorage = products.map(p => ({ ...p }));
-
   try {
     localStorage.setItem('adminProducts', JSON.stringify(productsForStorage));
   } catch(e) {
     console.warn('localStorage full:', e);
   }
-
   fetch('/admin/save-products', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3149,6 +3161,28 @@ function saveProducts() {
     console.error('Save failed:', err);
     showToast('Save failed - check connection.', true);
   });
+}
+
+// saveOneProduct(product) — save only ONE product so other products stocks are never touched
+async function saveOneProduct(product) {
+  // Update localStorage too (update just this one entry)
+  try {
+    const local = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+    const idx = local.findIndex(p => p.id === product.id);
+    if (idx !== -1) local[idx] = product; else local.push(product);
+    localStorage.setItem('adminProducts', JSON.stringify(local));
+  } catch(e) {
+    console.warn('localStorage update failed:', e);
+  }
+
+  const res = await fetch('/admin/save-product', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'Save failed');
 }
 
 // ===== TOAST =====
