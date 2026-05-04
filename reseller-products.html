@@ -534,14 +534,27 @@
     const key = (name || '').trim().toLowerCase();
     return COLOR_NAME_MAP_R[key] || null;
   }
+  function buildColorDotSwatch_r(c, size, className) {
+    const sep = c.match(/\s*[\/&]\s*|\s+and\s+/i);
+    if (sep) {
+      const parts = c.split(sep[0]).map(s => s.trim()).filter(Boolean);
+      if (parts.length >= 2) {
+        const c1 = colorToCSS_r(parts[0]) || '#ccc';
+        const c2 = colorToCSS_r(parts[1]) || '#999';
+        const bg = `linear-gradient(to right, ${c1} 50%, ${c2} 50%)`;
+        const needsBorder = parts.some(p => ['white','ivory','cream'].includes(p.toLowerCase()));
+        const border = needsBorder ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.15)';
+        return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
+      }
+    }
+    const css = colorToCSS_r(c);
+    const bg = css || '#ccc';
+    const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
+    return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
+  }
   function buildColorDots_r(colors, size, className) {
     if (!colors || !colors.length) return '';
-    const dots = colors.map(c => {
-      const css = colorToCSS_r(c);
-      const bg = css || '#ccc';
-      const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
-      return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
-    }).join('');
+    const dots = colors.map(c => buildColorDotSwatch_r(c, size, className)).join('');
     if (className === 'color-dot') {
       return `<div class="product-colors" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">${dots}</div>`;
     }
