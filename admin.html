@@ -1738,7 +1738,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <div class="modal-section">
         <div class="modal-section-label">Pricing & Stock</div>
 
-        <div class="field-row-3">
+        <div class="field-row">
           <div class="field-group">
             <label>Default Retail Price (₱) *</label>
             <input type="number" id="fPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
@@ -1747,15 +1747,11 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             <label>Default Reseller Price (₱)</label>
             <input type="number" id="fResellerPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
           </div>
-          <div class="field-group">
-            <label>Stock Qty *</label>
-            <input type="number" id="fStock" placeholder="0">
-          </div>
         </div>
+        <input type="hidden" id="fStock" value="0">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:-10px;margin-bottom:16px;">
-          Set per-size prices &amp; stock below — these defaults are used when a size has no price set
+          These are fallback defaults — set stock per size in the Sizes section below
         </div>
-
         <div class="field-row">
           <div class="field-group">
             <label>SKU / Model No.</label>
@@ -1770,9 +1766,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <div class="field-group">
           <label>Colors</label>
           <div class="color-tags-wrap" id="colorTagsWrap" onclick="document.getElementById('colorTagInput').focus()">
-            <input class="color-tag-input" id="colorTagInput" placeholder="e.g. Black, White, Black/White, Red &amp; Blue…" onkeydown="handleColorTagKey(event)" oninput="handleColorTagInput(this)">
+            <input class="color-tag-input" id="colorTagInput" placeholder="Type a color and press Enter or comma… e.g. Red, Black, White" onkeydown="handleColorTagKey(event)" oninput="handleColorTagInput(this)">
           </div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:6px;">Press Enter or comma to add a color. Use <strong style="color:var(--text-muted);">Black/White</strong> or <strong style="color:var(--text-muted);">Black &amp; White</strong> for split-color combos — renders as a split swatch on product cards</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:6px;">Press Enter or comma to add each color — shown as swatches on product cards</div>
         </div>
       </div>
 
@@ -2595,26 +2591,6 @@ function handleColorTagInput(input) {
   }
 }
 
-function buildSwatchStyle(name) {
-  // Detect combo: "Black/White", "Black & White", "Black and White"
-  const sep = name.match(/\s*[\/&]\s*|\s+and\s+/i);
-  if (sep) {
-    const parts = name.split(sep[0]).map(s => s.trim()).filter(Boolean);
-    if (parts.length >= 2) {
-      const c1 = colorToCSS(parts[0]) || '#ccc';
-      const c2 = colorToCSS(parts[1]) || '#999';
-      return `background:linear-gradient(to right,${c1} 50%,${c2} 50%);border:1px solid rgba(0,0,0,0.15);`;
-    }
-  }
-  const css = colorToCSS(name);
-  if (css) {
-    return css.startsWith('linear')
-      ? `background:${css};border:1px solid rgba(0,0,0,0.1);`
-      : `background:${css};border:1px solid rgba(0,0,0,0.15);`;
-  }
-  return `background:#ccc;border:1px dashed #999;`;
-}
-
 function addColorTag(name) {
   if (!name) return;
   const wrap = document.getElementById('colorTagsWrap');
@@ -2623,7 +2599,11 @@ function addColorTag(name) {
   const existing = [...wrap.querySelectorAll('.color-tag')].map(t => t.dataset.color.toLowerCase());
   if (existing.includes(name.toLowerCase())) return;
 
-  const swatchStyle = buildSwatchStyle(name);
+  const css = colorToCSS(name);
+  const swatchStyle = css
+    ? (css.startsWith('linear') ? `background:${css};border:1px solid rgba(0,0,0,0.1);` : `background:${css};border:1px solid rgba(0,0,0,0.15);`)
+    : `background:#ccc;border:1px dashed #999;`;
+
   const tag = document.createElement('span');
   tag.className = 'color-tag';
   tag.dataset.color = name;
