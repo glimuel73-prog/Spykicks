@@ -381,6 +381,24 @@ app.get("/reseller/orders", (req, res) => {
     }
 });
 
+// ================= RESELLER — CANCEL OWN ORDER =================
+app.post("/reseller/cancel-order", (req, res) => {
+    const { email, orderId } = req.body;
+    if (!email || !orderId) return res.json({ success: false, error: "Missing fields" });
+
+    try {
+        const orderRow = db.prepare("SELECT * FROM orders WHERE id = ? AND resellerEmail = ?").get(orderId, email);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+        if (orderRow.status !== "pending") return res.json({ success: false, error: "Only pending orders can be cancelled" });
+
+        const now = new Date().toISOString();
+        db.prepare("UPDATE orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
 // ================= ADMIN — GET ALL ORDERS =================
 app.get("/admin/orders", (req, res) => {
     try {
