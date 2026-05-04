@@ -415,10 +415,18 @@ app.post("/admin/approve-order", (req, res) => {
                 if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
                     // Per-size stock deduction
                     const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
-                    if (sizeObj && sizeObj.stock != null) {
-                        sizeObj.stock = Math.max(0, (Number(sizeObj.stock) || 0) - (Number(item.qty) || 1));
+                    if (sizeObj) {
+                        // Per-color stock deduction (new model)
+                        if (item.color && sizeObj.colorStock && typeof sizeObj.colorStock === 'object') {
+                            const prev = Number(sizeObj.colorStock[item.color]) || 0;
+                            sizeObj.colorStock[item.color] = Math.max(0, prev - (Number(item.qty) || 1));
+                            // Recompute aggregate stock for this size = sum of all color stocks
+                            sizeObj.stock = Object.values(sizeObj.colorStock).reduce((a, b) => a + (Number(b) || 0), 0);
+                        } else if (sizeObj.stock != null) {
+                            sizeObj.stock = Math.max(0, (Number(sizeObj.stock) || 0) - (Number(item.qty) || 1));
+                        }
                     }
-                    // Also update product-level stock as sum
+                    // Also update product-level stock as sum across all sizes
                     product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
                 } else {
                     // Global stock deduction
