@@ -367,7 +367,7 @@
     </nav>
     <div class="header-actions">
       <span style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-muted);">PH</span>
-      <button onclick="window.location.href='https://spykicks-catalog.up.railway.app/admin.html'" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;border-radius:20px;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">
+      <button onclick="window.location.href='https://spykicks-production.up.railway.app/admin.html'" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;border-radius:20px;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Admin
       </button>
@@ -742,31 +742,16 @@ async function loadAdminProducts() {
     const cardsHTML = products.map(buildProductCard).join('');
     grid.insertAdjacentHTML('afterbegin', cardsHTML);
 
-    // Build brand/line/model maps from actual product data
+    // Inject brand filter chips dynamically from products' brand/brandLine/brandModel fields
     const brandBar = document.getElementById('brandBar');
     const brandChips = document.getElementById('brandChips');
     [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
 
-    // Map: brand → { lines: Set, models: Map<line, Set<model>> }
-    window._brandMap = {};
-    products.forEach(p => {
-      const b = (p.brand || '').trim();
-      if (!b) return;
-      if (!window._brandMap[b]) window._brandMap[b] = { lines: new Set(), models: {} };
-      const l = (p.brandLine || '').trim();
-      if (l) {
-        window._brandMap[b].lines.add(l);
-        const m = (p.brandModel || '').trim();
-        if (m) {
-          if (!window._brandMap[b].models[l]) window._brandMap[b].models[l] = new Set();
-          window._brandMap[b].models[l].add(m);
-        }
-      }
-    });
+    // Build brand list from products
+    const allBrands = [...new Set(products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
 
-    const brandNames = Object.keys(window._brandMap).sort();
-    if (brandNames.length > 0) {
-      brandNames.forEach(brand => {
+    if (allBrands.length > 0) {
+      allBrands.forEach(brand => {
         const btn = document.createElement('button');
         btn.className = 'sort-chip';
         btn.textContent = brand;
@@ -777,6 +762,9 @@ async function loadAdminProducts() {
     } else {
       brandBar.style.display = 'none';
     }
+
+    // Store products globally so filter functions can derive lines/models
+    window._allProducts = products;
     updateFavUI();
     applyFiltersAndSort();
   } catch (err) {
@@ -1130,7 +1118,6 @@ function showTab(tabId, btn) {
 
 // ════ FILTER + SORT ════
 let activeCategory = "all", activeSort = "default", activeGender = "all", activeBrand = "all", activeLine = "all", activeModel = "all";
-let BRAND_TAXONOMY = []; // kept for compatibility but not required
 
 function applyFiltersAndSort() {
   const grid = document.getElementById("shopGrid");
@@ -1141,8 +1128,8 @@ function applyFiltersAndSort() {
     const catMatch = activeCategory === "all" || (activeCategory === "new-arrivals" ? c.dataset.newArrival === "1" : c.dataset.category === activeCategory);
     const genderMatch = activeGender === "all" || !c.dataset.gender || c.dataset.gender === activeGender;
     const brandMatch = activeBrand === "all" || (c.dataset.brand || "") === activeBrand;
-    const lineMatch = activeLine === "all" || (c.dataset.brandLine || "") === activeLine.toLowerCase();
-    const modelMatch = activeModel === "all" || (c.dataset.brandModel || "") === activeModel.toLowerCase();
+    const lineMatch = activeLine === "all" || (c.dataset.brandLine || "").toLowerCase() === activeLine.toLowerCase();
+    const modelMatch = activeModel === "all" || (c.dataset.brandModel || "").toLowerCase() === activeModel.toLowerCase();
     const nameMatch = !query || (c.dataset.name || "").toLowerCase().includes(query);
     c.style.display = (catMatch && genderMatch && brandMatch && lineMatch && modelMatch && nameMatch) ? "" : "none";
   });
@@ -1179,12 +1166,13 @@ function filterBrand(brand, btn) {
   activeModel = "all";
   document.querySelectorAll("#brandChips .sort-chip").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  // Show/hide line level
   updateLineChips();
   applyFiltersAndSort();
 }
 
 function filterLine(line, btn) {
-  activeLine = line;
+  activeLine = line; // keep original case for display matching
   activeModel = "all";
   document.querySelectorAll("#lineChips .sort-chip").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
@@ -1206,17 +1194,23 @@ function updateLineChips() {
   level3.style.display = "none";
   document.getElementById("modelChips").innerHTML = "";
 
-  if (activeBrand === "all") { level2.style.display = "none"; return; }
-
-  // Find the real brand name (case-insensitive match)
-  const brandMap = window._brandMap || {};
-  const realBrand = Object.keys(brandMap).find(b => b.toLowerCase() === activeBrand);
-  if (!realBrand || !brandMap[realBrand] || !brandMap[realBrand].lines.size) {
-    level2.style.display = "none"; return;
+  if (activeBrand === "all") {
+    level2.style.display = "none";
+    return;
   }
 
-  const lines = [...brandMap[realBrand].lines].sort();
-  lineChips.innerHTML = `<button class="sort-chip active" onclick="filterLine('all',this)">All ${realBrand}</button>`;
+  // Find all unique lines for this brand from products
+  const prods = (window._allProducts || []);
+  const lines = [...new Set(prods.filter(p => (p.brand||'').toLowerCase() === activeBrand).map(p => (p.brandLine||'').trim()).filter(Boolean))].sort();
+
+  if (!lines.length) {
+    level2.style.display = "none";
+    return;
+  }
+
+  // Find the display brand name (original case)
+  const brandDisplay = prods.find(p => (p.brand||'').toLowerCase() === activeBrand)?.brand || activeBrand;
+  lineChips.innerHTML = `<button class="sort-chip active" onclick="filterLine('all',this)">All ${brandDisplay}</button>`;
   lines.forEach(l => {
     const btn = document.createElement("button");
     btn.className = "sort-chip";
@@ -1231,16 +1225,22 @@ function updateModelChips() {
   const level3 = document.getElementById("brandLevel3");
   const modelChips = document.getElementById("modelChips");
 
-  if (activeLine === "all") { level3.style.display = "none"; return; }
+  if (activeLine === "all") {
+    level3.style.display = "none";
+    return;
+  }
 
-  const brandMap = window._brandMap || {};
-  const realBrand = Object.keys(brandMap).find(b => b.toLowerCase() === activeBrand);
-  if (!realBrand) { level3.style.display = "none"; return; }
+  const prods = (window._allProducts || []);
+  const models = [...new Set(
+    prods.filter(p => (p.brand||'').toLowerCase() === activeBrand && (p.brandLine||'').toLowerCase() === activeLine.toLowerCase())
+         .map(p => (p.brandModel||'').trim()).filter(Boolean)
+  )].sort();
 
-  const modelsSet = brandMap[realBrand].models[activeLine];
-  if (!modelsSet || !modelsSet.size) { level3.style.display = "none"; return; }
+  if (!models.length) {
+    level3.style.display = "none";
+    return;
+  }
 
-  const models = [...modelsSet].sort();
   modelChips.innerHTML = `<button class="sort-chip active" onclick="filterModel('all',this)">All ${activeLine}</button>`;
   models.forEach(m => {
     const btn = document.createElement("button");
@@ -1267,7 +1267,7 @@ async function applyReseller() {
   const social = document.getElementById("social").value;
   if (!email || !shopName || !experience || !social) { alert("All fields required!"); return; }
   try {
-    const res = await fetch("https://spykicks-catalog.up.railway.app/apply-reseller", {
+    const res = await fetch("https://spykicks-production.up.railway.app/apply-reseller", {
       method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ email, shopName, experience, social })
     });
@@ -1278,16 +1278,8 @@ async function applyReseller() {
 
 // ════ INIT ════
 updateFavUI();
-loadSocialLinks(); // loads social links from backend, then renders footer socials
-// Load brand taxonomy first, then products (so brand nav is aware of taxonomy)
-(async () => {
-  try {
-    const res = await fetch('/brand-taxonomy');
-    const data = await res.json();
-    BRAND_TAXONOMY = data.taxonomy || [];
-  } catch(e) { BRAND_TAXONOMY = []; }
-  loadAdminProducts(); // loads products from backend, then calls applyFiltersAndSort & updateFavUI
-})();
+loadSocialLinks();
+loadAdminProducts();
 </script>
 </body>
 </html>
