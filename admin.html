@@ -1108,10 +1108,24 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 /* ══ RESPONSIVE ══ */
 @media (max-width: 900px) {
-  .sidebar { transform: translateX(-100%); transition: transform .25s ease; z-index: 200; }
-  .sidebar.open { transform: translateX(0); }
-  .main { margin-left: 0; }
-  .topbar { padding: 0 16px; gap: 10px; }
+  .sidebar {
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform .25s ease, visibility .25s ease;
+    z-index: 200;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+  .main { margin-left: 0 !important; width: 100%; }
+  body { display: block; } /* remove flex — sidebar is fixed, main fills full width */
+  .topbar {
+    padding: 0 16px;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
   .hamburger { display: flex; }
   .topbar-title { flex: 1; }
   /* Hide the inline "Add Product" button — replaced by FAB */
@@ -1162,6 +1176,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 }
 
 @media (max-width: 480px) {
+  /* Hard-hide sidebar on small phones — belt and suspenders */
+  .sidebar:not(.open) { display: none !important; }
   .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .stat-card { padding: 14px; }
   .stat-value { font-size: 26px; }
@@ -3039,12 +3055,17 @@ document.getElementById('modalDrawer').addEventListener('click', e => {
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
-  sidebar.classList.toggle('open');
+  const isOpen = sidebar.classList.toggle('open');
   backdrop.classList.toggle('open');
+  // On very small screens the sidebar may be display:none — force show when opening
+  if (isOpen) sidebar.style.display = 'flex';
+  else sidebar.style.display = '';
 }
 
 function closeSidebar() {
-  document.querySelector('.sidebar').classList.remove('open');
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.remove('open');
+  sidebar.style.display = '';
   document.getElementById('sidebarBackdrop').classList.remove('open');
 }
 
