@@ -166,9 +166,10 @@
   .perks-list { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 10px; }
   .perks-list li { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #888; font-family: Arial, sans-serif; letter-spacing: 1px; text-transform: uppercase; }
   .perks-list li::before { content: ''; width: 20px; height: 1px; background: #555; flex-shrink: 0; }
-  .reseller-login-link { color: #555; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; font-family: Arial, sans-serif; margin-top: 16px; }
-  .reseller-login-link a { color: #fff; text-decoration: none; }
-  .reseller-login-link a:hover { text-decoration: underline; }
+  .reseller-login-link { color: #555; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-family: Arial, sans-serif; margin-top: 20px; margin-bottom: 10px; }
+  .reseller-login-btn { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: #000; font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px; border-radius: 50px; text-decoration: none; transition: background .2s, color .2s, transform .15s, box-shadow .2s; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+  .reseller-login-btn:hover { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
+  .reseller-login-btn svg { flex-shrink: 0; }
   .reseller-right { background: #f9f9f9; padding: 60px 48px; display: flex; flex-direction: column; justify-content: center; }
   .form-title { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #666; margin-bottom: 28px; }
   .form-group { margin-bottom: 16px; }
@@ -489,7 +490,11 @@
   <div class="reseller-split">
     <div class="reseller-left">
       <h2>Become a<span> Partner.</span></h2>
-      <div class="reseller-login-link">Already a reseller? <a href="https://brochure-availablestocks.up.railway.app/vip-login.html">Login to your account →</a></div>
+      <div class="reseller-login-link">Already a reseller?</div>
+      <a href="https://brochure-availablestocks.up.railway.app/vip-login.html" class="reseller-login-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Login to your account
+      </a>
     </div>
     <div class="reseller-right">
       <div class="form-title">Apply for Partnership</div>
