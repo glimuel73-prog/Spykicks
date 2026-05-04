@@ -128,9 +128,9 @@
   .product-stock { font-family: Arial, sans-serif; font-size: 11px; color: #aaa; letter-spacing: .5px; margin-bottom: 8px; }
   .product-colors { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
   .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: default; }
-  .pd-colors { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
-  .pd-color-dot { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: default; transition: transform .15s; }
-  .pd-color-dot:hover { transform: scale(1.25); }
+  .pd-colors { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .pd-color-dot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; cursor: default; transition: transform .15s, box-shadow .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .pd-color-dot:hover { transform: scale(1.3); box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial, sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #aaa; background: #fff; }
   
   /* VIEW DETAILS BUTTON on product cards */
@@ -573,8 +573,11 @@
       </div>
       <div class="pd-price" id="pdPrice">₱0</div>
       <div class="pd-stock-info" id="pdStockInfo">✔ In Stock</div>
-      <div id="pdColors"></div>
       <div class="pd-divider"></div>
+      <div id="pdColorsSection" style="display:none;margin-bottom:16px;">
+        <div class="pd-desc-title" style="margin-bottom:10px;">Colors</div>
+        <div id="pdColors" class="pd-colors"></div>
+      </div>
       <div class="pd-desc-title">Description</div>
       <div class="pd-desc" id="pdDesc">—</div>
       <div class="pd-divider"></div>
@@ -622,13 +625,15 @@ function buildColorDots(colors, size = 14, className = 'color-dot') {
   if (!colors || !colors.length) return '';
   const dots = colors.map(c => {
     const css = colorToCSS_store(c);
-    const bg = css
-      ? (css.startsWith('linear') ? css : css)
-      : '#ccc';
-    const border = c.toLowerCase() === 'white' || c.toLowerCase() === 'ivory' || c.toLowerCase() === 'cream' ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
-    return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;" title="${c}"></span>`;
+    const bg = css || '#ccc';
+    const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
+    return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
   }).join('');
-  return `<div class="${className === 'color-dot' ? 'product-colors' : 'pd-colors'}">${dots}</div>`;
+  // For card use, wrap in the product-colors div; for drawer, return bare dots (container already in HTML)
+  if (className === 'color-dot') {
+    return `<div class="product-colors">${dots}</div>`;
+  }
+  return dots; // bare dots for pd-colors container
 }
 
 // ════ RENDER PRODUCT CARDS FROM ADMIN DATA ════
@@ -915,7 +920,11 @@ function openPD(id) {
 
   // Colors
   const pdColorsEl = document.getElementById("pdColors");
-  if (pdColorsEl) pdColorsEl.innerHTML = buildColorDots(p.colors, 18, 'pd-color-dot');
+  const pdColorsSection = document.getElementById("pdColorsSection");
+  if (pdColorsEl && pdColorsSection) {
+    pdColorsEl.innerHTML = buildColorDots(p.colors, 22, 'pd-color-dot');
+    pdColorsSection.style.display = (p.colors && p.colors.length) ? '' : 'none';
+  }
 
   // Specs
   const specsEl = document.getElementById("pdSpecs");
