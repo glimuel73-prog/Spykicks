@@ -363,7 +363,7 @@
 <!-- HEADER -->
 <div class="header">
   <div class="header-top">
-    <a href="#" class="logo">Spykick<span>'s</span></a>
+    <a href="#" class="logo">Catalog</a>
     <nav class="nav-links">
       <button class="active" id="btnShop" onclick="showTab('buyer',this)">Shop</button>
       <button id="btnReseller" onclick="showTab('reseller',this)">Reseller</button>
@@ -532,7 +532,7 @@
 
 <!-- FOOTER -->
 <div class="footer">
-  <div class="footer-logo">Spykick<span>'s</span></div>
+  <div class="footer-logo">Catalog</div>
   <div style="display:flex;align-items:center;gap:12px;" id="footerSocials">
     <!-- populated by renderFooterSocials() -->
   </div>
@@ -1116,7 +1116,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") closePD(); }
 
 <script>
 // ════ FAVORITES ════
-const FAV_KEY = "spykick_buyer_favs";
+const FAV_KEY = "catalog_buyer_favs";
 let favorites = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
 
 function saveFavs() { localStorage.setItem(FAV_KEY, JSON.stringify(favorites)); }
