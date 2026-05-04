@@ -1052,6 +1052,18 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 }
 .status-pill.approved { color: var(--green); border-color: var(--green); background: rgba(46,204,113,.08); }
 .status-pill.pending { color: var(--orange); border-color: var(--orange); background: rgba(245,158,11,.08); }
+.status-pill.rejected { color: var(--red); border-color: var(--red); background: rgba(255,59,48,.08); }
+
+/* ===== ORDERS PAGE ===== */
+.order-row-expand { display:none; background:var(--surface2); }
+.order-row-expand.open { display:table-row; }
+.order-items-expand { padding:12px 16px; }
+.order-item-line { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; border-bottom:1px solid var(--border); }
+.order-item-line:last-child { border-bottom:none; }
+.order-approve-btn { background:var(--green); color:#000; font-family:var(--font); font-weight:700; font-size:11px; letter-spacing:.5px; text-transform:uppercase; padding:6px 14px; border:none; border-radius:5px; cursor:pointer; transition:opacity .15s; }
+.order-approve-btn:hover { opacity:.8; }
+.order-reject-btn { background:none; border:1px solid rgba(255,59,48,.4); color:var(--red); font-family:var(--font); font-weight:700; font-size:11px; letter-spacing:.5px; text-transform:uppercase; padding:6px 14px; border-radius:5px; cursor:pointer; transition:all .15s; }
+.order-reject-btn:hover { background:var(--red); color:#fff; border-color:var(--red); }
 
 /* ══ HAMBURGER BUTTON ══ */
 .hamburger {
@@ -1400,6 +1412,11 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       Resellers
     </div>
+    <div class="nav-item" id="navOrders" onclick="showPage('orders', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      Orders
+      <span id="pendingOrdersBadge" style="display:none;background:#ff3b30;color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;margin-left:auto;">0</span>
+    </div>
     <div class="nav-item" onclick="showPage('settings', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       Settings
@@ -1463,6 +1480,18 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
         <div class="stat-link" onclick="showPage('resellers', document.querySelector('.nav-item[onclick*=resellers]'))">View all resellers <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <div>
+            <div class="stat-label">Pending Orders</div>
+            <div class="stat-value" id="statPendingOrders">0</div>
+          </div>
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          </div>
+        </div>
+        <div class="stat-link" onclick="showPage('orders', document.getElementById('navOrders'))">View orders <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="stat-card">
         <div class="stat-card-top">
@@ -1641,6 +1670,47 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     </table>
     <!-- MOBILE CARD TABLE (resellers) -->
     <div class="card-table" id="resellersCardTable"></div>
+  </div>
+
+  <!-- ORDERS PAGE -->
+  <div id="page-orders" class="page">
+    <div class="section-hdr">
+      <h2>Reseller Orders</h2>
+      <div class="filter-bar">
+        <select class="select-filter" id="orderStatusFilter" onchange="renderOrdersTable()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <input type="text" class="search-input" placeholder="Search reseller…" id="orderSearch" oninput="renderOrdersTable()">
+        <button class="btn-add" onclick="loadOrders()" style="background:var(--surface);color:var(--text-muted);border:1px solid var(--border);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <table class="products-table" id="ordersTable">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Reseller</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody"></tbody>
+    </table>
+    <div id="ordersEmpty" class="empty-state" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      <p>No orders found</p>
+    </div>
+    <!-- Mobile cards -->
+    <div class="card-table" id="ordersCardTable"></div>
   </div>
 
 <!-- FLOATING ADD BUTTON (mobile, products page only) -->
@@ -2260,6 +2330,7 @@ function showPage(page, el) {
   if (page === 'dashboard') renderDashboard();
   if (page === 'resellers') loadResellers();
   if (page === 'settings') { loadSocialLinks(); }
+  if (page === 'orders') loadOrders();
 }
 
 // ===== DASHBOARD =====
@@ -2276,6 +2347,7 @@ function renderDashboard() {
   document.getElementById('statLow').textContent = low;
   document.getElementById('statOut').textContent = out;
   loadResellerCount();
+  loadPendingOrderCount();
 }
 
 async function loadResellerCount() {
@@ -2284,6 +2356,18 @@ async function loadResellerCount() {
     const data = await res.json();
     document.getElementById('statResellers').textContent = data.count || '—';
   } catch { document.getElementById('statResellers').textContent = '—'; }
+}
+
+async function loadPendingOrderCount() {
+  try {
+    const res = await fetch('/admin/order-count');
+    const data = await res.json();
+    const count = data.count || 0;
+    const el = document.getElementById('statPendingOrders');
+    if (el) el.textContent = count;
+    const badge = document.getElementById('pendingOrdersBadge');
+    if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline-flex' : 'none'; }
+  } catch { }
 }
 
 // ===== PRODUCTS TABLE =====
@@ -3380,6 +3464,174 @@ async function saveSocialLinks() {
     else showToast('Save failed.', true);
   } catch(e) {
     showToast('Save failed.', true);
+  }
+}
+
+// ===== ORDERS MANAGEMENT =====
+let allOrders = [];
+
+async function loadOrders() {
+  try {
+    const res = await fetch('/admin/orders');
+    const data = await res.json();
+    allOrders = data.orders || [];
+    renderOrdersTable();
+    // Update pending badge
+    const pending = allOrders.filter(o => o.status === 'pending').length;
+    const badge = document.getElementById('pendingOrdersBadge');
+    if (badge) {
+      badge.textContent = pending;
+      badge.style.display = pending > 0 ? 'inline-flex' : 'none';
+    }
+    const statPending = document.getElementById('statPendingOrders');
+    if (statPending) statPending.textContent = pending;
+  } catch(e) {
+    showToast('Failed to load orders.', true);
+  }
+}
+
+function renderOrdersTable() {
+  const statusFilter = (document.getElementById('orderStatusFilter')?.value || '').toLowerCase();
+  const search = (document.getElementById('orderSearch')?.value || '').toLowerCase();
+
+  let filtered = allOrders.filter(o => {
+    const matchStatus = !statusFilter || o.status === statusFilter;
+    const matchSearch = !search || o.resellerEmail.toLowerCase().includes(search) || o.id.toLowerCase().includes(search);
+    return matchStatus && matchSearch;
+  });
+
+  const tbody = document.getElementById('ordersTableBody');
+  const emptyEl = document.getElementById('ordersEmpty');
+  const cardTable = document.getElementById('ordersCardTable');
+
+  if (!tbody) return;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = '';
+    if (cardTable) cardTable.innerHTML = '';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(o => {
+    const d = new Date(o.createdAt);
+    const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
+    const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
+    const itemCount = o.items.reduce((s, i) => s + (i.qty || 1), 0);
+    const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
+    const actionBtns = o.status === 'pending'
+      ? `<div class="action-btns">
+           <button class="order-approve-btn" onclick="approveOrder('${o.id}')">✓ Approve</button>
+           <button class="order-reject-btn" onclick="promptRejectOrder('${o.id}')">✗ Reject</button>
+         </div>`
+      : `<span style="font-size:11px;color:var(--text-dim);font-family:var(--font);letter-spacing:1px;">—</span>`;
+
+    const expandId = 'expand_' + o.id.replace(/[^a-zA-Z0-9]/g,'_');
+    return `
+      <tr style="cursor:pointer;" onclick="toggleOrderExpand('${expandId}')">
+        <td><span style="font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;">#${o.id.replace('ORD_','').slice(0,12)}</span></td>
+        <td style="font-size:13px;">${o.resellerEmail}</td>
+        <td style="font-size:12px;color:var(--text-muted);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemSummary}</td>
+        <td class="price-cell">₱${Number(o.totalAmount).toLocaleString()}</td>
+        <td style="font-size:12px;color:var(--text-muted);">${dateStr}</td>
+        <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+        <td onclick="event.stopPropagation()">${actionBtns}</td>
+      </tr>
+      <tr id="${expandId}" class="order-row-expand">
+        <td colspan="7">
+          <div class="order-items-expand">
+            <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Order Items</div>
+            ${o.items.map(i => `
+              <div class="order-item-line">
+                <span><strong>${i.name}</strong> &nbsp;·&nbsp; Size: ${i.size} &nbsp;·&nbsp; Qty: ${i.qty}</span>
+                <span style="font-weight:700;">₱${(i.price * i.qty).toLocaleString()}</span>
+              </div>`).join('')}
+            ${o.note ? `<div style="margin-top:8px;font-size:12px;color:var(--text-muted);font-style:italic;">Note: ${o.note}</div>` : ''}
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  // Mobile cards
+  if (cardTable) {
+    cardTable.innerHTML = filtered.map(o => {
+      const d = new Date(o.createdAt);
+      const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+      const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
+      const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
+      return `<div class="card-row">
+        <div class="card-top">
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:var(--font);font-weight:700;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.resellerEmail}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">#${o.id.replace('ORD_','').slice(0,12)} · ${dateStr}</div>
+          </div>
+          <span class="status-pill ${statusClass}">${statusLabel}</span>
+        </div>
+        <div class="card-field"><strong>Items</strong>${o.items.map(i => `${i.name} ×${i.qty} (${i.size})`).join(', ')}</div>
+        ${o.note ? `<div class="card-field"><strong>Note</strong>${o.note}</div>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:var(--font);font-weight:700;font-size:16px;">₱${Number(o.totalAmount).toLocaleString()}</span>
+        </div>
+        ${o.status === 'pending' ? `<div class="card-actions">
+          <button class="order-approve-btn" style="flex:1;" onclick="approveOrder('${o.id}')">✓ Approve</button>
+          <button class="order-reject-btn" style="flex:1;" onclick="promptRejectOrder('${o.id}')">✗ Reject</button>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+  }
+}
+
+function toggleOrderExpand(expandId) {
+  const row = document.getElementById(expandId);
+  if (row) row.classList.toggle('open');
+}
+
+async function approveOrder(orderId) {
+  if (!confirm('Approve this order? Stock will be deducted immediately.')) return;
+  try {
+    const res = await fetch('/admin/approve-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Order approved! Stock updated.');
+      await loadOrders();
+      await loadProductsFromBackend();
+      renderDashboard();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown error'), true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+function promptRejectOrder(orderId) {
+  const reason = prompt('Reason for rejection (optional):') ?? null;
+  if (reason === null) return; // cancelled
+  rejectOrder(orderId, reason);
+}
+
+async function rejectOrder(orderId, reason) {
+  try {
+    const res = await fetch('/admin/reject-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, reason })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Order rejected.');
+      await loadOrders();
+    } else {
+      showToast('Failed to reject order.', true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
   }
 }
 
