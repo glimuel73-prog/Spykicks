@@ -1315,12 +1315,58 @@
 
   function pdPickColor(dotEl, colorName) {
     pdSelectedColor = colorName;
+    pdSelectedSize = null; // reset size selection since stocks may change
     // Update dot selection state
     document.querySelectorAll('#pdColors .pd-color-dot').forEach(d => d.classList.remove('selected'));
     dotEl.classList.add('selected');
     // Update label
     const label = document.getElementById('pdSelectedColorLabel');
     if (label) label.textContent = colorName;
+
+    // Refresh size buttons to show color-specific stock
+    const product = pdCurrentProduct;
+    if (product) {
+      const sizesEl = document.getElementById("pdSizes");
+      // Rebuild sizes with color-specific stock
+      let sizes;
+      if (product.sizes && product.sizes.length > 0) {
+        if (typeof product.sizes[0] === 'object') {
+          sizes = product.sizes.map(s => {
+            let stock = s.stock != null ? Number(s.stock) : null;
+            // Use colorStock for the selected color if available
+            if (s.colorStock && s.colorStock[colorName] != null) {
+              stock = Number(s.colorStock[colorName]);
+            }
+            return {
+              s: String(s.size),
+              p: s.resellerPrice || product.resellerPrice || product.price,
+              stock
+            };
+          });
+        } else {
+          sizes = product.sizes.map(s => ({ s: String(s), p: product.resellerPrice || product.price, stock: null }));
+        }
+      } else {
+        sizes = (SIZES_BY_CAT[product.category] || SIZES_BY_CAT.sneakers).map(s => ({
+          s: s.s, p: (product.resellerPrice || product.price) + s.p, stock: null
+        }));
+      }
+
+      sizesEl.innerHTML = sizes.map(s => {
+        const outOfStock = s.stock !== null && s.stock === 0;
+        const lowStock   = s.stock !== null && s.stock > 0 && s.stock <= 3;
+        let btnClass = 'pd-size';
+        if (outOfStock) btnClass += ' pd-size-out';
+        else if (lowStock) btnClass += ' pd-size-low';
+        const stockHint = outOfStock
+          ? `<span class="pd-size-stock-hint">✕</span>`
+          : lowStock ? `<span class="pd-size-stock-hint">${s.stock}</span>` : '';
+        const disabled = outOfStock ? 'disabled' : '';
+        return `<button class="${btnClass}" ${disabled} title="${outOfStock?'Size '+s.s+' — Out of Stock':lowStock?'Size '+s.s+' — Only '+s.stock+' left':'Size '+s.s}'"`+
+          ` onclick="pdPickSize(this,'${s.s}',${s.p},${s.stock ?? 'null'})">${s.s}${stockHint}</button>`;
+      }).join("");
+    }
+
     updateSocialLinks();
   }
 
