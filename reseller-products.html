@@ -160,6 +160,9 @@
   .order-status-pill.pending  { color: #b45309; border-color: #fbbf24; background: #fffbeb; }
   .order-status-pill.approved { color: #166534; border-color: #4ade80; background: #f0fdf4; }
   .order-status-pill.rejected { color: var(--red); border-color: var(--red); background: rgba(255,59,48,.06); }
+  .order-status-pill.cancelled { color: #6b7280; border-color: #9ca3af; background: #f3f4f6; }
+  .cancel-order-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; padding: 7px 14px; background: none; border: 1px solid #d1d5db; color: #6b7280; font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: border-color .2s, color .2s, background .2s; }
+  .cancel-order-btn:hover { border-color: var(--red); color: var(--red); background: rgba(255,59,48,.04); }
   .order-items-list { padding: 10px 16px; }
   .order-item-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; font-family: Arial,sans-serif; }
   .order-item-row:last-child { border-bottom: none; }
@@ -1744,8 +1747,8 @@
       listEl.innerHTML = data.orders.map(order => {
         const d = new Date(order.createdAt);
         const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-        const statusClass = order.status === 'approved' ? 'approved' : order.status === 'rejected' ? 'rejected' : 'pending';
-        const statusLabel = order.status === 'approved' ? '✓ Approved' : order.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
+        const statusClass = order.status === 'approved' ? 'approved' : order.status === 'rejected' ? 'rejected' : order.status === 'cancelled' ? 'cancelled' : 'pending';
+        const statusLabel = order.status === 'approved' ? '✓ Approved' : order.status === 'rejected' ? '✗ Rejected' : order.status === 'cancelled' ? '✕ Cancelled' : '⏳ Pending';
         const itemsHTML = order.items.map(i =>
           `<div class="order-item-row">
             <span>${i.name} <span style="color:#999;font-size:11px;">× ${i.qty} (Size ${i.size}${i.color ? ", " + i.color : ""})</span></span>
@@ -1753,8 +1756,13 @@
           </div>`
         ).join("");
         const noteHTML = order.note ? `<div style="padding:8px 16px;font-size:12px;color:#888;font-family:Arial,sans-serif;border-top:1px solid #f0f0f0;">Note: ${order.note}</div>` : "";
+        const cancelBtn = order.status === 'pending'
+          ? `<div style="padding:0 16px 14px;">
+               <button class="cancel-order-btn" onclick="cancelOrder('${order.id}', this)">✕ Cancel Order</button>
+             </div>`
+          : '';
         return `
-          <div class="order-card">
+          <div class="order-card" id="order-card-${order.id}">
             <div class="order-card-header">
               <div>
                 <div class="order-id">#${order.id.replace("ORD_","")}</div>
@@ -1768,11 +1776,43 @@
               <span>Total</span>
               <span>₱${Number(order.totalAmount).toLocaleString()}</span>
             </div>
+            ${cancelBtn}
           </div>`;
       }).join("");
     } catch (err) {
       loadEl.style.display = "none";
       listEl.innerHTML = `<div style="text-align:center;padding:32px;font-family:Arial,sans-serif;font-size:12px;color:#999;">Could not load orders.</div>`;
+    }
+  }
+
+  async function cancelOrder(orderId, btn) {
+    if (!confirm('Cancel this order? This cannot be undone.')) return;
+    btn.disabled = true;
+    btn.textContent = 'Cancelling…';
+    try {
+      const res = await fetch('/reseller/cancel-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, orderId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        // Update card UI immediately without full reload
+        const card = document.getElementById('order-card-' + orderId);
+        if (card) {
+          const pill = card.querySelector('.order-status-pill');
+          if (pill) { pill.className = 'order-status-pill cancelled'; pill.textContent = '✕ Cancelled'; }
+          btn.closest('div').remove();
+        }
+      } else {
+        btn.disabled = false;
+        btn.textContent = '✕ Cancel Order';
+        alert('Could not cancel: ' + (data.error || 'Unknown error'));
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '✕ Cancel Order';
+      alert('Connection error. Please try again.');
     }
   }
 
