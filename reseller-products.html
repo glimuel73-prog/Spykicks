@@ -93,8 +93,10 @@
   .product-colors { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
   .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); flex-shrink: 0; }
   .pd-colors { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .pd-color-dot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; cursor: default; transition: transform .15s, box-shadow .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
-  .pd-color-dot:hover { transform: scale(1.3); box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+  .pd-color-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: transform .15s, box-shadow .15s, outline .1s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); outline: 2px solid transparent; outline-offset: 3px; }
+  .pd-color-dot:hover { transform: scale(1.2); box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+  .pd-color-dot.selected { outline: 2.5px solid #111; outline-offset: 3px; transform: scale(1.15); box-shadow: 0 2px 10px rgba(0,0,0,0.22); }
+  .pd-color-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #777; margin-left: 6px; }
   /* VIEW DETAILS BUTTON */
   .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: #111; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 12px; border: none; cursor: pointer; transition: background .2s; margin-top: 8px; border-radius: 4px; }
   .product-view-btn:hover { background: #333; }
@@ -649,7 +651,6 @@
     if (!colors || !colors.length) return '';
     const dots = colors.map(c => {
       const label = c.trim();
-      // Check for double color: "black/white", "red-blue", "navy / white", etc.
       const splitMatch = label.match(/^(.+?)\s*[\/\-]\s*(.+)$/);
       let bgStyle, border;
       if (splitMatch) {
@@ -663,12 +664,18 @@
         const lc = label.toLowerCase();
         border = ['white','ivory','cream'].includes(lc) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
       }
+      if (className === 'pd-color-dot') {
+        return `<span class="${className}" style="width:${size}px;height:${size}px;${bgStyle};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${label}" data-color="${label}" onclick="pdPickColor(this,'${label.replace(/'/g,"\\'")}')"></span>`;
+      }
       return `<span class="${className}" style="width:${size}px;height:${size}px;${bgStyle};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${label}"></span>`;
     }).join('');
     if (className === 'color-dot') {
       return `<div class="product-colors" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">${dots}</div>`;
     }
-    return dots; // bare dots for pd-colors container
+    if (className === 'pd-color-dot') {
+      return `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">${dots}<span class="pd-color-label" id="pdColorLabel"></span></div>`;
+    }
+    return dots;
   }
 
   const FAV_KEY = `spykick_favs_${email}`;
@@ -1064,10 +1071,10 @@
 
   loadSocialLinks();
 
-  let pdSelectedSize = null, pdSelectedPrice = null, pdCurrentProduct = null, pdSelectedStock = null;
+  let pdSelectedSize = null, pdSelectedPrice = null, pdCurrentProduct = null, pdSelectedStock = null, pdSelectedColor = null;
 
   function openPD(product, productId, category, badge, displayPrice) {
-    pdSelectedSize = null; pdSelectedPrice = null; pdCurrentProduct = product; pdSelectedStock = null;
+    pdSelectedSize = null; pdSelectedPrice = null; pdCurrentProduct = product; pdSelectedStock = null; pdSelectedColor = null;
     pdCurrentProduct._displayPrice = displayPrice; // store for social links
     document.getElementById("pdBreadName").textContent = product.name;
     document.getElementById("pdBreadCat").textContent = category.charAt(0).toUpperCase() + category.slice(1);
@@ -1198,6 +1205,14 @@
     mainImg.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" alt="">`;
   }
 
+  function pdPickColor(dot, colorName) {
+    document.querySelectorAll("#pdColors .pd-color-dot").forEach(d => d.classList.remove("selected"));
+    dot.classList.add("selected");
+    pdSelectedColor = colorName;
+    const label = document.getElementById("pdColorLabel");
+    if (label) label.textContent = colorName;
+  }
+
   function pdPickSize(btn, size, price, stockQty) {
     document.querySelectorAll(".pd-size").forEach(b => b.classList.remove("selected"));
     btn.classList.add("selected");
@@ -1230,7 +1245,7 @@
     const hasSize = !!pdSelectedSize;
     const basePrice = pdSelectedPrice || p._displayPrice || p.resellerPrice || p.price;
     const msgBase = hasSize
-      ? `Hi! I'd like to order (Reseller): ${p.name} | Size: ${pdSelectedSize} | Price: ₱${pdSelectedPrice}`
+      ? `Hi! I'd like to order (Reseller): ${p.name}${pdSelectedColor ? ' | Color: ' + pdSelectedColor : ''} | Size: ${pdSelectedSize} | Price: ₱${pdSelectedPrice}`
       : `Hi! I'm interested in (Reseller): ${p.name} | Price: ₱${basePrice}`;
     const encoded = encodeURIComponent(msgBase);
     const wrap = document.getElementById("pdSocialBtns");
@@ -1392,12 +1407,18 @@
       setTimeout(() => { btn.textContent = "🛒 Add to Cart"; btn.style.background = ""; }, 1800);
       return;
     }
+    if (p.colors && p.colors.length > 0 && !pdSelectedColor) {
+      const btn = document.getElementById("pdAddToCartBtn");
+      btn.textContent = "⚠ Please select a color first";
+      btn.style.background = "#f59e0b";
+      setTimeout(() => { btn.textContent = "🛒 Add to Cart"; btn.style.background = ""; }, 1800);
+      return;
+    }
 
     const price = pdSelectedPrice || p.resellerPrice || p.price;
-    // maxStock: use per-size stock if known, else fall back to product-level stock, else unlimited (null)
     const maxStock = pdSelectedStock !== null ? pdSelectedStock : (Number(p.stock) || null);
 
-    const existing = cart.find(i => i.productId === String(p.id) && i.size === pdSelectedSize);
+    const existing = cart.find(i => i.productId === String(p.id) && i.size === pdSelectedSize && i.color === (pdSelectedColor || ""));
     if (existing) {
       if (maxStock !== null && existing.qty >= maxStock) {
         const btn = document.getElementById("pdAddToCartBtn");
@@ -1420,6 +1441,7 @@
         name: p.name,
         brand: p.brand || "",
         size: pdSelectedSize,
+        color: pdSelectedColor || "",
         price: Number(price),
         qty: 1,
         maxStock: maxStock,
@@ -1466,7 +1488,7 @@
           <div class="cart-item-info">
             <div class="cart-item-brand">${item.brand || "Reseller"}</div>
             <div class="cart-item-name">${item.name}</div>
-            <div class="cart-item-meta">Size: ${item.size} &nbsp;·&nbsp; ₱${Number(item.price).toLocaleString()} each${stockHint}</div>
+            <div class="cart-item-meta">Size: ${item.size}${item.color ? ` &nbsp;·&nbsp; <span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;">${(()=>{const lbl=item.color;const sm=lbl.match(/^(.+?)\s*[\/\-]\s*(.+)$/);let bg;if(sm){const c1=colorToCSS_r(sm[1].trim())||'#ccc';const c2=colorToCSS_r(sm[2].trim())||'#ccc';bg=`linear-gradient(to right,${c1} 50%,${c2} 50%)`;}else{bg=colorToCSS_r(lbl)||'#ccc';}return`<span style="width:11px;height:11px;border-radius:50%;background:${bg};border:1px solid rgba(0,0,0,0.18);display:inline-block;flex-shrink:0;"></span>`;})()}${item.color}</span>` : ''} &nbsp;·&nbsp; ₱${Number(item.price).toLocaleString()} each${stockHint}</div>
             <div class="cart-item-controls">
               <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
               <span class="qty-display">${item.qty}</span>
@@ -1505,6 +1527,7 @@
       name: i.name,
       brand: i.brand,
       size: i.size,
+      color: i.color || "",
       price: i.price,
       qty: i.qty
     }));
