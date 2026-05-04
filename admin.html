@@ -504,52 +504,77 @@ body {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   z-index: 1000;
   display: none;
-  align-items: flex-start;
-  justify-content: flex-end;
-  backdrop-filter: blur(2px);
+  align-items: stretch;
+  justify-content: stretch;
+  backdrop-filter: blur(3px);
 }
 
 .modal-overlay.open { display: flex; }
 
 .modal-drawer {
-  background: var(--surface);
-  width: 600px;
-  max-width: 100%;
+  background: var(--bg);
+  width: 100%;
   height: 100vh;
   height: 100dvh;
-  overflow-y: auto;
-  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  animation: slideIn .25s ease;
+  animation: modalFadeIn .22s ease;
 }
 
-@keyframes slideIn {
-  from { transform: translateX(40px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
+/* Full-screen top bar */
 .modal-header {
-  padding: 24px 28px 20px;
+  padding: 0 32px;
+  height: 60px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
   background: var(--surface);
+  flex-shrink: 0;
   z-index: 10;
 }
 
 .modal-header h2 {
   font-family: var(--font);
   font-weight: 800;
-  font-size: 20px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
   color: var(--text);
 }
+
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.modal-step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.modal-step-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+}
+.modal-step-dot.active { background: var(--accent); }
 
 .modal-close {
   background: none;
@@ -567,7 +592,28 @@ body {
 
 .modal-close:hover { border-color: var(--red); color: var(--red); }
 
-.modal-body { padding: 28px; flex: 1; }
+/* Two-column body */
+.modal-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  overflow: hidden;
+}
+
+.modal-body-left {
+  overflow-y: auto;
+  padding: 32px 40px;
+  border-right: 1px solid var(--border);
+}
+
+.modal-body-right {
+  overflow-y: auto;
+  padding: 32px 28px;
+  background: var(--surface2);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 
 .field-group { margin-bottom: 20px; }
 
@@ -857,7 +903,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 .image-previews {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-top: 12px;
 }
@@ -924,13 +970,12 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 /* FOOTER */
 .modal-footer {
-  padding: 18px 28px;
+  padding: 16px 32px;
   border-top: 1px solid var(--border);
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  position: sticky;
-  bottom: 0;
+  align-items: center;
   background: var(--surface);
   z-index: 10;
   flex-shrink: 0;
@@ -1165,24 +1210,23 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .products-table { display: none; }
   .resellers-table { display: none; }
   .card-table { display: flex; }
-  /* Modal takes full screen, footer always visible */
-  .modal-overlay { align-items: flex-end; }
-  .modal-drawer { width: 100%; height: 95vh; height: 95dvh; border-left: none; border-top: 1px solid var(--border); border-radius: 0; overflow: hidden; display: flex; flex-direction: column; }
-  .modal-body { padding: 20px 16px 8px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .modal-header { padding: 18px 16px 14px; flex-shrink: 0; }
+  /* Modal full-screen on mobile */
+  .modal-overlay { align-items: stretch; }
+  .modal-drawer { width: 100%; height: 100vh; height: 100dvh; border-left: none; border-radius: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-body { display: flex; flex-direction: column; overflow: hidden; }
+  .modal-body-left { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 16px; flex: 1; border-right: none; border-bottom: 1px solid var(--border); }
+  .modal-body-right { overflow-y: auto; padding: 20px 16px; flex-shrink: 0; }
+  .modal-header { padding: 0 16px; flex-shrink: 0; }
   .modal-footer {
     padding: 14px 16px;
     padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
     gap: 8px;
     justify-content: stretch;
-    min-height: 72px;
+    min-height: 64px;
     flex-shrink: 0;
-    position: relative;
-    bottom: auto;
-    z-index: 20;
   }
-  .modal-footer .btn-cancel { flex: 1; min-height: 48px; font-size: 13px; }
-  .modal-footer .btn-save { flex: 2; min-height: 48px; font-size: 13px; }
+  .modal-footer .btn-cancel { flex: 1; min-height: 44px; font-size: 13px; }
+  .modal-footer .btn-save { flex: 2; min-height: 44px; font-size: 13px; }
   .field-row, .field-row-3 { grid-template-columns: 1fr; }
   .login-box { width: calc(100vw - 32px); padding: 32px 24px; }
   .confirm-box { width: calc(100vw - 32px); padding: 28px 20px; }
@@ -1207,6 +1251,25 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .mgmt-title { font-size: 13px !important; }
   .mgmt-desc { font-size: 10px !important; line-height: 1.3 !important; }
   .mgmt-arrow svg { width: 12px !important; height: 12px !important; }
+}
+
+@media (max-width: 768px) {
+  .modal-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .modal-body-left {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 16px;
+  }
+  .modal-body-right {
+    padding: 20px 16px;
+    background: var(--surface2);
+  }
+  .modal-header { padding: 0 16px; }
+  .modal-step-indicator { display: none; }
+  .modal-footer { padding: 12px 16px; }
 }
 
 @media (max-width: 480px) {
@@ -1724,13 +1787,29 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-drawer" id="modalDrawer">
     <div class="modal-header">
-      <h2 id="modalTitle">Add Product</h2>
-      <button class="modal-close" onclick="closeModal()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <div class="modal-header-left">
+        <h2 id="modalTitle">Add Product</h2>
+        <div class="modal-step-indicator">
+          <div class="modal-step-dot active"></div>
+          <div class="modal-step-dot active"></div>
+          <div class="modal-step-dot active"></div>
+          <span style="margin-left:4px;">All fields on one page</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn-save" onclick="saveProduct()" style="padding:9px 24px;font-size:12px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:-2px;"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Product
+        </button>
+        <button class="modal-close" onclick="closeModal()" title="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
 
     <div class="modal-body">
+      <!-- LEFT COLUMN: all form fields -->
+      <div class="modal-body-left">
 
       <!-- BASIC INFO -->
       <div class="modal-section">
@@ -1821,20 +1900,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             <input type="number" id="fResellerPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
           </div>
         </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label style="display:flex;align-items:center;gap:8px;">
-              Wholesale Price (₱)
-              <span style="display:inline-flex;align-items:center;gap:4px;background:#111;color:#fff;font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:10px;">🔒 Reseller Only</span>
-            </label>
-            <input type="number" id="fWholesalePrice" placeholder="0 (optional)">
-          </div>
-          <div class="field-group" style="display:flex;align-items:flex-end;">
-            <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);line-height:1.6;padding-bottom:10px;">
-              Wholesale price is shown <strong>only</strong> to approved resellers — never visible on the public store.
-            </div>
-          </div>
-        </div>
         <input type="hidden" id="fStock" value="0">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:-10px;margin-bottom:16px;">
           These are fallback defaults — set stock per size in the Sizes section below
@@ -1913,24 +1978,28 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <button class="btn-add-spec" onclick="addSpec()">+ Add Specification</button>
       </div>
 
-      <!-- IMAGES -->
-      <div class="modal-section">
-        <div class="modal-section-label">Product Images</div>
+      </div><!-- /modal-body-left -->
 
-        <div class="image-upload-zone" id="dropZone">
-          <input type="file" id="fImages" accept="image/*" multiple onchange="handleImages(this)">
-          <div class="upload-icon">📷</div>
-          <div class="upload-text">Click or drag images here</div>
-          <div style="font-size:11px; color:var(--text-dim); margin-top:6px; font-family:'Barlow Condensed',sans-serif; letter-spacing:2px;">JPG, PNG, WEBP — Max 5MB each</div>
+      <!-- RIGHT COLUMN: Images + Visibility -->
+      <div class="modal-body-right">
+
+        <!-- IMAGES -->
+        <div class="modal-section" style="margin-bottom:0;">
+          <div class="modal-section-label">Product Images</div>
+
+          <div class="image-upload-zone" id="dropZone">
+            <input type="file" id="fImages" accept="image/*" multiple onchange="handleImages(this)">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Click or drag images here</div>
+            <div style="font-size:11px; color:var(--text-dim); margin-top:6px; font-family:'Barlow Condensed',sans-serif; letter-spacing:2px;">JPG, PNG, WEBP — Max 5MB each</div>
+          </div>
+
+          <div class="image-previews" id="imagePreviews"></div>
         </div>
 
-        <div class="image-previews" id="imagePreviews"></div>
-      </div>
-
-      <!-- EXTRA FLAGS -->
-      <div class="modal-section">
-        <div class="modal-section-label">Visibility</div>
-        <div class="field-row">
+        <!-- VISIBILITY -->
+        <div class="modal-section" style="margin-bottom:0;">
+          <div class="modal-section-label">Visibility</div>
           <div class="field-group">
             <label>Badge Label</label>
             <input type="text" id="fBadge" placeholder="e.g. NEW, HOT, SALE">
@@ -1943,22 +2012,31 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
               <option value="archived">Archived</option>
             </select>
           </div>
+          <div class="field-group" style="margin-top:14px;">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;display:block;">New Arrival</label>
+            <label style="display:flex;align-items:center;gap:14px;cursor:pointer;" onclick="toggleNewArrival()">
+              <div id="newArrivalToggle" style="position:relative;width:44px;height:24px;background:var(--border2);border-radius:12px;cursor:pointer;transition:background .2s;flex-shrink:0;">
+                <div id="newArrivalKnob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.25);"></div>
+              </div>
+              <div>
+                <div style="font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);" id="newArrivalLabel">Mark as New Arrival</div>
+                <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:2px;">Appears in the New Arrivals section</div>
+              </div>
+              <span id="newArrivalBadge" style="display:none;background:#000;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 10px;border-radius:10px;margin-left:auto;">NEW</span>
+            </label>
+            <input type="hidden" id="fNewArrival" value="0">
+          </div>
         </div>
-        <div class="field-group" style="margin-top:14px;">
-          <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;display:block;">New Arrival</label>
-          <label style="display:flex;align-items:center;gap:14px;cursor:pointer;" onclick="toggleNewArrival()">
-            <div id="newArrivalToggle" style="position:relative;width:44px;height:24px;background:var(--border2);border-radius:12px;cursor:pointer;transition:background .2s;flex-shrink:0;">
-              <div id="newArrivalKnob" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.25);"></div>
-            </div>
-            <div>
-              <div style="font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);" id="newArrivalLabel">Mark as New Arrival</div>
-              <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:2px;">Appears in the New Arrivals section for buyers &amp; resellers</div>
-            </div>
-            <span id="newArrivalBadge" style="display:none;background:#000;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 10px;border-radius:10px;margin-left:auto;">NEW ARRIVAL</span>
-          </label>
-          <input type="hidden" id="fNewArrival" value="0">
+
+        <!-- QUICK TIP -->
+        <div style="margin-top:auto;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:11px;color:var(--text-dim);line-height:1.6;">
+          <div style="font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;font-size:10px;">💡 Tips</div>
+          <div>• Upload multiple images for better showcase</div>
+          <div style="margin-top:4px;">• Set per-size prices in the Sizes section</div>
+          <div style="margin-top:4px;">• Wholesale price is only visible to resellers</div>
         </div>
-      </div>
+
+      </div><!-- /modal-body-right -->
 
     </div><!-- /modal-body -->
 
@@ -1982,22 +2060,22 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 </div>
 
 <!-- ADD RESELLER MODAL -->
-<div class="modal-overlay" id="addResellerOverlay">
-  <div class="modal-drawer" style="width:420px;">
-    <div class="modal-header">
+<div class="modal-overlay" id="addResellerOverlay" style="align-items:center;justify-content:center;background:rgba(0,0,0,0.5);">
+  <div class="modal-drawer" style="width:440px;max-width:calc(100vw - 32px);height:auto;max-height:80vh;border-radius:12px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.2);animation:modalFadeIn .2s ease;">
+    <div class="modal-header" style="border-radius:12px 12px 0 0;">
       <h2>Add Reseller</h2>
       <button class="modal-close" onclick="closeAddResellerModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="display:block;padding:24px 28px;overflow-y:auto;">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">Manually approve a reseller by email. They will immediately have access to the reseller dashboard.</p>
       <div class="field-group">
         <label>Email Address *</label>
         <input type="email" id="addResellerEmail" placeholder="reseller@email.com" onkeydown="if(event.key==='Enter')submitAddReseller()">
       </div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" style="border-radius:0 0 12px 12px;">
       <button class="btn-cancel" onclick="closeAddResellerModal()">Cancel</button>
       <button class="btn-save" style="background:var(--green);" onclick="submitAddReseller()">Add & Approve</button>
     </div>
@@ -2409,7 +2487,7 @@ function renderProductsTable() {
           <div class="prod-sku">${p.brand ? p.brand + ' — ' : ''}${p.sku || ''}</div>
         </div>
       </div></td>
-      <td><div class="price-cell">₱${Number(p.price).toLocaleString()}</div>${p.resellerPrice ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Reseller ₱${Number(p.resellerPrice).toLocaleString()}</div>` : ''}${p.wholesalePrice ? `<div style="font-size:11px;color:var(--blue);margin-top:2px;font-weight:700;">🔒 Wholesale ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}</td>
+      <td><div class="price-cell">₱${Number(p.price).toLocaleString()}</div>${p.resellerPrice ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Reseller ₱${Number(p.resellerPrice).toLocaleString()}</div>` : ''}</td>
       <td><span class="cat-tag">${p.category || '—'}</span></td>
       <td><div class="sizes-preview">${(p.sizes||[]).slice(0,5).map(s => {
         const lbl = typeof s === 'object' ? s.size : s;
@@ -2904,7 +2982,6 @@ async function openModal(id = null) {
     document.getElementById('fDescription').value = p.description || '';
     document.getElementById('fPrice').value = p.price || '';
     document.getElementById('fResellerPrice').value = p.resellerPrice || '';
-    document.getElementById('fWholesalePrice').value = p.wholesalePrice || '';
     document.getElementById('fStock').value = p.stock || '';
     document.getElementById('fSKU').value = p.sku || '';
     document.getElementById('fColorway').value = p.colorway || '';
@@ -2927,7 +3004,6 @@ async function openModal(id = null) {
     document.getElementById('fDescription').value = '';
     document.getElementById('fPrice').value = '';
     document.getElementById('fResellerPrice').value = '';
-    document.getElementById('fWholesalePrice').value = '';
     document.getElementById('fStock').value = '';
     document.getElementById('fSKU').value = '';
     document.getElementById('fColorway').value = '';
@@ -3037,7 +3113,6 @@ async function saveProduct() {
     description: document.getElementById('fDescription').value.trim(),
     price: Number(price),
     resellerPrice: Number(resellerPrice) || 0,
-    wholesalePrice: Number(document.getElementById('fWholesalePrice').value) || 0,
     stock: Number(stock) || 0,
     sku: document.getElementById('fSKU').value.trim(),
     colorway: document.getElementById('fColorway').value.trim(),
