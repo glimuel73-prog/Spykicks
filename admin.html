@@ -2654,6 +2654,22 @@ function colorToCSS(name) {
   return COLOR_NAME_MAP[key] || null;
 }
 
+function colorSwatchHTML(colorName) {
+  if (!colorName) return '';
+  const label = colorName.trim();
+  const splitMatch = label.match(/^(.+?)\s*[\/\-]\s*(.+)$/);
+  let bg;
+  if (splitMatch) {
+    const c1 = colorToCSS(splitMatch[1].trim()) || '#ccc';
+    const c2 = colorToCSS(splitMatch[2].trim()) || '#ccc';
+    bg = `linear-gradient(to right,${c1} 50%,${c2} 50%)`;
+  } else {
+    bg = colorToCSS(label) || '#ccc';
+  }
+  const border = ['white','ivory','cream'].includes(label.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.18)';
+  return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${bg};border:${border};vertical-align:middle;margin-right:4px;flex-shrink:0;"></span>`;
+}
+
 function handleColorTagKey(e) {
   if (e.key === 'Enter' || e.key === ',') {
     e.preventDefault();
@@ -3520,7 +3536,7 @@ function renderOrdersTable() {
     const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
     const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
     const itemCount = o.items.reduce((s, i) => s + (i.qty || 1), 0);
-    const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
+    const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
     const actionBtns = o.status === 'pending'
       ? `<div class="action-btns">
            <button class="order-approve-btn" onclick="approveOrder('${o.id}')">✓ Approve</button>
@@ -3545,7 +3561,7 @@ function renderOrdersTable() {
             <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Order Items</div>
             ${o.items.map(i => `
               <div class="order-item-line">
-                <span><strong>${i.name}</strong> &nbsp;·&nbsp; Size: ${i.size} &nbsp;·&nbsp; Qty: ${i.qty}</span>
+                <span><strong>${i.name}</strong> &nbsp;·&nbsp; Size: ${i.size}${i.color ? ` &nbsp;·&nbsp; <span style="display:inline-flex;align-items:center;vertical-align:middle;">${colorSwatchHTML(i.color)}<span style="font-size:12px;">${i.color}</span></span>` : ''} &nbsp;·&nbsp; Qty: ${i.qty}</span>
                 <span style="font-weight:700;">₱${(i.price * i.qty).toLocaleString()}</span>
               </div>`).join('')}
             ${o.note ? `<div style="margin-top:8px;font-size:12px;color:var(--text-muted);font-style:italic;">Note: ${o.note}</div>` : ''}
@@ -3569,7 +3585,7 @@ function renderOrdersTable() {
           </div>
           <span class="status-pill ${statusClass}">${statusLabel}</span>
         </div>
-        <div class="card-field"><strong>Items</strong>${o.items.map(i => `${i.name} ×${i.qty} (${i.size})`).join(', ')}</div>
+        <div class="card-field"><strong>Items</strong>${o.items.map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ')}</div>
         ${o.note ? `<div class="card-field"><strong>Note</strong>${o.note}</div>` : ''}
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span style="font-family:var(--font);font-weight:700;font-size:16px;">₱${Number(o.totalAmount).toLocaleString()}</span>
