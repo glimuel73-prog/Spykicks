@@ -1099,6 +1099,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .status-pill.approved { color: var(--green); border-color: var(--green); background: rgba(46,204,113,.08); }
 .status-pill.pending { color: var(--orange); border-color: var(--orange); background: rgba(245,158,11,.08); }
 .status-pill.rejected { color: var(--red); border-color: var(--red); background: rgba(255,59,48,.08); }
+.status-pill.cancelled { color: #6b7280; border-color: #9ca3af; background: #f3f4f6; }
 
 /* ===== ORDERS PAGE ===== */
 .order-row-expand { display:none; background:var(--surface2); }
@@ -1748,6 +1749,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
+          <option value="cancelled">Cancelled</option>
         </select>
         <input type="text" class="search-input" placeholder="Search reseller…" id="orderSearch" oninput="renderOrdersTable()">
         <button class="btn-add" onclick="loadOrders()" style="background:var(--surface);color:var(--text-muted);border:1px solid var(--border);">
@@ -3699,8 +3701,8 @@ function renderOrdersTable() {
   tbody.innerHTML = filtered.map(o => {
     const d = new Date(o.createdAt);
     const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
-    const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
+    const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : 'pending';
+    const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : o.status === 'cancelled' ? '✕ Cancelled by Reseller' : '⏳ Pending';
     const itemCount = o.items.reduce((s, i) => s + (i.qty || 1), 0);
     const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
     const actionBtns = o.status === 'pending'
@@ -3744,8 +3746,8 @@ function renderOrdersTable() {
     cardTable.innerHTML = filtered.map(o => {
       const d = new Date(o.createdAt);
       const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-      const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
-      const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
+      const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : 'pending';
+      const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : o.status === 'cancelled' ? '✕ Cancelled by Reseller' : '⏳ Pending';
       return `<div class="card-row">
         <div class="card-top">
           <div style="flex:1;min-width:0;">
