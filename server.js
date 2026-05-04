@@ -307,6 +307,135 @@ app.post("/admin/add-reseller", (req, res) => {
     }
 });
 
+// ================= ORDERS TABLE =================
+db.exec(`
+    CREATE TABLE IF NOT EXISTS orders (
+        id TEXT PRIMARY KEY,
+        resellerEmail TEXT,
+        items TEXT,
+        totalAmount REAL,
+        status TEXT DEFAULT 'pending',
+        note TEXT,
+        createdAt TEXT,
+        updatedAt TEXT
+    )
+`);
+
+// ================= RESELLER — PLACE ORDER =================
+app.post("/reseller/place-order", (req, res) => {
+    const { email, items, totalAmount, note } = req.body;
+    if (!email || !items || !Array.isArray(items) || items.length === 0)
+        return res.json({ success: false, error: "Missing fields" });
+
+    // Verify reseller is still approved
+    const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
+    if (!row) return res.json({ success: false, error: "Not an approved reseller" });
+
+    try {
+        const orderId = "ORD_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7).toUpperCase();
+        const now = new Date().toISOString();
+        db.prepare(
+            "INSERT INTO orders (id, resellerEmail, items, totalAmount, status, note, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'pending', ?, ?, ?)"
+        ).run(orderId, email, JSON.stringify(items), totalAmount || 0, note || "", now, now);
+        res.json({ success: true, orderId });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= RESELLER — GET OWN ORDERS =================
+app.get("/reseller/orders", (req, res) => {
+    const { email } = req.query;
+    if (!email) return res.json({ orders: [] });
+    try {
+        const rows = db.prepare("SELECT * FROM orders WHERE resellerEmail = ? ORDER BY createdAt DESC").all(email);
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        res.json({ orders });
+    } catch (err) {
+        res.json({ orders: [] });
+    }
+});
+
+// ================= ADMIN — GET ALL ORDERS =================
+app.get("/admin/orders", (req, res) => {
+    try {
+        const rows = db.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        res.json({ orders });
+    } catch (err) {
+        res.json({ orders: [] });
+    }
+});
+
+// ================= ADMIN — APPROVE ORDER (deduct stock) =================
+app.post("/admin/approve-order", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+
+    try {
+        const orderRow = db.prepare("SELECT * FROM orders WHERE id = ?").get(orderId);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+        if (orderRow.status !== "pending") return res.json({ success: false, error: "Order is not pending" });
+
+        const items = JSON.parse(orderRow.items);
+        const now = new Date().toISOString();
+
+        // Deduct stock for each item in a transaction
+        const approve = db.transaction(() => {
+            for (const item of items) {
+                const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
+                if (!prodRow) continue;
+                const product = JSON.parse(prodRow.data);
+
+                if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
+                    // Per-size stock deduction
+                    const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
+                    if (sizeObj && sizeObj.stock != null) {
+                        sizeObj.stock = Math.max(0, (Number(sizeObj.stock) || 0) - (Number(item.qty) || 1));
+                    }
+                    // Also update product-level stock as sum
+                    product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+                } else {
+                    // Global stock deduction
+                    product.stock = Math.max(0, (Number(product.stock) || 0) - (Number(item.qty) || 1));
+                }
+
+                db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), item.productId);
+            }
+            db.prepare("UPDATE orders SET status = 'approved', updatedAt = ? WHERE id = ?").run(now, orderId);
+        });
+
+        approve();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — REJECT ORDER =================
+app.post("/admin/reject-order", (req, res) => {
+    const { orderId, reason } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const now = new Date().toISOString();
+        db.prepare("UPDATE orders SET status = 'rejected', note = ?, updatedAt = ? WHERE id = ?")
+            .run(reason || "", now, orderId);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — ORDER COUNT (pending) =================
+app.get("/admin/order-count", (req, res) => {
+    try {
+        const row = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status = 'pending'").get();
+        res.json({ count: row ? row.count : 0 });
+    } catch (err) {
+        res.json({ count: 0 });
+    }
+});
+
 // ================= START SERVER =================
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
