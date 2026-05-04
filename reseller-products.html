@@ -534,27 +534,14 @@
     const key = (name || '').trim().toLowerCase();
     return COLOR_NAME_MAP_R[key] || null;
   }
-  function buildColorDotSwatch_r(c, size, className) {
-    const sep = c.match(/\s*[\/&]\s*|\s+and\s+/i);
-    if (sep) {
-      const parts = c.split(sep[0]).map(s => s.trim()).filter(Boolean);
-      if (parts.length >= 2) {
-        const c1 = colorToCSS_r(parts[0]) || '#ccc';
-        const c2 = colorToCSS_r(parts[1]) || '#999';
-        const bg = `linear-gradient(to right, ${c1} 50%, ${c2} 50%)`;
-        const needsBorder = parts.some(p => ['white','ivory','cream'].includes(p.toLowerCase()));
-        const border = needsBorder ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.15)';
-        return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
-      }
-    }
-    const css = colorToCSS_r(c);
-    const bg = css || '#ccc';
-    const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
-    return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
-  }
   function buildColorDots_r(colors, size, className) {
     if (!colors || !colors.length) return '';
-    const dots = colors.map(c => buildColorDotSwatch_r(c, size, className)).join('');
+    const dots = colors.map(c => {
+      const css = colorToCSS_r(c);
+      const bg = css || '#ccc';
+      const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
+      return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
+    }).join('');
     if (className === 'color-dot') {
       return `<div class="product-colors" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">${dots}</div>`;
     }
@@ -788,9 +775,12 @@
         const productId = p.id || `product_${i}`;
         const isFav = favorites.includes(productId);
         const hasImg = p.images && p.images.length > 0;
-        const stockNum = Number(p.stock) || 0;
+        // Sum per-size stocks if available (matches admin logic), else fall back to global p.stock
+        let stockNum = Number(p.stock) || 0;
+        if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
+          stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+        }
         const stockLabel = stockNum === 0 ? "Out of Stock" : "In Stock";
-
         // Use first size's resellerPrice as the card display price, fallback to p.resellerPrice then p.price
         let displayPrice = p.resellerPrice || p.price;
         if (p.sizes && p.sizes.length > 0 && typeof p.sizes[0] === 'object') {
