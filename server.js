@@ -426,6 +426,19 @@ app.post("/admin/reject-order", (req, res) => {
     }
 });
 
+// ================= ADMIN — DELETE ORDER =================
+app.post("/admin/delete-order", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const result = db.prepare("DELETE FROM orders WHERE id = ?").run(orderId);
+        if (result.changes === 0) return res.json({ success: false, error: "Order not found" });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
 // ================= ADMIN — ORDER COUNT (pending) =================
 app.get("/admin/order-count", (req, res) => {
     try {
