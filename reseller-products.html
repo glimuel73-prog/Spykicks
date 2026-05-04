@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SPYKICK'S — Reseller Store</title>
+<title>Catalog — Reseller Store</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -414,21 +414,21 @@
 <!-- TICKER -->
 <div class="ticker">
   <div class="ticker-inner">
-    <span>Spykick's Official Website</span><span>•</span>
-    <span>Spykick's Official Website</span><span>•</span>
-    <span>Spykick's Official Website</span><span>•</span>
-    <span>Spykick's Official Website</span><span>•</span>
-    <span>Spykick's Official Website</span><span>•</span>
-    <span>Spykick's Official Website</span><span>•</span>
-    <span>Spykick's Official Website</span><span>•</span>
-    <span>Spykick's Official Website</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
+    <span>Available Stocks</span><span>•</span>
   </div>
 </div>
 
 <!-- HEADER -->
 <div class="header">
   <div class="header-top">
-    <a class="logo">Spykick<span>'s</span></a>
+    <a class="logo">Catalog</a>
     <div class="header-actions">
       <span class="reseller-badge">Reseller Page</span>
       <button class="cart-btn" id="cartBtn" onclick="openCart()">
@@ -456,7 +456,7 @@
 <div id="unauthorized" class="state-box">
   <h2 style="color:var(--red);">Access<span style="display:block;">Denied.</span></h2>
   <p>You are not an approved reseller.</p>
-  <a href="https://spykicks-catalog.up.railway.app/index.html">← Back to Store</a>
+  <a href="https://brochure-availablestocks.up.railway.app/index.html">← Back to Store</a>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -679,16 +679,16 @@
 
 <!-- FOOTER -->
 <div class="footer">
-  <div class="footer-logo">Spykick<span>'s</span></div>
+  <div class="footer-logo">Catalog</div>
   <div style="display:flex;align-items:center;gap:12px;" id="footerSocials">
     <!-- populated by renderFooterSocials() -->
   </div>
-  <div class="footer-copy">© 2026 Spykick's. All rights reserved.</div>
+  <div class="footer-copy">© 2026 Catalog. All rights reserved.</div>
 </div>
 
 <script>
   const email = localStorage.getItem("resellerEmail");
-  if (!email) window.location.href = "https://spykicks-catalog.up.railway.app/vip-login.html";
+  if (!email) window.location.href = "https://brochure-availablestocks.up.railway.app/vip-login.html";
 
   // Color name → CSS map
   const COLOR_NAME_MAP_R = {
@@ -734,7 +734,7 @@
     return dots; // bare dots for pd-colors container
   }
 
-  const FAV_KEY = `spykick_favs_${email}`;
+  const FAV_KEY = `catalog_favs_${email}`;
   let favorites = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
   let currentCat = "all";
   let showingFavs = false;
@@ -1346,7 +1346,7 @@
 
   function logout() {
     localStorage.removeItem("resellerEmail");
-    window.location.href = "https://spykicks-catalog.up.railway.app/index.html";
+    window.location.href = "https://brochure-availablestocks.up.railway.app/index.html";
   }
 
   // ════ PRODUCT MODAL ════
