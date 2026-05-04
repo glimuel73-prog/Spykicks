@@ -126,6 +126,11 @@
   .product-tag { font-size: 10px; font-family: Arial, sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #666; border: 1px solid #ddd; padding: 3px 10px; border-radius: 3px; }
   .product-category-tag { position: absolute; bottom: 16px; left: 24px; font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #aaa; border: 1px solid #eee; padding: 2px 8px; pointer-events: none; border-radius: 3px; }
   .product-stock { font-family: Arial, sans-serif; font-size: 11px; color: #aaa; letter-spacing: .5px; margin-bottom: 8px; }
+  .product-colors { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+  .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: default; }
+  .pd-colors { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .pd-color-dot { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: default; transition: transform .15s; }
+  .pd-color-dot:hover { transform: scale(1.25); }
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial, sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #aaa; background: #fff; }
   
   /* VIEW DETAILS BUTTON on product cards */
@@ -568,6 +573,7 @@
       </div>
       <div class="pd-price" id="pdPrice">₱0</div>
       <div class="pd-stock-info" id="pdStockInfo">✔ In Stock</div>
+      <div id="pdColors"></div>
       <div class="pd-divider"></div>
       <div class="pd-desc-title">Description</div>
       <div class="pd-desc" id="pdDesc">—</div>
@@ -594,6 +600,37 @@ let PRODUCTS_INDEX = {};
 // ════ SHOE PLACEHOLDER SVG ════
 const SHOE_SVG = `<svg viewBox="0 0 80 40" fill="none"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#fff"/><rect x="4" y="28" width="52" height="5" rx="2" fill="#fff"/></svg>`;
 
+// Color name → CSS map (shared with admin)
+const COLOR_NAME_MAP_STORE = {
+  red:'#e53935',crimson:'#c62828',rose:'#e91e63',pink:'#f48fb1',
+  orange:'#fb8c00',amber:'#ffb300',yellow:'#fdd835',gold:'#f9a825',
+  green:'#43a047','olive green':'#827717',olive:'#827717',lime:'#c6ef00',mint:'#a5d6a7',
+  teal:'#00897b',cyan:'#00acc1',sky:'#039be5',
+  blue:'#1e88e5','navy blue':'#1565c0',navy:'#1565c0','royal blue':'#1976d2',
+  indigo:'#3949ab',violet:'#8e24aa',purple:'#7b1fa2',lavender:'#ce93d8',
+  white:'#ffffff',cream:'#fffde7',beige:'#f5f0e8',ivory:'#fffff0',
+  gray:'#9e9e9e',grey:'#9e9e9e','light gray':'#e0e0e0','dark gray':'#424242',silver:'#bdbdbd',
+  black:'#212121',charcoal:'#37474f',brown:'#6d4c41',tan:'#d7b899',
+  multicolor:'linear-gradient(135deg,#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#7b1fa2)',
+  multi:'linear-gradient(135deg,#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#7b1fa2)',
+};
+function colorToCSS_store(name) {
+  const key = (name || '').trim().toLowerCase();
+  return COLOR_NAME_MAP_STORE[key] || null;
+}
+function buildColorDots(colors, size = 14, className = 'color-dot') {
+  if (!colors || !colors.length) return '';
+  const dots = colors.map(c => {
+    const css = colorToCSS_store(c);
+    const bg = css
+      ? (css.startsWith('linear') ? css : css)
+      : '#ccc';
+    const border = c.toLowerCase() === 'white' || c.toLowerCase() === 'ivory' || c.toLowerCase() === 'cream' ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
+    return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;" title="${c}"></span>`;
+  }).join('');
+  return `<div class="${className === 'color-dot' ? 'product-colors' : 'pd-colors'}">${dots}</div>`;
+}
+
 // ════ RENDER PRODUCT CARDS FROM ADMIN DATA ════
 function buildProductCard(p) {
   const id = p.id;
@@ -618,6 +655,8 @@ function buildProductCard(p) {
     ? `<div class="product-img-placeholder" style="padding:0;overflow:hidden;"><img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;" alt="${name}"></div>`
     : `<div class="product-img-placeholder">${SHOE_SVG}</div>`;
 
+  const colorDotsHTML = buildColorDots(p.colors, 14, 'color-dot');
+
   return `
     <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-brand="${brand.toLowerCase()}" data-brand-line="${(p.brandLine||'').toLowerCase()}" data-brand-model="${(p.brandModel||'').toLowerCase()}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" onclick="openPD('${id}')">
       ${badgeHTML}
@@ -626,6 +665,7 @@ function buildProductCard(p) {
       <div class="product-category-tag">${catLabel}</div>
       <div class="product-brand">${brand}</div>
       <div class="product-name">${name}</div>
+      ${colorDotsHTML}
       <div class="product-footer">
         <div class="product-price">₱${price.toLocaleString()}</div>
       </div>
@@ -872,6 +912,10 @@ function openPD(id) {
   }
 
   document.getElementById("pdDesc").textContent = p.desc;
+
+  // Colors
+  const pdColorsEl = document.getElementById("pdColors");
+  if (pdColorsEl) pdColorsEl.innerHTML = buildColorDots(p.colors, 18, 'pd-color-dot');
 
   // Specs
   const specsEl = document.getElementById("pdSpecs");
