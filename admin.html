@@ -1627,16 +1627,29 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
         <!-- BRAND 3-LEVEL TEXT INPUTS -->
         <div class="field-group">
-          <label>Brand <span style="font-weight:400;color:var(--text-dim);letter-spacing:0;text-transform:none;font-size:10px;">(optional)</span></label>
-          <input type="text" id="fBrand" placeholder="e.g. Nike" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-        </div>
-        <div class="field-group">
-          <label>Brand Line <span style="font-weight:400;color:var(--text-dim);letter-spacing:0;text-transform:none;font-size:10px;">(optional — e.g. Air Max)</span></label>
-          <input type="text" id="fBrandLine" placeholder="e.g. Air Max" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-        </div>
-        <div class="field-group">
-          <label>Model / Type <span style="font-weight:400;color:var(--text-dim);letter-spacing:0;text-transform:none;font-size:10px;">(optional — e.g. Air Max 90)</span></label>
-          <input type="text" id="fBrandModel" placeholder="e.g. Air Max 90" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          <label>Brand <span style="color:var(--text-dim);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;">— optional levels below</span></label>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="position:relative;">
+              <input type="text" id="fBrand" placeholder="e.g. Nike" autocomplete="off"
+                style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;padding:10px 12px;outline:none;border-radius:6px;transition:border-color .2s;"
+                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" oninput="onBrandTextInput()">
+              <div id="brandSuggestBox" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;z-index:50;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.08);"></div>
+            </div>
+            <div style="position:relative;">
+              <div style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;padding-left:2px;">Product Line <span style="color:var(--border2);">— optional</span></div>
+              <input type="text" id="fBrandLine" placeholder="e.g. Air Max" autocomplete="off"
+                style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px 10px 20px;outline:none;border-radius:6px;transition:border-color .2s;border-left:3px solid var(--border2);"
+                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" oninput="onLineTextInput()">
+              <div id="lineSuggestBox" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;z-index:50;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.08);"></div>
+            </div>
+            <div style="position:relative;">
+              <div style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;padding-left:2px;">Model / Type <span style="color:var(--border2);">— optional</span></div>
+              <input type="text" id="fBrandModel" placeholder="e.g. Air Max 90" autocomplete="off"
+                style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:10px 12px 10px 36px;outline:none;border-radius:6px;transition:border-color .2s;border-left:3px solid var(--border2);"
+                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+              <div id="modelSuggestBox" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;z-index:50;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.08);"></div>
+            </div>
+          </div>
         </div>
 
         <div class="field-group">
@@ -1923,23 +1936,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </div>
     </div>
   </div>
-
-  <!-- BRAND TAXONOMY -->
-  <div style="margin-top:32px;">
-    <div class="section-hdr" style="margin-bottom:16px;">
-      <h2>Brand Taxonomy</h2>
-      <button class="btn-add" onclick="addBrand()" style="font-size:11px;padding:8px 16px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add Brand
-      </button>
-    </div>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.6;">Build a 3-level hierarchy: <strong>Brand → Line → Model</strong>. This powers the navigation filters on the store and the cascade dropdowns when adding products.</p>
-    <div id="taxonomyBuilder" style="display:flex;flex-direction:column;gap:12px;"></div>
-    <div style="display:flex;gap:12px;margin-top:20px;">
-      <button class="btn-save" onclick="saveTaxonomy()" style="flex:1;">Save Brand Taxonomy</button>
-    </div>
-  </div>
-</div>
 </div>
 
 <!-- TOAST -->
@@ -2176,7 +2172,7 @@ function showPage(page, el) {
   if (page === 'products') renderProductsTable();
   if (page === 'dashboard') renderDashboard();
   if (page === 'resellers') loadResellers();
-  if (page === 'settings') { loadSocialLinks(); loadTaxonomy(); }
+  if (page === 'settings') { loadSocialLinks(); }
 }
 
 // ===== DASHBOARD =====
@@ -2556,9 +2552,7 @@ function openModal(id = null) {
     if (!p) return;
     document.getElementById('modalTitle').textContent = 'Edit Product';
     document.getElementById('fName').value = p.name || '';
-    document.getElementById('fBrand').value = p.brand || '';
-    document.getElementById('fBrandLine').value = p.brandLine || '';
-    document.getElementById('fBrandModel').value = p.brandModel || '';
+    setBrandCascade(p.brand || '', p.brandLine || '', p.brandModel || '');
     setCategory(p.category || '');
     setGender(p.gender || '');
     document.getElementById('fDescription').value = p.description || '';
@@ -2578,10 +2572,7 @@ function openModal(id = null) {
   } else {
     document.getElementById('modalTitle').textContent = 'Add Product';
     document.getElementById('fName').value = '';
-    document.getElementById('fBrand').value = '';
-    document.getElementById('fBrandLine').value = '';
-    document.getElementById('fBrandModel').value = '';
-    document.getElementById('fBrandCustom') && (document.getElementById('fBrandCustom').value = '');
+    setBrandCascade('', '', '');
     setCategory('');
     document.getElementById('fCategoryCustom').style.display = 'none';
     setGender('');
@@ -2688,9 +2679,9 @@ function saveProduct() {
   const product = {
     id: editingId || 'p_' + Date.now(),
     name,
-    brand: document.getElementById('fBrand').value.trim(),
-    brandLine: document.getElementById('fBrandLine').value.trim(),
-    brandModel: document.getElementById('fBrandModel').value.trim(),
+    brand: getSelectedBrand(),
+    brandLine: getSelectedBrandLine(),
+    brandModel: getSelectedBrandModel(),
     gender: document.querySelector('input[name="fGender"]:checked')?.value || '',
     category,
     description: document.getElementById('fDescription').value.trim(),
@@ -3086,145 +3077,100 @@ function renderResellersCards(filtered) {
   `).join('');
 }
 
-// ===== BRAND TAXONOMY =====
-let brandTaxonomy = []; // [{ brand, lines: [{ name, models: [string] }] }]
+// ===== BRAND 3-LEVEL TEXT INPUTS WITH AUTOCOMPLETE =====
 
-async function loadTaxonomy() {
-  try {
-    const res = await fetch('/admin/brand-taxonomy');
-    const data = await res.json();
-    brandTaxonomy = data.taxonomy || [];
-  } catch(e) {
-    brandTaxonomy = [];
+function getBrandsFromProducts() {
+  return [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))].sort();
+}
+function getLinesForBrand(brand) {
+  if (!brand) return [];
+  const b = brand.toLowerCase();
+  return [...new Set(products.filter(p => (p.brand||'').toLowerCase() === b).map(p => (p.brandLine||'').trim()).filter(Boolean))].sort();
+}
+function getModelsForLine(brand, line) {
+  if (!brand || !line) return [];
+  const b = brand.toLowerCase(), l = line.toLowerCase();
+  return [...new Set(products.filter(p => (p.brand||'').toLowerCase() === b && (p.brandLine||'').toLowerCase() === l).map(p => (p.brandModel||'').trim()).filter(Boolean))].sort();
+}
+
+function showSuggestBox(boxId, items, inputId) {
+  const box = document.getElementById(boxId);
+  const inp = document.getElementById(inputId);
+  if (!items.length) { box.style.display = 'none'; return; }
+  box.innerHTML = items.map(item => `
+    <div style="padding:9px 14px;cursor:pointer;font-family:var(--font);font-size:13px;color:var(--text);transition:background .1s;"
+      onmousedown="event.preventDefault();document.getElementById('${inputId}').value='${item.replace(/'/g,"\\'")}';hideSuggestBox('${boxId}');if('${inputId}'==='fBrand')onBrandTextInput(true);if('${inputId}'==='fBrandLine')onLineTextInput(true);"
+      onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">${item}</div>
+  `).join('');
+  box.style.display = 'block';
+}
+
+function hideSuggestBox(boxId) {
+  const box = document.getElementById(boxId);
+  if (box) box.style.display = 'none';
+}
+
+function onBrandTextInput(picked) {
+  const val = document.getElementById('fBrand').value.trim();
+  if (!picked) {
+    const brands = getBrandsFromProducts().filter(b => b.toLowerCase().includes(val.toLowerCase()) && b.toLowerCase() !== val.toLowerCase());
+    showSuggestBox('brandSuggestBox', brands, 'fBrand');
+  } else {
+    hideSuggestBox('brandSuggestBox');
   }
-  renderTaxonomyBuilder();
-  populateBrandDropdown();
+  // Clear downstream
+  document.getElementById('fBrandLine').value = '';
+  document.getElementById('fBrandModel').value = '';
 }
 
-async function saveTaxonomy() {
-  readTaxonomyFromDOM();
-  try {
-    const res = await fetch('/admin/brand-taxonomy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ taxonomy: brandTaxonomy })
-    });
-    const data = await res.json();
-    if (data.success) { showToast('Brand taxonomy saved!'); populateBrandDropdown(); }
-    else showToast('Save failed.', true);
-  } catch(e) {
-    showToast('Save failed.', true);
+function onLineTextInput(picked) {
+  const brand = document.getElementById('fBrand').value.trim();
+  const val = document.getElementById('fBrandLine').value.trim();
+  if (!picked) {
+    const lines = getLinesForBrand(brand).filter(l => l.toLowerCase().includes(val.toLowerCase()) && l.toLowerCase() !== val.toLowerCase());
+    showSuggestBox('lineSuggestBox', lines, 'fBrandLine');
+  } else {
+    hideSuggestBox('lineSuggestBox');
   }
+  document.getElementById('fBrandModel').value = '';
 }
 
-function readTaxonomyFromDOM() {
-  brandTaxonomy = [];
-  document.querySelectorAll('.tx-brand-block').forEach(bBlock => {
-    const brandName = bBlock.querySelector('.tx-brand-name').value.trim();
-    if (!brandName) return;
-    const lines = [];
-    bBlock.querySelectorAll('.tx-line-block').forEach(lBlock => {
-      const lineName = lBlock.querySelector('.tx-line-name').value.trim();
-      if (!lineName) return;
-      const models = [];
-      lBlock.querySelectorAll('.tx-model-input').forEach(inp => {
-        const v = inp.value.trim();
-        if (v) models.push(v);
-      });
-      lines.push({ name: lineName, models });
-    });
-    brandTaxonomy.push({ brand: brandName, lines });
-  });
-}
+// Hide suggest boxes on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#fBrand') && !e.target.closest('#brandSuggestBox')) hideSuggestBox('brandSuggestBox');
+  if (!e.target.closest('#fBrandLine') && !e.target.closest('#lineSuggestBox')) hideSuggestBox('lineSuggestBox');
+  if (!e.target.closest('#fBrandModel') && !e.target.closest('#modelSuggestBox')) hideSuggestBox('modelSuggestBox');
+});
 
-function renderTaxonomyBuilder() {
-  const wrap = document.getElementById('taxonomyBuilder');
-  if (!wrap) return;
-  if (!brandTaxonomy.length) {
-    wrap.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-dim);font-size:13px;border:1px dashed var(--border);border-radius:8px;">No brands yet — click "Add Brand" to get started.</div>`;
-    return;
+// Focus: show existing suggestions
+document.addEventListener('focusin', (e) => {
+  if (e.target.id === 'fBrand') {
+    const brands = getBrandsFromProducts();
+    const val = e.target.value.trim();
+    const filtered = val ? brands.filter(b => b.toLowerCase().includes(val.toLowerCase()) && b.toLowerCase() !== val.toLowerCase()) : brands;
+    showSuggestBox('brandSuggestBox', filtered, 'fBrand');
   }
-  wrap.innerHTML = brandTaxonomy.map((b, bi) => renderBrandBlock(b, bi)).join('');
-}
+  if (e.target.id === 'fBrandLine') {
+    const brand = document.getElementById('fBrand').value.trim();
+    const lines = getLinesForBrand(brand);
+    const val = e.target.value.trim();
+    const filtered = val ? lines.filter(l => l.toLowerCase().includes(val.toLowerCase()) && l.toLowerCase() !== val.toLowerCase()) : lines;
+    showSuggestBox('lineSuggestBox', filtered, 'fBrandLine');
+  }
+  if (e.target.id === 'fBrandModel') {
+    const brand = document.getElementById('fBrand').value.trim();
+    const line = document.getElementById('fBrandLine').value.trim();
+    const models = getModelsForLine(brand, line);
+    const val = e.target.value.trim();
+    const filtered = val ? models.filter(m => m.toLowerCase().includes(val.toLowerCase()) && m.toLowerCase() !== val.toLowerCase()) : models;
+    showSuggestBox('modelSuggestBox', filtered, 'fBrandModel');
+  }
+});
 
-function renderBrandBlock(b, bi) {
-  const linesHTML = (b.lines || []).map((l, li) => renderLineBlock(b, bi, l, li)).join('');
-  return `
-  <div class="tx-brand-block" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
-    <div style="background:var(--surface2);padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);">
-      <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);flex-shrink:0;">Brand</div>
-      <input class="tx-brand-name" type="text" value="${escHTML(b.brand)}" placeholder="Brand name (e.g. Nike)" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;font-weight:700;padding:8px 12px;border-radius:5px;outline:none;">
-      <button onclick="addLine(this)" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 14px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;">+ Line</button>
-      <button onclick="this.closest('.tx-brand-block').remove()" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 14px;background:none;color:var(--red);border:1px solid rgba(255,59,48,.3);border-radius:5px;cursor:pointer;">Remove</button>
-    </div>
-    <div class="tx-lines-wrap" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
-      ${linesHTML}
-    </div>
-  </div>`;
-}
-
-function renderLineBlock(b, bi, l, li) {
-  const modelsHTML = (l.models || []).map(m => `
-    <div style="display:flex;gap:6px;align-items:center;">
-      <input class="tx-model-input" type="text" value="${escHTML(m)}" placeholder="Model (e.g. Air Max 90)" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:7px 10px;border-radius:5px;outline:none;">
-      <button onclick="this.parentElement.remove()" style="color:var(--red);background:none;border:1px solid rgba(255,59,48,.3);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">×</button>
-    </div>`).join('');
-  return `
-  <div class="tx-line-block" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-      <div style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);flex-shrink:0;">Line</div>
-      <input class="tx-line-name" type="text" value="${escHTML(l.name)}" placeholder="Line name (e.g. Air Max)" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;font-weight:600;padding:7px 10px;border-radius:5px;outline:none;">
-      <button onclick="addModel(this)" style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;background:var(--surface);color:var(--text-muted);border:1px solid var(--border2);border-radius:5px;cursor:pointer;">+ Model</button>
-      <button onclick="this.closest('.tx-line-block').remove()" style="color:var(--red);background:none;border:1px solid rgba(255,59,48,.3);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">×</button>
-    </div>
-    <div class="tx-models-wrap" style="display:flex;flex-direction:column;gap:6px;padding-left:12px;border-left:2px solid var(--border);">
-      ${modelsHTML}
-    </div>
-  </div>`;
-}
-
-function escHTML(s) {
-  return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-}
-
-function addBrand() {
-  readTaxonomyFromDOM();
-  brandTaxonomy.push({ brand: '', lines: [] });
-  renderTaxonomyBuilder();
-  const blocks = document.querySelectorAll('.tx-brand-block');
-  if (blocks.length) blocks[blocks.length-1].querySelector('.tx-brand-name').focus();
-}
-
-function addLine(btn) {
-  const bBlock = btn.closest('.tx-brand-block');
-  const wrap = bBlock.querySelector('.tx-lines-wrap');
-  const div = document.createElement('div');
-  div.innerHTML = renderLineBlock({}, 0, { name: '', models: [] }, 0);
-  wrap.appendChild(div.firstElementChild);
-  wrap.lastElementChild.querySelector('.tx-line-name').focus();
-}
-
-function addModel(btn) {
-  const lBlock = btn.closest('.tx-line-block');
-  const wrap = lBlock.querySelector('.tx-models-wrap');
-  const div = document.createElement('div');
-  div.innerHTML = `
-    <div style="display:flex;gap:6px;align-items:center;">
-      <input class="tx-model-input" type="text" value="" placeholder="Model (e.g. Air Max 90)" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:7px 10px;border-radius:5px;outline:none;">
-      <button onclick="this.parentElement.remove()" style="color:var(--red);background:none;border:1px solid rgba(255,59,48,.3);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">×</button>
-    </div>`;
-  wrap.appendChild(div.firstElementChild);
-  wrap.lastElementChild.querySelector('.tx-model-input').focus();
-}
-
-// ===== BRAND CASCADE DROPDOWNS (product modal) =====
-function populateBrandDropdown() { /* no-op — brand is a plain text input now */ }
-function onBrandChange() {}
-function onLineChange() {}
-function syncBrandCustom() {}
-function getSelectedBrand() { return document.getElementById('fBrand').value.trim(); }
-function getSelectedBrandLine() { return document.getElementById('fBrandLine').value.trim(); }
+function getSelectedBrand()      { return document.getElementById('fBrand').value.trim(); }
+function getSelectedBrandLine()  { return document.getElementById('fBrandLine').value.trim(); }
 function getSelectedBrandModel() { return document.getElementById('fBrandModel').value.trim(); }
+
 function setBrandCascade(brand, line, model) {
   document.getElementById('fBrand').value = brand || '';
   document.getElementById('fBrandLine').value = line || '';
@@ -3270,7 +3216,6 @@ async function saveSocialLinks() {
 renderSizeGrid();
 checkSession(); // hide login screen if valid session exists
 loadProductsFromBackend(); // load from backend DB, fall back to localStorage
-loadTaxonomy(); // load brand taxonomy for cascade dropdowns
 </script>
 
 </body>
