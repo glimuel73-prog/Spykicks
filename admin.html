@@ -1870,20 +1870,22 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <!-- Per-size pricing table -->
         <div class="size-price-wrap" id="sizePriceWrap">
           <div class="size-price-wrap-header">
-            <span>💰 Set Prices &amp; Stock Per Size</span>
+            <span>💰 Set Prices &amp; Stock Per Size / Color</span>
             <span class="count-badge" id="sizePriceCount">0 sizes</span>
           </div>
-          <table class="size-price-table" id="sizePriceTable">
-            <thead>
-              <tr>
-                <th>Size</th>
-                <th>🛍 Buyer Price (₱)</th>
-                <th>🤝 Reseller Price (₱)</th>
-                <th>📦 Stock (qty)</th>
-              </tr>
-            </thead>
-            <tbody id="sizePriceBody"></tbody>
-          </table>
+          <div style="overflow-x:auto;">
+            <table class="size-price-table" id="sizePriceTable">
+              <thead id="sizePriceHead">
+                <tr>
+                  <th>Size</th>
+                  <th>🛍 Buyer Price (₱)</th>
+                  <th>🤝 Reseller Price (₱)</th>
+                  <th>📦 Stock (qty)</th>
+                </tr>
+              </thead>
+              <tbody id="sizePriceBody"></tbody>
+            </table>
+          </div>
         </div>
         <div id="sizePriceHint" style="margin-top:12px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);padding:12px;border:1px dashed var(--border);text-align:center;">
           ☝ Select sizes above — buyer price, reseller price &amp; stock qty will appear per size
@@ -2487,6 +2489,7 @@ function renderSizePriceTable() {
   const sizes = getCheckedSizes();
   const wrap = document.getElementById('sizePriceWrap');
   const tbody = document.getElementById('sizePriceBody');
+  const head = document.getElementById('sizePriceHead');
   const hint = document.getElementById('sizePriceHint');
   const countBadge = document.getElementById('sizePriceCount');
 
@@ -2503,39 +2506,88 @@ function renderSizePriceTable() {
   const defRetail = Number(document.getElementById('fPrice').value) || 0;
   const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
 
+  // Get current colors from color tags
+  const colors = getColors();
+  const hasColors = colors.length > 0;
+
   const prevSizes = [...tbody.querySelectorAll('tr')].map(r => r.dataset.size);
   const isNewSize = sizes.some(s => !prevSizes.includes(s));
+
+  // Rebuild header
+  if (hasColors) {
+    head.innerHTML = `<tr>
+      <th style="min-width:60px;">Size</th>
+      <th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer ₱</th>
+      <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller ₱</th>
+      ${colors.map(c => {
+        const css = colorToCSS(c) || '#999';
+        const isGrad = css.startsWith('linear');
+        const swatch = isGrad
+          ? `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${css};border:1px solid rgba(0,0,0,.15);vertical-align:middle;margin-right:5px;"></span>`
+          : `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${css};border:1px solid rgba(0,0,0,.15);vertical-align:middle;margin-right:5px;"></span>`;
+        return `<th style="background:rgba(245,158,11,0.04);border-top:2px solid var(--orange);color:var(--orange);white-space:nowrap;">📦 ${swatch}${c}</th>`;
+      }).join('')}
+    </tr>`;
+  } else {
+    head.innerHTML = `<tr>
+      <th>Size</th>
+      <th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer Price (₱)</th>
+      <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller Price (₱)</th>
+      <th style="background:rgba(245,158,11,0.04);border-top:2px solid var(--orange);color:var(--orange);">📦 Stock (qty)</th>
+    </tr>`;
+  }
+
+  // Seed sizePrices with defaults for new rows
+  sizes.forEach(s => {
+    if (!sizePrices[s]) {
+      sizePrices[s] = { retailPrice: defRetail || 0, resellerPrice: defReseller || 0, stock: 0, colorStock: {} };
+    }
+    if (!sizePrices[s].colorStock) sizePrices[s].colorStock = {};
+  });
 
   tbody.innerHTML = sizes.map(s => {
     const existing = sizePrices[s] || {};
     const retailVal = existing.retailPrice != null ? existing.retailPrice : (defRetail || '');
     const resellerVal = existing.resellerPrice != null ? existing.resellerPrice : (defReseller || '');
-    const stockVal = existing.stock != null ? existing.stock : '';
-    return `
-      <tr data-size="${s}">
-        <td class="size-label">${s}</td>
-        <td><input class="size-price-input" type="number" placeholder="Buyer ₱"
-          data-size="${s}" data-ptype="retailPrice"
-          value="${retailVal}"
-          oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
-        <td><input class="size-price-input" type="number" placeholder="Reseller ₱"
-          data-size="${s}" data-ptype="resellerPrice"
-          value="${resellerVal}"
-          oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
-        <td><input class="size-price-input" type="number" placeholder="0" min="0"
-          data-size="${s}" data-ptype="stock"
-          value="${stockVal}"
-          oninput="updateSizePrice('${s}','stock',this.value)"></td>
-      </tr>
-    `;
-  }).join('');
 
-  // Seed sizePrices with defaults for new rows
-  sizes.forEach(s => {
-    if (!sizePrices[s]) {
-      sizePrices[s] = { retailPrice: defRetail || 0, resellerPrice: defReseller || 0, stock: 0 };
+    if (hasColors) {
+      const colorCells = colors.map(c => {
+        const stockVal = existing.colorStock && existing.colorStock[c] != null ? existing.colorStock[c] : '';
+        return `<td style="background:rgba(245,158,11,0.03);">
+          <input class="size-price-input" type="number" placeholder="0" min="0"
+            data-size="${s}" data-ptype="colorStock" data-color="${c.replace(/"/g,'&quot;')}"
+            value="${stockVal}"
+            oninput="updateSizeColorStock('${s}','${c.replace(/'/g,"\\'")}',this.value)">
+        </td>`;
+      }).join('');
+      return `
+        <tr data-size="${s}">
+          <td class="size-label">${s}</td>
+          <td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
+            data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
+            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
+          <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
+            data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
+            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
+          ${colorCells}
+        </tr>`;
+    } else {
+      const stockVal = existing.stock != null ? existing.stock : '';
+      return `
+        <tr data-size="${s}">
+          <td class="size-label">${s}</td>
+          <td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
+            data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
+            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
+          <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
+            data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
+            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
+          <td style="background:rgba(245,158,11,0.03);"><input class="size-price-input" type="number" placeholder="0" min="0"
+            data-size="${s}" data-ptype="stock" value="${stockVal}"
+            oninput="updateSizePrice('${s}','stock',this.value)"></td>
+        </tr>`;
     }
-  });
+  }).join('');
 
   // Scroll the price table into view if new sizes were added
   if (isNewSize) {
@@ -2543,6 +2595,14 @@ function renderSizePriceTable() {
       wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 80);
   }
+}
+
+function updateSizeColorStock(size, color, value) {
+  if (!sizePrices[size]) sizePrices[size] = { retailPrice: 0, resellerPrice: 0, stock: 0, colorStock: {} };
+  if (!sizePrices[size].colorStock) sizePrices[size].colorStock = {};
+  sizePrices[size].colorStock[color] = Number(value) || 0;
+  // Update aggregate stock = sum of all color stocks for this size
+  sizePrices[size].stock = Object.values(sizePrices[size].colorStock).reduce((a, b) => a + b, 0);
 }
 
 // Called when default price fields change — refreshes the table to show new defaults
@@ -2586,16 +2646,26 @@ function getCheckedSizes() {
   return [...document.querySelectorAll('#sizeGridWrap input[type=checkbox]:checked')].map(cb => cb.value);
 }
 
-// Returns array of { size, retailPrice, resellerPrice, stock }
+// Returns array of { size, retailPrice, resellerPrice, stock, colorStock }
 function getSelectedSizes() {
   const baseRetail = Number(document.getElementById('fPrice').value) || 0;
   const baseReseller = Number(document.getElementById('fResellerPrice').value) || 0;
-  return getCheckedSizes().map(s => ({
-    size: s,
-    retailPrice: (sizePrices[s]?.retailPrice) || baseRetail,
-    resellerPrice: (sizePrices[s]?.resellerPrice) || baseReseller,
-    stock: (sizePrices[s]?.stock) || 0
-  }));
+  const colors = getColors();
+  return getCheckedSizes().map(s => {
+    const sp = sizePrices[s] || {};
+    const colorStock = (colors.length > 0 && sp.colorStock) ? sp.colorStock : {};
+    // stock = sum of color stocks if colors exist, else explicit stock field
+    const stock = colors.length > 0
+      ? Object.values(colorStock).reduce((a, b) => a + b, 0)
+      : (sp.stock || 0);
+    return {
+      size: s,
+      retailPrice: sp.retailPrice || baseRetail,
+      resellerPrice: sp.resellerPrice || baseReseller,
+      stock,
+      colorStock
+    };
+  });
 }
 
 function setSelectedSizes(sizes) {
@@ -2609,7 +2679,12 @@ function setSelectedSizes(sizes) {
   sizePrices = {};
   if (!isOldFormat) {
     sizes.forEach(s => {
-      sizePrices[s.size] = { retailPrice: s.retailPrice || 0, resellerPrice: s.resellerPrice || 0, stock: s.stock || 0 };
+      sizePrices[s.size] = {
+        retailPrice: s.retailPrice || 0,
+        resellerPrice: s.resellerPrice || 0,
+        stock: s.stock || 0,
+        colorStock: s.colorStock || {}
+      };
     });
   }
 
@@ -2691,8 +2766,11 @@ function addColorTag(name) {
   const tag = document.createElement('span');
   tag.className = 'color-tag';
   tag.dataset.color = name;
-  tag.innerHTML = `<span class="color-tag-swatch" style="${swatchStyle}"></span>${name}<button class="color-tag-remove" onclick="this.parentElement.remove()" title="Remove">×</button>`;
+  tag.innerHTML = `<span class="color-tag-swatch" style="${swatchStyle}"></span>${name}<button class="color-tag-remove" onclick="this.parentElement.remove();renderSizePriceTable();" title="Remove">×</button>`;
   wrap.insertBefore(tag, input);
+
+  // Refresh table to add new color column
+  renderSizePriceTable();
 }
 
 function getColors() {
@@ -2708,6 +2786,7 @@ function setColors(arr) {
 function clearColorTags() {
   document.getElementById('colorTagsWrap').querySelectorAll('.color-tag').forEach(t => t.remove());
   document.getElementById('colorTagInput').value = '';
+  renderSizePriceTable();
 }
 
 // ===== SPECS =====
