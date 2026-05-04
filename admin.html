@@ -480,6 +480,9 @@ body {
 .btn-edit { color: var(--text-muted); border-color: var(--border2); }
 .btn-edit:hover { border-color: var(--text); color: var(--text); }
 
+.btn-duplicate { color: var(--blue); border-color: rgba(59,130,246,0.35); }
+.btn-duplicate:hover { background: var(--blue); color: white; border-color: var(--blue); }
+
 .btn-delete { color: var(--red); border-color: rgba(255,59,48,0.3); }
 .btn-delete:hover { background: var(--red); color: white; border-color: var(--red); }
 
@@ -1099,7 +1102,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .status-pill.approved { color: var(--green); border-color: var(--green); background: rgba(46,204,113,.08); }
 .status-pill.pending { color: var(--orange); border-color: var(--orange); background: rgba(245,158,11,.08); }
 .status-pill.rejected { color: var(--red); border-color: var(--red); background: rgba(255,59,48,.08); }
-.status-pill.cancelled { color: #6b7280; border-color: #9ca3af; background: #f3f4f6; }
 
 /* ===== ORDERS PAGE ===== */
 .order-row-expand { display:none; background:var(--surface2); }
@@ -1749,7 +1751,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
-          <option value="cancelled">Cancelled</option>
         </select>
         <input type="text" class="search-input" placeholder="Search reseller…" id="orderSearch" oninput="renderOrdersTable()">
         <button class="btn-add" onclick="loadOrders()" style="background:var(--surface);color:var(--text-muted);border:1px solid var(--border);">
@@ -2501,6 +2502,7 @@ function renderProductsTable() {
       <td>${stockPill(p.stock, p.sizes)}</td>
       <td><div class="action-btns">
         <button class="btn-edit" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn-duplicate" onclick="duplicateProduct('${p.id}')">⧉ Duplicate</button>
         <button class="btn-delete" onclick="askDelete('${p.id}')">Delete</button>
       </div></td>
     </tr>
@@ -3153,6 +3155,31 @@ function editProduct(id) {
   openModal(id);
 }
 
+async function duplicateProduct(id) {
+  const original = products.find(p => p.id === id);
+  if (!original) return;
+
+  const newId = 'prod_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  const now = new Date().toISOString();
+
+  // Deep-clone the product, assign new id/name/timestamps
+  const copy = JSON.parse(JSON.stringify(original));
+  copy.id = newId;
+  copy.name = original.name + ' (Copy)';
+  copy.createdAt = now;
+  copy.updatedAt = now;
+
+  try {
+    await saveOneProduct(copy);
+    products.push(copy);
+    renderProductsTable();
+    renderDashboard();
+    showToast('Product duplicated — "' + copy.name + '" created.');
+  } catch (err) {
+    showToast('Failed to duplicate: ' + err.message, true);
+  }
+}
+
 // ===== DELETE =====
 function askDelete(id) {
   deleteId = id;
@@ -3481,6 +3508,7 @@ function renderProductsCards(filtered) {
       }).join('')}${(p.sizes||[]).length>6?`<span class="size-tag">+${p.sizes.length-6}</span>`:''}</div>` : ''}
       <div class="card-actions">
         <button class="btn-edit" style="flex:1;" onclick="editProduct('${p.id}')">Edit</button>
+        <button class="btn-duplicate" onclick="duplicateProduct('${p.id}')">⧉</button>
         <button class="btn-delete" style="flex:1;" onclick="askDelete('${p.id}')">Delete</button>
       </div>
     </div>`;
@@ -3701,8 +3729,8 @@ function renderOrdersTable() {
   tbody.innerHTML = filtered.map(o => {
     const d = new Date(o.createdAt);
     const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : 'pending';
-    const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : o.status === 'cancelled' ? '✕ Cancelled by Reseller' : '⏳ Pending';
+    const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
+    const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
     const itemCount = o.items.reduce((s, i) => s + (i.qty || 1), 0);
     const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
     const actionBtns = o.status === 'pending'
@@ -3746,8 +3774,8 @@ function renderOrdersTable() {
     cardTable.innerHTML = filtered.map(o => {
       const d = new Date(o.createdAt);
       const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-      const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : 'pending';
-      const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : o.status === 'cancelled' ? '✕ Cancelled by Reseller' : '⏳ Pending';
+      const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
+      const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
       return `<div class="card-row">
         <div class="card-top">
           <div style="flex:1;min-width:0;">
