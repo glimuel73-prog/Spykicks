@@ -2123,10 +2123,6 @@ async function deleteProduct(id) {
     body: JSON.stringify({ id })
   });
   products = products.filter(p => p.id !== id);
-  try {
-    const local = JSON.parse(localStorage.getItem('adminProducts') || '[]');
-    localStorage.setItem('adminProducts', JSON.stringify(local.filter(p => p.id !== id)));
-  } catch(e) {}
   renderProductsTable();
 }
 
@@ -2279,35 +2275,12 @@ async function loadProductsFromBackend() {
     const res = await fetch('/admin/products');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-
-    if (data.products && data.products.length > 0) {
-      // DB has products — use them as the source of truth
-      products = data.products;
-      localStorage.setItem('adminProducts', JSON.stringify(products));
-    } else {
-      // DB is empty — check if localStorage has products from a previous session
-      // and push them up to the DB so index.html can find them
-      const local = JSON.parse(localStorage.getItem('adminProducts') || '[]');
-      if (local.length > 0) {
-        const pushRes = await fetch('/admin/save-products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ products: local })
-        });
-        if (pushRes.ok) {
-          products = local;
-          console.log('Synced', local.length, 'products from localStorage to DB');
-        } else {
-          products = local; // use local even if push failed
-        }
-      } else {
-        products = [];
-      }
-    }
+    // DB is always the source of truth — never fall back to localStorage as a source
+    products = data.products || [];
   } catch (err) {
-    // Server unreachable — fall back to localStorage so admin still works offline
-    console.warn('Backend unreachable, using localStorage:', err.message);
-    products = JSON.parse(localStorage.getItem('adminProducts') || '[]');
+    console.warn('Backend unreachable:', err.message);
+    showToast('Could not connect to server. Please refresh.', true);
+    products = [];
   }
   renderProductsTable();
   renderDashboard();
@@ -3113,7 +3086,6 @@ async function confirmDelete() {
   }
 
   products = products.filter(p => p.id !== idToDelete);
-  localStorage.setItem('adminProducts', JSON.stringify(products));
   renderProductsTable();
   renderDashboard();
   showToast('Product deleted.');
@@ -3240,14 +3212,9 @@ async function submitAddReseller() {
 }
 
 // ===== STORAGE =====
-// saveProducts() — bulk save the whole local array (used for initial sync only)
+// saveProducts() — bulk save the whole local array (legacy, kept for compatibility)
 function saveProducts() {
   const productsForStorage = products.map(p => ({ ...p }));
-  try {
-    localStorage.setItem('adminProducts', JSON.stringify(productsForStorage));
-  } catch(e) {
-    console.warn('localStorage full:', e);
-  }
   fetch('/admin/save-products', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -3262,16 +3229,6 @@ function saveProducts() {
 
 // saveOneProduct(product) — save only ONE product so other products stocks are never touched
 async function saveOneProduct(product) {
-  // Update localStorage too (update just this one entry)
-  try {
-    const local = JSON.parse(localStorage.getItem('adminProducts') || '[]');
-    const idx = local.findIndex(p => p.id === product.id);
-    if (idx !== -1) local[idx] = product; else local.push(product);
-    localStorage.setItem('adminProducts', JSON.stringify(local));
-  } catch(e) {
-    console.warn('localStorage update failed:', e);
-  }
-
   const res = await fetch('/admin/save-product', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
