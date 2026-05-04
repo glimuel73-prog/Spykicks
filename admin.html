@@ -3554,7 +3554,7 @@ function renderOrdersTable() {
     const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : 'pending';
     const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
     const itemCount = o.items.reduce((s, i) => s + (i.qty || 1), 0);
-    const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
+    const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
     const actionBtns = o.status === 'pending'
       ? `<div class="action-btns">
            <button class="order-approve-btn" onclick="approveOrder('${o.id}')">✓ Approve</button>
@@ -3582,7 +3582,7 @@ function renderOrdersTable() {
             <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Order Items</div>
             ${o.items.map(i => `
               <div class="order-item-line">
-                <span><strong>${i.name}</strong> &nbsp;·&nbsp; Size: ${i.size} &nbsp;·&nbsp; Qty: ${i.qty}</span>
+                <span><strong>${i.name}</strong> &nbsp;·&nbsp; Size: ${i.size}${i.color ? ' &nbsp;·&nbsp; <span style="display:inline-flex;align-items:center;gap:5px;">' + i.color + '</span>' : ''} &nbsp;·&nbsp; Qty: ${i.qty}</span>
                 <span style="font-weight:700;">₱${(i.price * i.qty).toLocaleString()}</span>
               </div>`).join('')}
             ${o.note ? `<div style="margin-top:8px;font-size:12px;color:var(--text-muted);font-style:italic;">Note: ${o.note}</div>` : ''}
@@ -3606,7 +3606,7 @@ function renderOrdersTable() {
           </div>
           <span class="status-pill ${statusClass}">${statusLabel}</span>
         </div>
-        <div class="card-field"><strong>Items</strong>${o.items.map(i => `${i.name} ×${i.qty} (${i.size})`).join(', ')}</div>
+        <div class="card-field"><strong>Items</strong>${o.items.map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ')}</div>
         ${o.note ? `<div class="card-field"><strong>Note</strong>${o.note}</div>` : ''}
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span style="font-family:var(--font);font-weight:700;font-size:16px;">₱${Number(o.totalAmount).toLocaleString()}</span>
