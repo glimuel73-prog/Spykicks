@@ -589,7 +589,6 @@
         <span class="pd-men-tag" id="pdGenderTag" style="display:none;"></span>
       </div>
       <div class="pd-price" id="pdPrice">₱0</div>
-      <div id="pdWholesaleWrap" style="display:none;align-items:center;gap:8px;margin-top:6px;margin-bottom:2px;"></div>
       <div class="pd-stock-info" id="pdStock">✔ In Stock</div>
       <div class="pd-divider"></div>
       <div id="pdColorsSection" style="display:none;margin-bottom:16px;">
@@ -1024,7 +1023,6 @@
             <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
             <div class="product-tag">${stockLabel}</div>
           </div>
-          ${p.wholesalePrice ? `<div style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;color:#2ecc71;letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;gap:6px;"><span style="background:#111;color:#fff;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:2px 6px;border-radius:10px;font-weight:700;">🔒 WHOLESALE</span> ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
           <div class="product-stock">Stock: ${stockNum} units</div>
           <button class="product-view-btn js-view-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -1160,16 +1158,6 @@
     document.getElementById("pdBrand").textContent = product.brand || "Reseller Collection";
     document.getElementById("pdName").textContent = product.name;
     document.getElementById("pdPrice").textContent = `₱${displayPrice}`;
-    // Wholesale price badge in detail drawer
-    const pdWholesaleWrap = document.getElementById("pdWholesaleWrap");
-    if (pdWholesaleWrap) {
-      if (product.wholesalePrice) {
-        pdWholesaleWrap.innerHTML = `<span style="background:#111;color:#fff;font-family:Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:10px;">🔒 WHOLESALE</span> <span style="font-family:Arial,sans-serif;font-weight:700;font-size:16px;color:#2ecc71;">₱${Number(product.wholesalePrice).toLocaleString()}</span>`;
-        pdWholesaleWrap.style.display = 'flex';
-      } else {
-        pdWholesaleWrap.style.display = 'none';
-      }
-    }
     const gTag = document.getElementById("pdGenderTag");
     if (product.gender) {
       const gLabel = product.gender === 'male' ? "♂ Men's" : product.gender === 'female' ? "♀ Women's" : "⚥ Unisex";
@@ -1455,7 +1443,7 @@
       wrap.appendChild(a);
     });
 
-    document.getElementById('pdOrderSection').style.display = hasBtns ? '' : 'none';
+    document.getElementById('pdSocialBtns').style.display = hasBtns ? 'flex' : 'none';
   }
 
   document.addEventListener("keydown", e => { if (e.key === "Escape") closePD(); });
