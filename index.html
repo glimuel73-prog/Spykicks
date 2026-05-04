@@ -621,14 +621,28 @@ function colorToCSS_store(name) {
   const key = (name || '').trim().toLowerCase();
   return COLOR_NAME_MAP_STORE[key] || null;
 }
+function buildColorDotSwatch(c, size, className) {
+  // Detect combo: "Black/White", "Black & White", "Black and White"
+  const sep = c.match(/\s*[\/&]\s*|\s+and\s+/i);
+  if (sep) {
+    const parts = c.split(sep[0]).map(s => s.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      const c1 = colorToCSS_store(parts[0]) || '#ccc';
+      const c2 = colorToCSS_store(parts[1]) || '#999';
+      const bg = `linear-gradient(to right, ${c1} 50%, ${c2} 50%)`;
+      const needsBorder = parts.some(p => ['white','ivory','cream'].includes(p.toLowerCase()));
+      const border = needsBorder ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.15)';
+      return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
+    }
+  }
+  const css = colorToCSS_store(c);
+  const bg = css || '#ccc';
+  const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
+  return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
+}
 function buildColorDots(colors, size = 14, className = 'color-dot') {
   if (!colors || !colors.length) return '';
-  const dots = colors.map(c => {
-    const css = colorToCSS_store(c);
-    const bg = css || '#ccc';
-    const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
-    return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
-  }).join('');
+  const dots = colors.map(c => buildColorDotSwatch(c, size, className)).join('');
   // For card use, wrap in the product-colors div; for drawer, return bare dots (container already in HTML)
   if (className === 'color-dot') {
     return `<div class="product-colors">${dots}</div>`;
