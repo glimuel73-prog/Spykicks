@@ -1839,9 +1839,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <div class="field-group">
           <label>Colors</label>
           <div class="color-tags-wrap" id="colorTagsWrap" onclick="document.getElementById('colorTagInput').focus()">
-            <input class="color-tag-input" id="colorTagInput" placeholder="Type a color and press Enter or comma… e.g. Red, Black, White" onkeydown="handleColorTagKey(event)" oninput="handleColorTagInput(this)">
+            <input class="color-tag-input" id="colorTagInput" placeholder="e.g. Black, White, Black/White, Red/Blue/White…" onkeydown="handleColorTagKey(event)" oninput="handleColorTagInput(this)">
           </div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:6px;">Press Enter or comma to add each color — shown as swatches on product cards</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:6px;">Press Enter or comma to add — use / for combos: Black/White, Red/Blue/White</div>
         </div>
       </div>
 
@@ -2520,11 +2520,8 @@ function renderSizePriceTable() {
       <th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer ₱</th>
       <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller ₱</th>
       ${colors.map(c => {
-        const css = colorToCSS(c) || '#999';
-        const isGrad = css.startsWith('linear');
-        const swatch = isGrad
-          ? `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${css};border:1px solid rgba(0,0,0,.15);vertical-align:middle;margin-right:5px;"></span>`
-          : `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${css};border:1px solid rgba(0,0,0,.15);vertical-align:middle;margin-right:5px;"></span>`;
+        const swStyle = buildSwatchStyle(c);
+        const swatch = `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;${swStyle}vertical-align:middle;margin-right:5px;flex-shrink:0;"></span>`;
         return `<th style="background:rgba(245,158,11,0.04);border-top:2px solid var(--orange);color:var(--orange);white-space:nowrap;">📦 ${swatch}${c}</th>`;
       }).join('')}
     </tr>`;
@@ -2726,7 +2723,33 @@ const COLOR_NAME_MAP = {
 
 function colorToCSS(name) {
   const key = name.trim().toLowerCase();
-  return COLOR_NAME_MAP[key] || null;
+  if (COLOR_NAME_MAP[key]) return COLOR_NAME_MAP[key];
+  // Handle combination colors: "Black/White", "Red/Blue/White", "Black-White", etc.
+  const parts = key.split(/\s*[\/\-]\s*/).map(p => p.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const hexes = parts.map(p => {
+      const c = COLOR_NAME_MAP[p];
+      return c && !c.startsWith('linear') ? c : '#cccccc';
+    });
+    if (hexes.length === 2) {
+      return `linear-gradient(to right, ${hexes[0]} 50%, ${hexes[1]} 50%)`;
+    }
+    // 3+ colors: divide evenly
+    const pct = 100 / hexes.length;
+    const stops = hexes.map((h, i) => `${h} ${(i * pct).toFixed(1)}%, ${h} ${((i + 1) * pct).toFixed(1)}%`).join(', ');
+    return `linear-gradient(to right, ${stops})`;
+  }
+  return null;
+}
+
+function buildSwatchStyle(name) {
+  const css = colorToCSS(name);
+  if (!css) return 'background:#ccc;border:1px dashed #999;';
+  if (css.startsWith('linear')) return `background:${css};border:1px solid rgba(0,0,0,0.12);`;
+  const lc = name.trim().toLowerCase();
+  const lightColors = ['white','cream','ivory','beige','light gray','light grey','silver'];
+  const border = lightColors.includes(lc) ? '1px solid #ccc' : '1px solid rgba(0,0,0,0.15)';
+  return `background:${css};${border};`;
 }
 
 function handleColorTagKey(e) {
@@ -2758,10 +2781,7 @@ function addColorTag(name) {
   const existing = [...wrap.querySelectorAll('.color-tag')].map(t => t.dataset.color.toLowerCase());
   if (existing.includes(name.toLowerCase())) return;
 
-  const css = colorToCSS(name);
-  const swatchStyle = css
-    ? (css.startsWith('linear') ? `background:${css};border:1px solid rgba(0,0,0,0.1);` : `background:${css};border:1px solid rgba(0,0,0,0.15);`)
-    : `background:#ccc;border:1px dashed #999;`;
+  const swatchStyle = buildSwatchStyle(name);
 
   const tag = document.createElement('span');
   tag.className = 'color-tag';
