@@ -761,6 +761,7 @@ function buildProductsIndex(products) {
       stock:     totalStock,
       hasPerSizeStock,
       colors:    p.colors || [],
+      rawSizes:  p.sizes || [],  // keep raw for colorStock lookup
     };
   });
 }
@@ -1030,6 +1031,33 @@ function pdPickColor(dot, colorName) {
   const label = document.getElementById("pdColorLabel");
   if (label) label.textContent = colorName;
   const p = PRODUCTS_INDEX[pdCurrentId];
+
+  // Refresh size buttons with color-specific stock
+  const sizesEl = document.getElementById("pdSizes");
+  sizesEl.innerHTML = p.sizes.map(s => {
+    // Look up per-color stock for this size from rawSizes
+    let stockQty = s.stock;
+    const rawSize = (p.rawSizes || []).find(r => typeof r === 'object' && String(r.size) === s.s);
+    if (rawSize && rawSize.colorStock && rawSize.colorStock[colorName] != null) {
+      stockQty = Number(rawSize.colorStock[colorName]);
+    }
+
+    const outOfStock = stockQty !== null && stockQty === 0;
+    const lowStock   = stockQty !== null && stockQty > 0 && stockQty <= 3;
+    let btnClass = 'pd-size';
+    if (outOfStock) btnClass += ' pd-size-out';
+    else if (lowStock) btnClass += ' pd-size-low';
+    const stockHint = outOfStock
+      ? `<span class="pd-size-stock-hint">✕</span>`
+      : lowStock ? `<span class="pd-size-stock-hint">${stockQty}</span>` : '';
+    const disabled = outOfStock ? 'disabled' : '';
+    return `<button class="${btnClass}" ${disabled} title="Size ${s.s}${outOfStock?' — Out of Stock':lowStock?' — Only '+stockQty+' left':''}"
+      onclick="pdPickSize(this,'${s.s}',${s.p},${stockQty ?? 'null'})"
+    >${s.s}${stockHint}</button>`;
+  }).join("");
+
+  // Deselect current size since stock may have changed
+  pdSelectedSize = null;
   updateSocialLinks(p);
 }
 
