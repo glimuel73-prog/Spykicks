@@ -648,10 +648,22 @@
   function buildColorDots_r(colors, size, className) {
     if (!colors || !colors.length) return '';
     const dots = colors.map(c => {
-      const css = colorToCSS_r(c);
-      const bg = css || '#ccc';
-      const border = ['white','ivory','cream'].includes(c.toLowerCase()) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
-      return `<span class="${className}" style="width:${size}px;height:${size}px;background:${bg};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${c}"></span>`;
+      const label = c.trim();
+      // Check for double color: "black/white", "red-blue", "navy / white", etc.
+      const splitMatch = label.match(/^(.+?)\s*[\/\-]\s*(.+)$/);
+      let bgStyle, border;
+      if (splitMatch) {
+        const c1 = colorToCSS_r(splitMatch[1].trim()) || '#ccc';
+        const c2 = colorToCSS_r(splitMatch[2].trim()) || '#ccc';
+        bgStyle = `background: linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
+        border = '1px solid rgba(0,0,0,0.15)';
+      } else {
+        const css = colorToCSS_r(label);
+        bgStyle = `background: ${css || '#ccc'}`;
+        const lc = label.toLowerCase();
+        border = ['white','ivory','cream'].includes(lc) ? '1px solid #ddd' : '1px solid rgba(0,0,0,0.12)';
+      }
+      return `<span class="${className}" style="width:${size}px;height:${size}px;${bgStyle};border:${border};border-radius:50%;display:inline-block;flex-shrink:0;" title="${label}"></span>`;
     }).join('');
     if (className === 'color-dot') {
       return `<div class="product-colors" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">${dots}</div>`;
