@@ -35,6 +35,8 @@
   .header-top { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 64px; max-width: 1400px; margin: 0 auto; }
   .logo { font-family: Arial, sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 4px; color: #000; text-transform: uppercase; text-decoration: none; }
   .logo span { color: #000; }
+  .logo-short { display: none; }
+  .logo-full { display: inline; }
   .nav-links { display: flex; gap: 2px; }
   .nav-links button { background: none; border: none; color: #666; font-family: Arial, sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 20px; cursor: pointer; transition: color .2s, background .2s; position: relative; border-radius: 20px; }
   .nav-links button.active, .nav-links button:hover { color: #000; background: #f0f0f0; }
@@ -310,27 +312,51 @@
 
   /* ══ MOBILE RESPONSIVE ══ */
   @media (max-width: 768px) {
-    /* Header — 2-row mobile layout */
+    /* Header — 3-row mobile layout: logo | actions | nav */
     .header { position: sticky; top: 0; z-index: 100; }
-    .header-top { padding: 0 16px; height: auto; flex-wrap: wrap; gap: 0; }
+    .header-top { padding: 0 12px; height: auto; flex-wrap: wrap; gap: 0; align-items: center; }
 
-    /* Row 1: logo + actions — full width, fixed height */
-    .logo { font-size: 22px; letter-spacing: 2px; order: 1; }
-    .header-actions { order: 2; gap: 8px; margin-left: auto; height: 52px; align-items: center; }
+    /* Row 1: logo — shrink and truncate */
+    .logo {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      order: 1;
+      line-height: 48px;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: calc(100% - 120px);
+    }
+    .logo-full { display: none; }
+    .logo-short { display: inline; font-size: 18px; letter-spacing: 2px; }
+
+    /* Row 1: actions — right side, same row as logo */
+    .header-actions { order: 2; gap: 6px; height: 48px; align-items: center; flex-shrink: 0; }
     .badge-pill { display: none; }
     .header-top > span { display: none; }
 
     /* Hide the PH text on mobile */
     .header-actions > span:first-child { display: none; }
 
+    /* Admin button — icon only on mobile */
+    .header-actions button[onclick*="admin"] {
+      padding: 6px 8px;
+      font-size: 0;
+      letter-spacing: 0;
+      min-width: 32px;
+      justify-content: center;
+    }
+    .header-actions button[onclick*="admin"] svg { width: 16px; height: 16px; }
+
+    /* Fav counter — icon + badge only */
+    .fav-counter { padding: 6px 8px; }
+    .fav-counter svg { width: 16px; height: 16px; }
+
     /* Row 2: nav tabs — full-width strip below */
     .nav-links { display: flex; gap: 0; order: 3; width: 100%; border-top: 1px solid #e8e8e8; background: #fff; }
-    .nav-links button { flex: 1; font-size: 12px; padding: 10px 4px; letter-spacing: 1px; border-radius: 0; }
+    .nav-links button { flex: 1; font-size: 11px; padding: 9px 4px; letter-spacing: 0.5px; border-radius: 0; }
     .nav-links button.active::after { left: 15%; right: 15%; bottom: 0; }
-
-    /* Admin button — compact on mobile */
-    .header-actions button[onclick*="admin"] { padding: 6px 10px; font-size: 10px; letter-spacing: 1px; }
-    .header-actions button[onclick*="admin"] span { display: none; }
 
     /* Hero */
     .hero { flex-direction: column; padding: 40px 20px 60px; gap: 24px; text-align: center; min-height: auto; }
@@ -402,7 +428,7 @@
 <!-- HEADER -->
 <div class="header">
   <div class="header-top">
-    <a href="#" class="logo">CATALOG & AVAILABLE STOCKS</a>
+    <a href="#" class="logo"><span class="logo-full">CATALOG & AVAILABLE STOCKS</span><span class="logo-short">CATALOG</span></a>
     <nav class="nav-links">
       <button class="active" id="btnShop" onclick="showTab('buyer',this)">Shop</button>
       <button id="btnReseller" onclick="showTab('reseller',this)">Reseller</button>
