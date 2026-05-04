@@ -201,7 +201,7 @@
   .pd-sub { font-size: 12px; color: #aaa; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
   .pd-men-tag { background: #eee; color: #666; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
   .pd-new-tag { background: #000; color: #fff; font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; }
-  .pd-stock-info { font-size: 12px; font-family: Arial, sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+  .pd-stock-info { font-size: 12px; font-family: Arial, sans-serif; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0; }
   .pd-wishlist { display: flex; align-items: center; gap: 4px; font-family: Arial, sans-serif; font-size: 12px; color: #aaa; letter-spacing: 1px; cursor: pointer; }
   .pd-wishlist svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
   .pd-price { font-family: Arial, sans-serif; font-weight: 900; font-size: 32px; color: #111; margin-bottom: 20px; letter-spacing: 1px; }
@@ -598,7 +598,6 @@
         <span class="pd-men-tag" id="pdGenderTag" style="display:none;"></span>
       </div>
       <div class="pd-price" id="pdPrice">₱0</div>
-      <div class="pd-stock-info" id="pdStockInfo">✔ In Stock</div>
       <div class="pd-divider"></div>
       <div id="pdColorsSection" style="display:none;margin-bottom:16px;">
         <div class="pd-desc-title" style="margin-bottom:10px;">Colors</div>
@@ -612,6 +611,7 @@
       <div class="pd-divider"></div>
       <div class="pd-size-label">Select your size — price updates</div>
       <div class="pd-sizes" id="pdSizes"></div>
+      <div class="pd-stock-info" id="pdStockInfo" style="margin-top:-10px;margin-bottom:16px;">✔ In Stock</div>
       <div id="pdOrderSection" style="margin-top:4px;">
         <div id="pdSocialBtns" style="display:flex;flex-direction:column;gap:8px;">
           <!-- populated dynamically by updatePDSocialBtns() -->
