@@ -39,6 +39,8 @@
   .header-top { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 64px; max-width: 1400px; margin: 0 auto; }
   .logo { font-family: Arial,sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 4px; color: var(--black); text-transform: uppercase; text-decoration: none; }
   .logo span { color: var(--black); }
+  .logo-short { display: none; }
+  .logo-full { display: inline; }
   .header-actions { display: flex; align-items: center; gap: 16px; }
   .reseller-badge { background: var(--black); color: var(--white); font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; }
   .logout-btn { background: none; border: 1px solid var(--border-dark); color: var(--text-muted); font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 16px; cursor: pointer; transition: all .2s; border-radius: 4px; }
@@ -329,19 +331,31 @@
   @media (max-width: 768px) {
 
     /* ── Header ── */
-    .header-top { padding: 0 14px; height: auto; flex-wrap: wrap; gap: 0; }
-    .logo { font-size: 20px; letter-spacing: 2px; order: 1; line-height: 52px; }
-    .header-actions { order: 2; gap: 6px; margin-left: auto; height: 52px; align-items: center; }
+    .header-top { padding: 0 12px; height: auto; flex-wrap: wrap; gap: 0; align-items: center; }
+    .logo {
+      font-size: 18px;
+      letter-spacing: 2px;
+      order: 1;
+      line-height: 48px;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: calc(100% - 160px);
+    }
+    .logo-full { display: none; }
+    .logo-short { display: inline; }
+    .header-actions { order: 2; gap: 5px; height: 48px; align-items: center; flex-shrink: 0; }
     .reseller-badge { display: none; }
-    .logout-btn { font-size: 10px; padding: 5px 10px; letter-spacing: 1px; }
     /* Cart button — icon + badge only, no text */
-    .cart-btn { padding: 7px 10px; gap: 0; font-size: 0; letter-spacing: 0; }
-    .cart-btn svg { width: 18px; height: 18px; }
-    .cart-btn::after { content: 'Cart'; font-size: 0; }
+    .cart-btn { padding: 7px 9px; gap: 0; font-size: 0; letter-spacing: 0; min-width: 34px; justify-content: center; }
+    .cart-btn svg { width: 17px; height: 17px; }
     /* Favorites — icon + count only */
-    .fav-chip { padding: 5px 10px; gap: 4px; font-size: 0; letter-spacing: 0; }
-    .fav-chip svg { width: 13px; height: 13px; }
+    .fav-chip { padding: 5px 9px; gap: 3px; font-size: 0; letter-spacing: 0; }
+    .fav-chip svg { width: 14px; height: 14px; }
     .fav-count { font-size: 10px; min-width: 15px; height: 15px; }
+    /* Logout — compact */
+    .logout-btn { font-size: 10px; padding: 5px 9px; letter-spacing: 0.5px; }
 
     /* ── Hero ── */
     .hero { flex-direction: column; padding: 28px 16px 32px; gap: 16px; }
@@ -471,7 +485,7 @@
 <!-- HEADER -->
 <div class="header">
   <div class="header-top">
-    <a class="logo">CATALOG & AVAILABLE STOCKS</a>
+    <a class="logo"><span class="logo-full">CATALOG & AVAILABLE STOCKS</span><span class="logo-short">CATALOG</span></a>
     <div class="header-actions">
       <span class="reseller-badge">Reseller Page</span>
       <button class="cart-btn" id="cartBtn" onclick="openCart()">
