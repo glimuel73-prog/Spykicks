@@ -1729,7 +1729,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <div class="modal-section">
         <div class="modal-section-label">Pricing & Stock</div>
 
-        <div class="field-row-3">
+        <div class="field-row">
           <div class="field-group">
             <label>Default Retail Price (₱) *</label>
             <input type="number" id="fPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
@@ -1737,10 +1737,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <div class="field-group">
             <label>Default Reseller Price (₱)</label>
             <input type="number" id="fResellerPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
-          </div>
-          <div class="field-group">
-            <label>Stock Qty *</label>
-            <input type="number" id="fStock" placeholder="0">
           </div>
         </div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:-10px;margin-bottom:16px;">
@@ -2632,7 +2628,6 @@ function openModal(id = null) {
     document.getElementById('fDescription').value = p.description || '';
     document.getElementById('fPrice').value = p.price || '';
     document.getElementById('fResellerPrice').value = p.resellerPrice || '';
-    document.getElementById('fStock').value = p.stock || '';
     document.getElementById('fSKU').value = p.sku || '';
     document.getElementById('fColorway').value = p.colorway || '';
     document.getElementById('fBadge').value = p.badge || '';
@@ -2653,7 +2648,6 @@ function openModal(id = null) {
     document.getElementById('fDescription').value = '';
     document.getElementById('fPrice').value = '';
     document.getElementById('fResellerPrice').value = '';
-    document.getElementById('fStock').value = '';
     document.getElementById('fSKU').value = '';
     document.getElementById('fColorway').value = '';
     document.getElementById('fBadge').value = '';
@@ -2727,9 +2721,13 @@ function setCategory(val) {
 function saveProduct() {
   const name = document.getElementById('fName').value.trim();
   const category = getSelectedCategory();
-  const stock = document.getElementById('fStock').value;
 
   const selectedSizes = getSelectedSizes();
+
+  // Derive stock from per-size stock totals
+  const stock = selectedSizes.length > 0
+    ? selectedSizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0)
+    : 0;
 
   // Derive price: use manual input, or auto-calculate from size prices
   let price = Number(document.getElementById('fPrice').value) || 0;
