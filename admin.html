@@ -1169,10 +1169,20 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   #page-settings > div[style*="max-width"] { max-width: 100% !important; }
   .settings-card { padding: 20px 16px !important; border-radius: 8px !important; }
   .settings-save-btn { min-height: 48px; font-size: 14px !important; }
-  .management-grid { grid-template-columns: 1fr; }
-  .quick-actions-grid { flex-direction: column; }
-  .quick-action-item { border-right: none !important; border-bottom: 1px solid var(--border); padding: 18px 24px; }
-  .quick-action-item:last-child { border-bottom: none; }
+  /* Quick actions — stay in a row, just reduce padding */
+  .quick-actions-grid { flex-direction: row !important; }
+  .quick-action-item { padding: 16px 6px !important; flex: 1; border-right: 1px solid var(--border) !important; border-bottom: none !important; }
+  .quick-action-item:last-child { border-right: none !important; }
+  .quick-action-icon { width: 40px !important; height: 40px !important; }
+  .quick-action-label { font-size: 8px !important; letter-spacing: .5px !important; }
+  /* Management grid — keep 2-col but fix text */
+  .management-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .management-item { padding: 14px 12px; gap: 10px; }
+  .mgmt-icon { width: 38px !important; height: 38px !important; border-radius: 8px !important; flex-shrink: 0; }
+  .mgmt-icon svg { width: 18px !important; height: 18px !important; }
+  .mgmt-title { font-size: 13px !important; }
+  .mgmt-desc { font-size: 10px !important; line-height: 1.3 !important; }
+  .mgmt-arrow svg { width: 12px !important; height: 12px !important; }
 }
 
 @media (max-width: 480px) {
@@ -1893,14 +1903,14 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 </div>
 
 <!-- SETTINGS PAGE -->
-<div id="page-settings" class="page">
+<div id="page-settings" class="page" style="max-width:100%;">
 
   <div class="section-hdr" style="margin-bottom:20px;">
     <h2>Settings</h2>
   </div>
 
   <!-- SOCIAL LINKS CARD -->
-  <div style="max-width:640px;">
+  <div style="max-width:560px;margin:0 auto;width:100%;">
     <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Social Media Links</div>
     <div class="settings-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;overflow:hidden;">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">These links appear in the store footer and product order buttons. Leave blank to hide a platform.</p>
