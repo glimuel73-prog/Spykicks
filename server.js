@@ -265,7 +265,7 @@ app.get("/admin/reseller-count", (req, res) => {
     }
 });
 
-// ================= ADMIN — SAVE PRODUCTS =================
+// ================= ADMIN — SAVE PRODUCTS (bulk) =================
 app.post("/admin/save-products", (req, res) => {
     const { products } = req.body;
     if (!Array.isArray(products)) return res.json({ success: false });
@@ -278,6 +278,31 @@ app.post("/admin/save-products", (req, res) => {
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — SAVE SINGLE PRODUCT (upsert) =================
+// Use this instead of save-products when adding/editing one product,
+// so that stock deductions on OTHER products are never overwritten.
+app.post("/admin/save-product", (req, res) => {
+    const { product } = req.body;
+    if (!product || !product.id) return res.json({ success: false, error: "Missing product or id" });
+    try {
+        db.prepare("INSERT OR REPLACE INTO products (id, data) VALUES (?, ?)").run(product.id, JSON.stringify(product));
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — GET SINGLE PRODUCT (fresh from DB) =================
+app.get("/admin/product/:id", (req, res) => {
+    try {
+        const row = db.prepare("SELECT data FROM products WHERE id = ?").get(req.params.id);
+        if (!row) return res.json({ product: null });
+        res.json({ product: JSON.parse(row.data) });
+    } catch (err) {
+        res.json({ product: null });
     }
 });
 
