@@ -600,6 +600,63 @@ app.get("/admin/buyer-order-count", (req, res) => {
     }
 });
 
+// ================= BUYER — GET OWN ORDERS (by contact) =================
+app.get("/buyer/orders", (req, res) => {
+    const { contact } = req.query;
+    if (!contact) return res.json({ orders: [] });
+    try {
+        const rows = db.prepare("SELECT * FROM buyer_orders WHERE contact = ? ORDER BY createdAt DESC").all(contact);
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        res.json({ orders });
+    } catch (err) {
+        res.json({ orders: [] });
+    }
+});
+
+// ================= BUYER — CANCEL OWN ORDER =================
+app.post("/buyer/cancel-order", (req, res) => {
+    const { orderId, contact } = req.body;
+    if (!orderId || !contact) return res.json({ success: false, error: "Missing fields" });
+    try {
+        const orderRow = db.prepare("SELECT * FROM buyer_orders WHERE id = ? AND contact = ?").get(orderId, contact);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+        if (orderRow.status !== "pending") return res.json({ success: false, error: "Only pending orders can be cancelled" });
+        const now = new Date().toISOString();
+        db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — APPROVE BUYER ORDER =================
+app.post("/admin/approve-buyer-order", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const now = new Date().toISOString();
+        const result = db.prepare("UPDATE buyer_orders SET status = 'processing', updatedAt = ? WHERE id = ? AND status = 'pending'").run(now, orderId);
+        if (result.changes === 0) return res.json({ success: false, error: "Order not found or not pending" });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — REJECT BUYER ORDER =================
+app.post("/admin/reject-buyer-order", (req, res) => {
+    const { orderId, reason } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const now = new Date().toISOString();
+        const result = db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
+        if (result.changes === 0) return res.json({ success: false, error: "Order not found" });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
 // ================= START SERVER =================
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
