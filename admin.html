@@ -1687,6 +1687,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <th>Product</th>
           <th>Price</th>
           <th>Category</th>
+          <th>Publish To</th>
           <th>Sizes</th>
           <th>Stock</th>
           <th>Actions</th>
@@ -2069,6 +2070,37 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
               <option value="hidden">Hidden</option>
               <option value="archived">Archived</option>
             </select>
+          </div>
+          <!-- PUBLISH TO -->
+          <div class="field-group" style="margin-bottom:0;">
+            <label style="margin-bottom:10px;display:block;">Publish To</label>
+            <div style="display:flex;flex-direction:column;gap:8px;" id="publishToGroup">
+              <label id="ptLabelBuyer" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" onclick="setPublishTo('buyer')">
+                <input type="radio" name="fPublishTo" id="fPublishBuyer" value="buyer" style="display:none;">
+                <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;" id="ptDotBuyer"><div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:none;" id="ptDotBuyerInner"></div></div>
+                <div>
+                  <div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);">🛍 Buyer Page</div>
+                  <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:1px;">Visible on the public store (index)</div>
+                </div>
+              </label>
+              <label id="ptLabelReseller" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" onclick="setPublishTo('reseller')">
+                <input type="radio" name="fPublishTo" id="fPublishReseller" value="reseller" style="display:none;">
+                <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;" id="ptDotReseller"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);display:none;" id="ptDotResellerInner"></div></div>
+                <div>
+                  <div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);">🤝 Reseller Page</div>
+                  <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:1px;">Visible only to approved resellers</div>
+                </div>
+              </label>
+              <label id="ptLabelBoth" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" onclick="setPublishTo('both')">
+                <input type="radio" name="fPublishTo" id="fPublishBoth" value="both" style="display:none;">
+                <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;" id="ptDotBoth"><div style="width:8px;height:8px;border-radius:50%;background:#000;display:none;" id="ptDotBothInner"></div></div>
+                <div>
+                  <div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);">✦ Both Pages</div>
+                  <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:1px;">Visible everywhere (default)</div>
+                </div>
+              </label>
+            </div>
+            <input type="hidden" id="fPublishTo" value="both">
           </div>
           <div class="field-group" style="margin-top:14px;">
             <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;display:block;">New Arrival</label>
@@ -2730,6 +2762,7 @@ function renderProductsTable() {
       </div></td>
       <td><div class="price-cell">₱${Number(p.price).toLocaleString()}</div>${p.resellerPrice ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Reseller ₱${Number(p.resellerPrice).toLocaleString()}</div>` : ''}</td>
       <td><span class="cat-tag">${p.category || '—'}</span></td>
+      <td>${(() => { const pt = p.publishTo || 'both'; if (pt === 'buyer') return `<span style="display:inline-block;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;border:1px solid #3b82f6;color:#3b82f6;background:rgba(59,130,246,.07);">🛍 Buyer</span>`; if (pt === 'reseller') return `<span style="display:inline-block;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--green);color:var(--green);background:rgba(46,204,113,.07);">🤝 Reseller</span>`; return `<span style="display:inline-block;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--border2);color:var(--text-muted);background:var(--surface2);">✦ Both</span>`; })()}</td>
       <td><div class="sizes-preview">${(p.sizes||[]).slice(0,5).map(s => {
         const lbl = typeof s === 'object' ? s.size : s;
         const stk = typeof s === 'object' ? (s.stock ?? null) : null;
@@ -3230,6 +3263,7 @@ async function openModal(id = null) {
     setColors(p.colors || []);
     document.getElementById('fBadge').value = p.badge || '';
     document.getElementById('fStatus').value = p.status || 'active';
+    setPublishTo(p.publishTo || 'both');
     setNewArrival(!!p.newArrival);
 
     (p.specs || []).forEach(s => addSpec(s.key, s.val));
@@ -3252,6 +3286,7 @@ async function openModal(id = null) {
     clearColorTags();
     document.getElementById('fBadge').value = '';
     document.getElementById('fStatus').value = 'active';
+    setPublishTo('both');
     setNewArrival(false);
     document.getElementById('fSizeType').value = 'footwear';
     renderSizeGrid();
@@ -3361,6 +3396,7 @@ async function saveProduct() {
     colors: getColors(),
     badge: document.getElementById('fBadge').value.trim(),
     status: document.getElementById('fStatus').value,
+    publishTo: getPublishTo(),
     newArrival: document.getElementById('fNewArrival').value === '1',
     sizes: selectedSizes,
     specs: getSpecs(),
@@ -3624,6 +3660,34 @@ function toggleNewArrival() {
     knob.style.left = '3px';
     badge.style.display = 'none';
   }
+}
+
+// ===== PUBLISH TO =====
+function setPublishTo(val) {
+  document.getElementById('fPublishTo').value = val;
+  const opts = ['buyer', 'reseller', 'both'];
+  const colors = { buyer: '#3b82f6', reseller: 'var(--green)', both: '#000' };
+  const borderColors = { buyer: '#3b82f6', reseller: '#2ecc71', both: '#000' };
+  opts.forEach(o => {
+    const label = document.getElementById('ptLabel' + o.charAt(0).toUpperCase() + o.slice(1));
+    const dot = document.getElementById('ptDot' + o.charAt(0).toUpperCase() + o.slice(1));
+    const inner = document.getElementById('ptDot' + o.charAt(0).toUpperCase() + o.slice(1) + 'Inner');
+    if (o === val) {
+      label.style.borderColor = borderColors[o];
+      label.style.background = 'var(--surface2)';
+      dot.style.borderColor = borderColors[o];
+      inner.style.display = 'block';
+    } else {
+      label.style.borderColor = 'var(--border)';
+      label.style.background = 'var(--surface)';
+      dot.style.borderColor = 'var(--border)';
+      inner.style.display = 'none';
+    }
+  });
+}
+
+function getPublishTo() {
+  return document.getElementById('fPublishTo').value || 'both';
 }
 
 function setNewArrival(val) {
