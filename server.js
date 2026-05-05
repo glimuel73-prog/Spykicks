@@ -514,9 +514,12 @@ db.exec(`
         totalAmount REAL,
         status TEXT DEFAULT 'pending',
         createdAt TEXT,
-        updatedAt TEXT
+        updatedAt TEXT,
+        stockDeducted INTEGER DEFAULT 0
     )
 `);
+// Migration: add stockDeducted column for existing DBs
+try { db.exec("ALTER TABLE buyer_orders ADD COLUMN stockDeducted INTEGER DEFAULT 0"); } catch(e) {}
 
 // ================= BUYER — PLACE ORDER =================
 app.post("/buyer/place-order", (req, res) => {
@@ -561,16 +564,157 @@ app.get("/admin/buyer-orders", (req, res) => {
     }
 });
 
-// ================= ADMIN — UPDATE BUYER ORDER STATUS =================
+// ================= SHARED HELPER — deduct/restore stock for buyer order items =================
+function deductBuyerStock(items) {
+    for (const item of items) {
+        const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
+        if (!prodRow) continue;
+        const product = JSON.parse(prodRow.data);
+
+        if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
+            const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
+            if (sizeObj) {
+                if (item.color && sizeObj.colorStock && typeof sizeObj.colorStock === 'object') {
+                    const prev = Number(sizeObj.colorStock[item.color]) || 0;
+                    sizeObj.colorStock[item.color] = Math.max(0, prev - (Number(item.qty) || 1));
+                    sizeObj.stock = Object.values(sizeObj.colorStock).reduce((a, b) => a + (Number(b) || 0), 0);
+                } else if (sizeObj.stock != null) {
+                    sizeObj.stock = Math.max(0, (Number(sizeObj.stock) || 0) - (Number(item.qty) || 1));
+                }
+            }
+            product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+        } else {
+            product.stock = Math.max(0, (Number(product.stock) || 0) - (Number(item.qty) || 1));
+        }
+        db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), item.productId);
+    }
+}
+
+function restoreBuyerStock(items) {
+    for (const item of items) {
+        const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
+        if (!prodRow) continue;
+        const product = JSON.parse(prodRow.data);
+
+        if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
+            const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
+            if (sizeObj) {
+                if (item.color && sizeObj.colorStock && typeof sizeObj.colorStock === 'object') {
+                    const prev = Number(sizeObj.colorStock[item.color]) || 0;
+                    sizeObj.colorStock[item.color] = prev + (Number(item.qty) || 1);
+                    sizeObj.stock = Object.values(sizeObj.colorStock).reduce((a, b) => a + (Number(b) || 0), 0);
+                } else if (sizeObj.stock != null) {
+                    sizeObj.stock = (Number(sizeObj.stock) || 0) + (Number(item.qty) || 1);
+                }
+            }
+            product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+        } else {
+            product.stock = (Number(product.stock) || 0) + (Number(item.qty) || 1);
+        }
+        db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), item.productId);
+    }
+}
+
+// ================= ADMIN — UPDATE BUYER ORDER STATUS (with stock logic) =================
 app.post("/admin/buyer-order-status", (req, res) => {
     const { orderId, status } = req.body;
     if (!orderId || !status) return res.json({ success: false, error: "Missing fields" });
     const allowed = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
     if (!allowed.includes(status)) return res.json({ success: false, error: "Invalid status" });
     try {
+        const orderRow = db.prepare("SELECT * FROM buyer_orders WHERE id = ?").get(orderId);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+
+        const items = JSON.parse(orderRow.items);
+        const wasDeducted = orderRow.stockDeducted === 1;
+        // Stock-affecting statuses: processing/shipped/delivered = stock deducted
+        // pending/cancelled = stock NOT deducted
+        const shouldDeduct = ['processing', 'shipped', 'delivered'].includes(status);
         const now = new Date().toISOString();
-        const result = db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ? WHERE id = ?").run(status, now, orderId);
-        if (result.changes === 0) return res.json({ success: false, error: "Order not found" });
+
+        const doUpdate = db.transaction(() => {
+            if (shouldDeduct && !wasDeducted) {
+                // Moving into a "confirmed" state — deduct stock
+                deductBuyerStock(items);
+                db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ?, stockDeducted = 1 WHERE id = ?").run(status, now, orderId);
+            } else if (!shouldDeduct && wasDeducted) {
+                // Moving back to pending or cancelling — restore stock
+                restoreBuyerStock(items);
+                db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ?, stockDeducted = 0 WHERE id = ?").run(status, now, orderId);
+            } else {
+                // No stock change needed (e.g. shipped → delivered, pending → cancelled without prior deduction)
+                db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ? WHERE id = ?").run(status, now, orderId);
+            }
+        });
+        doUpdate();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — APPROVE BUYER ORDER (deduct stock, move to processing) =================
+app.post("/admin/approve-buyer-order", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const orderRow = db.prepare("SELECT * FROM buyer_orders WHERE id = ?").get(orderId);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+        if (orderRow.status !== "pending") return res.json({ success: false, error: "Order is not pending" });
+
+        const items = JSON.parse(orderRow.items);
+        const now = new Date().toISOString();
+
+        const approve = db.transaction(() => {
+            deductBuyerStock(items);
+            db.prepare("UPDATE buyer_orders SET status = 'processing', updatedAt = ?, stockDeducted = 1 WHERE id = ?").run(now, orderId);
+        });
+        approve();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — REJECT BUYER ORDER (restore stock if deducted, cancel) =================
+app.post("/admin/reject-buyer-order", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const orderRow = db.prepare("SELECT * FROM buyer_orders WHERE id = ?").get(orderId);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+
+        const items = JSON.parse(orderRow.items);
+        const now = new Date().toISOString();
+
+        const reject = db.transaction(() => {
+            if (orderRow.stockDeducted === 1) {
+                restoreBuyerStock(items);
+            }
+            db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ?, stockDeducted = 0 WHERE id = ?").run(now, orderId);
+        });
+        reject();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= BUYER — CANCEL OWN ORDER (restore stock if deducted) =================
+app.post("/buyer/cancel-order", (req, res) => {
+    const { orderId, contact } = req.body;
+    if (!orderId || !contact) return res.json({ success: false, error: "Missing fields" });
+    try {
+        const orderRow = db.prepare("SELECT * FROM buyer_orders WHERE id = ? AND contact = ?").get(orderId, contact);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+        if (!['pending', 'processing'].includes(orderRow.status)) return res.json({ success: false, error: "This order can no longer be cancelled" });
+        const items = JSON.parse(orderRow.items);
+        const now = new Date().toISOString();
+        const cancel = db.transaction(() => {
+            if (orderRow.stockDeducted === 1) restoreBuyerStock(items);
+            db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ?, stockDeducted = 0 WHERE id = ?").run(now, orderId);
+        });
+        cancel();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -610,50 +754,6 @@ app.get("/buyer/orders", (req, res) => {
         res.json({ orders });
     } catch (err) {
         res.json({ orders: [] });
-    }
-});
-
-// ================= BUYER — CANCEL OWN ORDER =================
-app.post("/buyer/cancel-order", (req, res) => {
-    const { orderId, contact } = req.body;
-    if (!orderId || !contact) return res.json({ success: false, error: "Missing fields" });
-    try {
-        const orderRow = db.prepare("SELECT * FROM buyer_orders WHERE id = ? AND contact = ?").get(orderId, contact);
-        if (!orderRow) return res.json({ success: false, error: "Order not found" });
-        if (orderRow.status !== "pending") return res.json({ success: false, error: "Only pending orders can be cancelled" });
-        const now = new Date().toISOString();
-        db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
-        res.json({ success: true });
-    } catch (err) {
-        res.json({ success: false, error: err.message });
-    }
-});
-
-// ================= ADMIN — APPROVE BUYER ORDER =================
-app.post("/admin/approve-buyer-order", (req, res) => {
-    const { orderId } = req.body;
-    if (!orderId) return res.json({ success: false, error: "orderId required" });
-    try {
-        const now = new Date().toISOString();
-        const result = db.prepare("UPDATE buyer_orders SET status = 'processing', updatedAt = ? WHERE id = ? AND status = 'pending'").run(now, orderId);
-        if (result.changes === 0) return res.json({ success: false, error: "Order not found or not pending" });
-        res.json({ success: true });
-    } catch (err) {
-        res.json({ success: false, error: err.message });
-    }
-});
-
-// ================= ADMIN — REJECT BUYER ORDER =================
-app.post("/admin/reject-buyer-order", (req, res) => {
-    const { orderId, reason } = req.body;
-    if (!orderId) return res.json({ success: false, error: "orderId required" });
-    try {
-        const now = new Date().toISOString();
-        const result = db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
-        if (result.changes === 0) return res.json({ success: false, error: "Order not found" });
-        res.json({ success: true });
-    } catch (err) {
-        res.json({ success: false, error: err.message });
     }
 });
 
