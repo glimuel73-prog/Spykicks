@@ -2019,8 +2019,20 @@
           if (msg.type !== 'products') return;
 
           const incoming = (msg.products || []).filter(p => !p.status || p.status === 'active');
+          const incomingIds = new Set(incoming.map(p => String(p.id)));
 
-          // --- Always update stock on existing cards ---
+          // --- On the first message: just mark initialised, sync stock, don't add/remove cards ---
+          if (!_firstMessageConsumed) {
+            _firstMessageConsumed = true;
+            // Sync global list with fresh data from server
+            incoming.forEach(p => {
+              const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
+              if (idx !== -1) window._resellerProducts[idx] = p;
+            });
+            return; // ← CRITICAL: skip add/remove logic on the initial snapshot
+          }
+
+          // --- UPDATE: fix stock number + label on existing cards ---
           incoming.forEach(p => {
             const card = document.querySelector(`.product-card[data-id="${CSS.escape(String(p.id))}"]`);
             if (!card) return;
@@ -2031,28 +2043,39 @@
             }
             const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
 
+            // Update "Stock: X units" text
+            const stockEl = card.querySelector('.product-stock');
+            if (stockEl) stockEl.textContent = `Stock: ${stockNum} units`;
+
+            // Update In Stock / Out of Stock chip
             const tagEl = card.querySelector('.product-tag');
-            if (tagEl && tagEl.textContent !== stockLabel) {
+            if (tagEl) {
               tagEl.textContent = stockLabel;
               tagEl.style.color = stockNum === 0 ? 'var(--red)' : '';
               tagEl.style.borderColor = stockNum === 0 ? 'var(--red)' : '';
-              // Flash card to signal the update
-              card.style.outline = '2px solid rgba(46,204,113,0.6)';
-              setTimeout(() => { card.style.outline = ''; }, 1200);
             }
 
-            // Keep global product list in sync
+            // Flash card briefly to signal the change
+            card.style.outline = '2px solid rgba(46,204,113,0.6)';
+            setTimeout(() => { card.style.outline = ''; }, 1200);
+
+            // Keep global list in sync
             const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
             if (idx !== -1) window._resellerProducts[idx] = p;
           });
 
-          // --- On the first message: just mark initialised, don't add any cards ---
-          if (!_firstMessageConsumed) {
-            _firstMessageConsumed = true;
-            return; // ← CRITICAL: skip new-product logic on the initial snapshot
-          }
+          // --- DELETE: remove cards for products no longer in the list ---
+          document.querySelectorAll('.product-card[data-id]').forEach(card => {
+            if (!incomingIds.has(card.dataset.id)) {
+              card.remove();
+            }
+          });
+          // Sync global list too
+          window._resellerProducts = (window._resellerProducts || []).filter(p => incomingIds.has(String(p.id)));
+          document.getElementById('productCount').textContent = (window._resellerProducts.length || incoming.length) + '+';
+          applyView();
 
-          // --- Subsequent messages: append genuinely new products ---
+          // --- ADD: append genuinely new products ---
           const currentIds = new Set((window._resellerProducts || []).map(p => String(p.id)));
           const newProducts = incoming.filter(p => !currentIds.has(String(p.id)));
 
