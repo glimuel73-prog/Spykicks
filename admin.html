@@ -1745,8 +1745,21 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   <!-- ORDERS PAGE -->
   <div id="page-orders" class="page">
     <div class="section-hdr">
-      <h2>Reseller Orders</h2>
-      <div class="filter-bar">
+      <h2>Orders</h2>
+    </div>
+
+    <!-- Order type tabs -->
+    <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;background:var(--surface);padding:0 32px;">
+      <button id="orderTabReseller" onclick="switchOrdersTab('reseller')" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 28px;border:none;cursor:pointer;background:none;color:var(--text);border-bottom:2px solid var(--text);margin-bottom:-2px;transition:all .15s;">Reseller Orders</button>
+      <button id="orderTabBuyer" onclick="switchOrdersTab('buyer')" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 28px;border:none;cursor:pointer;background:none;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;">
+        Buyer Orders
+        <span id="buyerOrderBadge" style="display:none;background:#ff3b30;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:6px;vertical-align:middle;"></span>
+      </button>
+    </div>
+
+    <!-- RESELLER ORDERS PANEL -->
+    <div id="resellerOrdersPanel">
+      <div class="filter-bar" style="padding:14px 32px;border-bottom:1px solid var(--border);">
         <select class="select-filter" id="orderStatusFilter" onchange="renderOrdersTable()">
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
@@ -1759,28 +1772,67 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           Refresh
         </button>
       </div>
+      <table class="products-table" id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Reseller</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody"></tbody>
+      </table>
+      <div id="ordersEmpty" class="empty-state" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        <p>No orders found</p>
+      </div>
+      <div class="card-table" id="ordersCardTable"></div>
     </div>
 
-    <table class="products-table" id="ordersTable">
-      <thead>
-        <tr>
-          <th>Order ID</th>
-          <th>Reseller</th>
-          <th>Items</th>
-          <th>Total</th>
-          <th>Date</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="ordersTableBody"></tbody>
-    </table>
-    <div id="ordersEmpty" class="empty-state" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
-      <p>No orders found</p>
+    <!-- BUYER ORDERS PANEL -->
+    <div id="buyerOrdersPanel" style="display:none;">
+      <div class="filter-bar" style="padding:14px 32px;border-bottom:1px solid var(--border);">
+        <select class="select-filter" id="buyerOrderStatusFilter" onchange="renderBuyerOrdersTable()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <input type="text" class="search-input" placeholder="Search name / order ID…" id="buyerOrderSearch" oninput="renderBuyerOrdersTable()">
+        <button class="btn-add" onclick="loadBuyerOrders()" style="background:var(--surface);color:var(--text-muted);border:1px solid var(--border);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Desktop table -->
+      <table class="products-table" id="buyerOrdersTable" style="display:table;">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Contact</th>
+            <th>Delivery Address</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="buyerOrdersTableBody"></tbody>
+      </table>
+      <div id="buyerOrdersEmpty" class="empty-state" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        <p>No buyer orders yet</p>
+      </div>
+      <div class="card-table" id="buyerOrdersCardTable"></div>
     </div>
-    <!-- Mobile cards -->
-    <div class="card-table" id="ordersCardTable"></div>
+
   </div>
 
 <!-- FLOATING ADD BUTTON (mobile, products page only) -->
