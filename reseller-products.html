@@ -2049,9 +2049,6 @@
           // --- On the first message: just mark initialised, don't add any cards ---
           if (!_firstMessageConsumed) {
             _firstMessageConsumed = true;
-            // Update live dot
-            const dot = document.getElementById('resellerSSEDot');
-            if (dot) { dot.style.background = '#2ecc71'; dot.title = 'Live — ' + new Date().toLocaleTimeString(); }
             return; // ← CRITICAL: skip new-product logic on the initial snapshot
           }
 
@@ -2157,22 +2154,15 @@
             showSSEToast(`${newProducts.length} new product${newProducts.length > 1 ? 's' : ''} added!`);
           }
 
-          const dot = document.getElementById('resellerSSEDot');
-          if (dot) { dot.style.background = '#2ecc71'; dot.title = 'Live — ' + new Date().toLocaleTimeString(); }
-
         } catch (e) { /* ignore malformed frames */ }
       };
 
       es.onopen = () => {
         reconnectDelay = 3000;
-        const dot = document.getElementById('resellerSSEDot');
-        if (dot) { dot.style.background = '#2ecc71'; dot.title = 'Live updates connected'; }
       };
 
       es.onerror = () => {
         es.close();
-        const dot = document.getElementById('resellerSSEDot');
-        if (dot) { dot.style.background = '#f59e0b'; dot.title = 'Reconnecting…'; }
         setTimeout(connect, reconnectDelay);
         reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
       };
@@ -2196,24 +2186,7 @@
     el._t = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; }, 3000);
   }
 
-  // Pulsing "Live" dot injected into the header
-  (function injectSSEDot() {
-    const style = document.createElement('style');
-    style.textContent = `
-      #resellerSSEDot { display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ecc71;animation:rSSEPulse 2.5s infinite;flex-shrink:0;cursor:default; }
-      @keyframes rSSEPulse { 0%{box-shadow:0 0 0 0 rgba(46,204,113,.55)} 70%{box-shadow:0 0 0 6px rgba(46,204,113,0)} 100%{box-shadow:0 0 0 0 rgba(46,204,113,0)} }
-      #resellerSSEWrap { display:flex;align-items:center;gap:5px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#aaa; }
-    `;
-    document.head.appendChild(style);
-    window.addEventListener('DOMContentLoaded', () => {
-      const actions = document.querySelector('.header-actions');
-      if (!actions) return;
-      const wrap = document.createElement('div');
-      wrap.id = 'resellerSSEWrap';
-      wrap.innerHTML = '<span id="resellerSSEDot" title="Live updates connected"></span><span>Live</span>';
-      actions.prepend(wrap);
-    });
-  })();
+
 </script>
 </body>
 </html>
