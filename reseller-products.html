@@ -2000,16 +2000,17 @@
   renderCartItems();
 
   // ===== SSE — LIVE PRODUCT UPDATES =====
-  // Connects to /events/products so stock levels, new products, and price changes
-  // appear in real-time without requiring the reseller to refresh the page.
   (function initResellerSSE() {
-    // Only start SSE once the page is authorised (mainContent visible)
-    // We'll call this right after window.onload authorises the user.
-    // For safety, also start it here so it runs even if authorisation already resolved.
     let es;
     let reconnectDelay = 3000;
+    // The server sends the full product list IMMEDIATELY on connect as a "hello".
+    // window.onload already rendered all cards, so we must SKIP adding new cards
+    // on that very first message — otherwise every product is duplicated.
+    // After the first message we flip this flag and handle additions normally.
+    let _firstMessageConsumed = false;
 
     function connect() {
+      _firstMessageConsumed = false; // reset on every (re)connect
       es = new EventSource('/events/products');
 
       es.onmessage = (event) => {
@@ -2019,50 +2020,51 @@
 
           const incoming = (msg.products || []).filter(p => !p.status || p.status === 'active');
 
-          // --- Reconcile with current cards ---
-          const currentIds = new Set((window._resellerProducts || []).map(p => p.id));
-          const incomingMap = Object.fromEntries(incoming.map(p => [p.id, p]));
-
-          let changed = false;
-
-          // Update stock/price on existing cards without full re-render
+          // --- Always update stock on existing cards ---
           incoming.forEach(p => {
             const card = document.querySelector(`.product-card[data-id="${CSS.escape(String(p.id))}"]`);
             if (!card) return;
 
-            // Compute effective stock
             let stockNum = Number(p.stock) || 0;
             if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
               stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
             }
             const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
 
-            // Update the stock tag chip
             const tagEl = card.querySelector('.product-tag');
             if (tagEl && tagEl.textContent !== stockLabel) {
               tagEl.textContent = stockLabel;
               tagEl.style.color = stockNum === 0 ? 'var(--red)' : '';
               tagEl.style.borderColor = stockNum === 0 ? 'var(--red)' : '';
-              changed = true;
-            }
-
-            // Flash the card briefly so the reseller notices the update
-            if (changed) {
-              card.style.transition = 'outline 0s';
+              // Flash card to signal the update
               card.style.outline = '2px solid rgba(46,204,113,0.6)';
               setTimeout(() => { card.style.outline = ''; }, 1200);
             }
+
+            // Keep global product list in sync
+            const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
+            if (idx !== -1) window._resellerProducts[idx] = p;
           });
 
-          // Handle newly added products — add them to the grid
-          const newProducts = incoming.filter(p => !currentIds.has(p.id));
+          // --- On the first message: just mark initialised, don't add any cards ---
+          if (!_firstMessageConsumed) {
+            _firstMessageConsumed = true;
+            // Update live dot
+            const dot = document.getElementById('resellerSSEDot');
+            if (dot) { dot.style.background = '#2ecc71'; dot.title = 'Live — ' + new Date().toLocaleTimeString(); }
+            return; // ← CRITICAL: skip new-product logic on the initial snapshot
+          }
+
+          // --- Subsequent messages: append genuinely new products ---
+          const currentIds = new Set((window._resellerProducts || []).map(p => String(p.id)));
+          const newProducts = incoming.filter(p => !currentIds.has(String(p.id)));
+
           if (newProducts.length > 0) {
-            // Append new cards and update global list
             window._resellerProducts = [...(window._resellerProducts || []), ...newProducts];
             document.getElementById('productCount').textContent = window._resellerProducts.length + '+';
 
             newProducts.forEach((p, offset) => {
-              const i = (window._resellerProducts || []).length - newProducts.length + offset;
+              const i = (window._resellerProducts.length - newProducts.length) + offset;
               const badge    = p.badge || '';
               const category = (p.category || 'sneakers').toLowerCase();
               const productId = p.id || `product_sse_${i}`;
@@ -2084,12 +2086,12 @@
                 ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;">
                     <img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;" alt="${p.name}">
                     ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
-                    <button class="img-zoom-btn" title="View full image" data-imgs='${JSON.stringify(p.images).replace(/'/g,"&#39;")}' data-idx="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
-                    <button class="img-dl-btn" title="Download image" data-src="${p.images[0]}" data-name="${(p.name||'product').replace(/"/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                    <button class="img-zoom-btn" data-imgs='${JSON.stringify(p.images).replace(/'/g,"&#39;")}' data-idx="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
+                    <button class="img-dl-btn" data-src="${p.images[0]}" data-name="${(p.name||'product').replace(/"/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
                   </div>`
                 : `<div class="product-img-placeholder" style="position:relative;">
                     ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
-                    <svg viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#fff"/><rect x="4" y="28" width="52" height="5" rx="2" fill="#fff"/></svg>
+                    <svg viewBox="0 0 80 40" fill="none"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#fff"/><rect x="4" y="28" width="52" height="5" rx="2" fill="#fff"/></svg>
                   </div>`;
 
               const card = document.createElement('div');
@@ -2115,31 +2117,38 @@
                   <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
                   <div class="product-tag">${stockLabel}</div>
                 </div>
-                <button class="fav-btn${isFav?' active':''}" onclick="event.stopPropagation();toggleFav('${productId}',this)" title="${isFav?'Remove from favorites':'Add to favorites'}">
-                  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                </button>
-                <button class="product-view-btn" onclick="openPD('${productId}')">
+                <div class="product-stock">Stock: ${stockNum} units</div>
+                <button class="product-view-btn js-view-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   View Details
+                </button>
+                <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+                  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </button>`;
 
-              // "New product" pulse border
+              card.querySelector('.js-view-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                openPD(p, String(productId), category, badge, displayPrice);
+              });
+              card.querySelector('.img-zoom-btn')?.addEventListener('click', function(e) {
+                e.stopPropagation();
+                try { openLightbox(JSON.parse(this.dataset.imgs), 0); } catch(err) {}
+              });
+              card.querySelector('.img-dl-btn')?.addEventListener('click', function(e) {
+                e.stopPropagation();
+                downloadImage(this.dataset.src, this.dataset.name + '.jpg');
+              });
+              card.addEventListener('click', function() {
+                openPD(p, String(productId), category, badge, displayPrice);
+              });
+              card.querySelector('.fav-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleFav(String(productId), this);
+              });
+
+              // Brief green outline so the reseller notices the new card
               card.style.outline = '2px solid rgba(46,204,113,0.7)';
               setTimeout(() => { card.style.outline = ''; }, 2500);
-
-              // Attach image button events
-              card.querySelectorAll('.img-zoom-btn').forEach(btn => {
-                btn.addEventListener('click', e => {
-                  e.stopPropagation();
-                  try { openLightbox(JSON.parse(btn.dataset.imgs), parseInt(btn.dataset.idx||0,10)); } catch {}
-                });
-              });
-              card.querySelectorAll('.img-dl-btn').forEach(btn => {
-                btn.addEventListener('click', e => {
-                  e.stopPropagation();
-                  downloadImage(btn.dataset.src, btn.dataset.name);
-                });
-              });
 
               document.getElementById('productGrid').appendChild(card);
             });
@@ -2148,19 +2157,10 @@
             showSSEToast(`${newProducts.length} new product${newProducts.length > 1 ? 's' : ''} added!`);
           }
 
-          // Sync global product list with latest stock data
-          incoming.forEach(p => {
-            const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
-            if (idx !== -1) window._resellerProducts[idx] = p;
-          });
-
-          // Show subtle live indicator
           const dot = document.getElementById('resellerSSEDot');
-          if (dot) {
-            dot.style.background = '#2ecc71';
-            dot.title = 'Live — ' + new Date().toLocaleTimeString();
-          }
-        } catch (e) { /* ignore */ }
+          if (dot) { dot.style.background = '#2ecc71'; dot.title = 'Live — ' + new Date().toLocaleTimeString(); }
+
+        } catch (e) { /* ignore malformed frames */ }
       };
 
       es.onopen = () => {
@@ -2181,7 +2181,7 @@
     connect();
   })();
 
-  // Tiny toast for SSE-triggered updates (non-intrusive, appears bottom-left)
+  // Non-intrusive toast for SSE-triggered new-product events
   function showSSEToast(msg) {
     let el = document.getElementById('sseToast');
     if (!el) {
@@ -2191,42 +2191,20 @@
       document.body.appendChild(el);
     }
     el.textContent = '✦ ' + msg;
-    el.style.opacity = '1';
-    el.style.transform = 'translateY(0)';
-    clearTimeout(el._timeout);
-    el._timeout = setTimeout(() => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(8px)';
-    }, 3000);
+    el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; }, 3000);
   }
 
-  // Inject live indicator dot into the header
+  // Pulsing "Live" dot injected into the header
   (function injectSSEDot() {
     const style = document.createElement('style');
     style.textContent = `
-      #resellerSSEDot {
-        display: inline-block;
-        width: 8px; height: 8px;
-        border-radius: 50%;
-        background: #2ecc71;
-        animation: rSSEPulse 2.5s infinite;
-        flex-shrink: 0;
-        cursor: default;
-      }
-      @keyframes rSSEPulse {
-        0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.55); }
-        70%  { box-shadow: 0 0 0 6px rgba(46,204,113,0); }
-        100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
-      }
-      #resellerSSEWrap {
-        display: flex; align-items: center; gap: 5px;
-        font-family: Arial, sans-serif; font-size: 10px;
-        letter-spacing: 2px; text-transform: uppercase;
-        color: #aaa;
-      }
+      #resellerSSEDot { display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ecc71;animation:rSSEPulse 2.5s infinite;flex-shrink:0;cursor:default; }
+      @keyframes rSSEPulse { 0%{box-shadow:0 0 0 0 rgba(46,204,113,.55)} 70%{box-shadow:0 0 0 6px rgba(46,204,113,0)} 100%{box-shadow:0 0 0 0 rgba(46,204,113,0)} }
+      #resellerSSEWrap { display:flex;align-items:center;gap:5px;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#aaa; }
     `;
     document.head.appendChild(style);
-
     window.addEventListener('DOMContentLoaded', () => {
       const actions = document.querySelector('.header-actions');
       if (!actions) return;
