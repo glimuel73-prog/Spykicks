@@ -287,7 +287,7 @@ app.get("/reseller-products", (req, res) => {
         const rows = db.prepare("SELECT data FROM products").all();
         const products = rows
             .map(r => JSON.parse(r.data))
-            .filter(p => !p.status || p.status === "active");
+            .filter(p => (!p.status || p.status === "active") && (p.publishTo === "reseller" || p.publishTo === "both" || !p.publishTo));
         res.json({ authorized: true, products });
     } catch (err) {
         res.json({ authorized: false });
