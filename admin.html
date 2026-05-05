@@ -4251,31 +4251,17 @@ loadProductsFromBackend(); // load from backend DB, fall back to localStorage
             renderDashboard();
           }
 
-          // Always refresh the live indicator
-          const indicator = document.getElementById('sseIndicator');
-          if (indicator) {
-            indicator.title = 'Live — last update: ' + new Date().toLocaleTimeString();
-          }
+
         }
       } catch (e) { /* ignore malformed frames */ }
     };
 
     es.onopen = () => {
       reconnectDelay = 3000;
-      const indicator = document.getElementById('sseIndicator');
-      if (indicator) {
-        indicator.style.background = '#2ecc71';
-        indicator.title = 'Live updates connected';
-      }
     };
 
     es.onerror = () => {
       es.close();
-      const indicator = document.getElementById('sseIndicator');
-      if (indicator) {
-        indicator.style.background = '#f59e0b';
-        indicator.title = 'Reconnecting…';
-      }
       setTimeout(connect, reconnectDelay);
       reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
     };
@@ -4290,51 +4276,7 @@ loadProductsFromBackend(); // load from backend DB, fall back to localStorage
   });
 })();
 
-// Inject the live indicator dot into the topbar (small green pulsing dot)
-(function injectSSEIndicator() {
-  const style = document.createElement('style');
-  style.textContent = `
-    #sseIndicator {
-      display: inline-block;
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      background: #2ecc71;
-      box-shadow: 0 0 0 0 rgba(46,204,113,0.5);
-      animation: ssePulse 2.5s infinite;
-      flex-shrink: 0;
-      cursor: default;
-      transition: background 0.3s;
-    }
-    @keyframes ssePulse {
-      0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.55); }
-      70%  { box-shadow: 0 0 0 7px rgba(46,204,113,0); }
-      100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
-    }
-    #sseLabel {
-      font-family: var(--font);
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-    #sseWrapper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-  `;
-  document.head.appendChild(style);
 
-  // Wait for DOM then inject next to the topbar title
-  window.addEventListener('DOMContentLoaded', () => {
-    const topbar = document.querySelector('.topbar-right') || document.querySelector('.topbar');
-    if (!topbar) return;
-    const wrap = document.createElement('div');
-    wrap.id = 'sseWrapper';
-    wrap.innerHTML = '<span id="sseIndicator" title="Live updates connected"></span><span id="sseLabel">Live</span>';
-    topbar.prepend(wrap);
-  });
-})();
 </script>
 
 </body>
