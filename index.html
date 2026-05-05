@@ -855,7 +855,7 @@
     </div>
 
     <!-- FORM VIEW -->
-    <div id="checkoutFormView">
+    <div id="checkoutFormView" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
       <div class="checkout-modal-body" id="checkoutModalBody">
 
         <!-- ⚠ Warning -->
@@ -1942,7 +1942,7 @@ function openCheckout() {
   totalEl.textContent = '₱' + total.toLocaleString();
 
   // Show form, hide success
-  document.getElementById('checkoutFormView').style.display = '';
+  document.getElementById('checkoutFormView').style.display = 'flex';
   document.getElementById('checkoutSuccessView').classList.remove('show');
   document.getElementById('coErrorMsg').style.display = 'none';
   document.getElementById('coSubmitBtn').disabled = false;
