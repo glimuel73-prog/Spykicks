@@ -9,6 +9,21 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+// ================= SSE — LIVE PRODUCT UPDATES =================
+const sseClients = new Set();
+
+function broadcastProducts() {
+    if (sseClients.size === 0) return;
+    try {
+        const rows = db.prepare("SELECT data FROM products").all();
+        const products = rows.map(r => JSON.parse(r.data));
+        const payload = JSON.stringify({ type: "products", products });
+        for (const res of sseClients) {
+            try { res.write(`data: ${payload}\n\n`); } catch (e) { sseClients.delete(res); }
+        }
+    } catch (e) {}
+}
+
 // ================= PERSISTENT DATA DIR =================
 const DATA_DIR = "/data";
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -175,6 +190,7 @@ app.post("/admin/delete-product", (req, res) => {
             } catch (e) {}
         }
         db.prepare("DELETE FROM products WHERE id = ?").run(id);
+        broadcastProducts();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
@@ -275,6 +291,7 @@ app.post("/admin/save-products", (req, res) => {
             for (const p of prods) stmt.run(p.id, JSON.stringify(p));
         });
         insertMany(products);
+        broadcastProducts();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -289,6 +306,7 @@ app.post("/admin/save-product", (req, res) => {
     if (!product || !product.id) return res.json({ success: false, error: "Missing product or id" });
     try {
         db.prepare("INSERT OR REPLACE INTO products (id, data) VALUES (?, ?)").run(product.id, JSON.stringify(product));
+        broadcastProducts();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -647,6 +665,7 @@ app.post("/admin/buyer-order-status", (req, res) => {
             }
         });
         doUpdate();
+        broadcastProducts();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -670,6 +689,7 @@ app.post("/admin/approve-buyer-order", (req, res) => {
             db.prepare("UPDATE buyer_orders SET status = 'processing', updatedAt = ?, stockDeducted = 1 WHERE id = ?").run(now, orderId);
         });
         approve();
+        broadcastProducts();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -715,6 +735,7 @@ app.post("/buyer/cancel-order", (req, res) => {
             db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ?, stockDeducted = 0 WHERE id = ?").run(now, orderId);
         });
         cancel();
+        broadcastProducts();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -755,6 +776,24 @@ app.get("/buyer/orders", (req, res) => {
     } catch (err) {
         res.json({ orders: [] });
     }
+});
+
+// ================= SSE — CLIENT SUBSCRIPTION =================
+app.get("/events/products", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+
+    // Send current products immediately on connect
+    try {
+        const rows = db.prepare("SELECT data FROM products").all();
+        const products = rows.map(r => JSON.parse(r.data));
+        res.write(`data: ${JSON.stringify({ type: "products", products })}\n\n`);
+    } catch (e) {}
+
+    sseClients.add(res);
+    req.on("close", () => sseClients.delete(res));
 });
 
 // ================= START SERVER =================
