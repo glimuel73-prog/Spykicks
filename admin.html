@@ -1949,14 +1949,26 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <div class="modal-section">
         <div class="modal-section-label">Pricing & Stock</div>
 
-        <div class="field-row">
+        <div class="field-row" id="priceRowRetail">
           <div class="field-group">
             <label>Default Retail Price (₱) *</label>
             <input type="number" id="fPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
           </div>
-          <div class="field-group">
+          <div class="field-group" id="priceFieldReseller">
             <label>Default Reseller Price (₱)</label>
             <input type="number" id="fResellerPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
+          </div>
+        </div>
+        <!-- Wholesale price — reseller-only, hidden from buyers -->
+        <div class="field-group" id="priceFieldWholesale" style="display:none;">
+          <label style="display:flex;align-items:center;gap:8px;">
+            🏭 Wholesale Price (₱)
+            <span style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:#000;color:#fff;padding:2px 7px;border-radius:10px;">Reseller Only</span>
+          </label>
+          <input type="number" id="fWholesalePrice" placeholder="0" oninput="refreshSizePriceDefaults()"
+            style="border-color:var(--green);">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-top:5px;">
+            🤫 This price is only visible to approved resellers
           </div>
         </div>
         <input type="hidden" id="fStock" value="0">
@@ -2845,6 +2857,13 @@ function renderSizePriceTable() {
 
   const defRetail = Number(document.getElementById('fPrice').value) || 0;
   const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
+  const defWholesale = Number(document.getElementById('fWholesalePrice').value) || 0;
+
+  // Determine which price columns to show based on publishTo
+  const publishTo = getPublishTo();
+  const showBuyer = (publishTo === 'buyer' || publishTo === 'both');
+  const showReseller = (publishTo === 'reseller' || publishTo === 'both');
+  const showWholesale = (publishTo === 'reseller' || publishTo === 'both');
 
   // Get current colors from color tags
   const colors = getColors();
@@ -2857,8 +2876,9 @@ function renderSizePriceTable() {
   if (hasColors) {
     head.innerHTML = `<tr>
       <th style="min-width:60px;">Size</th>
-      <th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer ₱</th>
-      <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller ₱</th>
+      ${showBuyer ? `<th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer ₱</th>` : ''}
+      ${showReseller ? `<th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller ₱</th>` : ''}
+      ${showWholesale ? `<th style="background:rgba(0,0,0,0.04);border-top:2px solid #666;color:#444;white-space:nowrap;">🏭 Wholesale ₱ <span style="font-size:8px;background:#000;color:#fff;padding:1px 5px;border-radius:8px;vertical-align:middle;">R</span></th>` : ''}
       ${colors.map(c => {
         const swStyle = buildSwatchStyle(c);
         const swatch = `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;${swStyle}vertical-align:middle;margin-right:5px;flex-shrink:0;"></span>`;
@@ -2868,8 +2888,9 @@ function renderSizePriceTable() {
   } else {
     head.innerHTML = `<tr>
       <th>Size</th>
-      <th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer Price (₱)</th>
-      <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller Price (₱)</th>
+      ${showBuyer ? `<th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer Price (₱)</th>` : ''}
+      ${showReseller ? `<th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller Price (₱)</th>` : ''}
+      ${showWholesale ? `<th style="background:rgba(0,0,0,0.04);border-top:2px solid #666;color:#444;">🏭 Wholesale ₱ <span style="font-size:8px;background:#000;color:#fff;padding:1px 5px;border-radius:8px;vertical-align:middle;">Reseller Only</span></th>` : ''}
       <th style="background:rgba(245,158,11,0.04);border-top:2px solid var(--orange);color:var(--orange);">📦 Stock (qty)</th>
     </tr>`;
   }
@@ -2877,7 +2898,7 @@ function renderSizePriceTable() {
   // Seed sizePrices with defaults for new rows
   sizes.forEach(s => {
     if (!sizePrices[s]) {
-      sizePrices[s] = { retailPrice: defRetail || 0, resellerPrice: defReseller || 0, stock: 0, colorStock: {} };
+      sizePrices[s] = { retailPrice: defRetail || 0, resellerPrice: defReseller || 0, wholesalePrice: defWholesale || 0, stock: 0, colorStock: {} };
     }
     if (!sizePrices[s].colorStock) sizePrices[s].colorStock = {};
   });
@@ -2886,6 +2907,7 @@ function renderSizePriceTable() {
     const existing = sizePrices[s] || {};
     const retailVal = existing.retailPrice != null ? existing.retailPrice : (defRetail || '');
     const resellerVal = existing.resellerPrice != null ? existing.resellerPrice : (defReseller || '');
+    const wholesaleVal = existing.wholesalePrice != null ? existing.wholesalePrice : (defWholesale || '');
 
     if (hasColors) {
       const colorCells = colors.map(c => {
@@ -2900,12 +2922,16 @@ function renderSizePriceTable() {
       return `
         <tr data-size="${s}">
           <td class="size-label">${s}</td>
-          <td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
+          ${showBuyer ? `<td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
             data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
-            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
-          <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
+            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>` : ''}
+          ${showReseller ? `<td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
             data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
-            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
+            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>` : ''}
+          ${showWholesale ? `<td style="background:rgba(0,0,0,0.03);"><input class="size-price-input" type="number" placeholder="Wholesale ₱"
+            data-size="${s}" data-ptype="wholesalePrice" value="${wholesaleVal}"
+            oninput="updateSizePrice('${s}','wholesalePrice',this.value)"
+            style="border-color:#ccc;"></td>` : ''}
           ${colorCells}
         </tr>`;
     } else {
@@ -2913,12 +2939,16 @@ function renderSizePriceTable() {
       return `
         <tr data-size="${s}">
           <td class="size-label">${s}</td>
-          <td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
+          ${showBuyer ? `<td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
             data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
-            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
-          <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
+            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>` : ''}
+          ${showReseller ? `<td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
             data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
-            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
+            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>` : ''}
+          ${showWholesale ? `<td style="background:rgba(0,0,0,0.03);"><input class="size-price-input" type="number" placeholder="Wholesale ₱"
+            data-size="${s}" data-ptype="wholesalePrice" value="${wholesaleVal}"
+            oninput="updateSizePrice('${s}','wholesalePrice',this.value)"
+            style="border-color:#ccc;"></td>` : ''}
           <td style="background:rgba(245,158,11,0.03);"><input class="size-price-input" type="number" placeholder="0" min="0"
             data-size="${s}" data-ptype="stock" value="${stockVal}"
             oninput="updateSizePrice('${s}','stock',this.value)"></td>
