@@ -837,7 +837,6 @@
       <div class="pd-stock-info" id="pdStockInfo" style="margin-top:-10px;margin-bottom:16px;">✔ In Stock</div>
       <div id="pdOrderSection" style="margin-top:4px;">
         <button class="pd-btn-add-cart" id="pdAddToCartBtn" onclick="addToCart()">🛒 Add to Cart</button>
-        <div id="pdNoLinksNotice" style="display:none;background:#f9f9f9;border:1px solid #e5e5e5;border-radius:8px;padding:12px 16px;font-family:Arial,sans-serif;font-size:12px;color:#999;text-align:center;letter-spacing:1px;">No order links configured yet.</div>
         <div id="pdSocialBtns" style="display:flex;flex-direction:column;gap:8px;">
           <!-- populated dynamically by updatePDSocialBtns() -->
         </div>
@@ -1576,9 +1575,7 @@ function updateSocialLinks(p) {
   // Only hide if the product is completely out of stock
   const orderSection = document.getElementById('pdOrderSection');
   if (orderSection) orderSection.style.display = '';
-  // Show/hide the "no social links" notice
-  const noLinksNotice = document.getElementById('pdNoLinksNotice');
-  if (noLinksNotice) noLinksNotice.style.display = hasBtns ? 'none' : '';
+
 }
 
 function pdToggleFav() {
