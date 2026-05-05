@@ -2331,9 +2331,13 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 <script>
 const ADMIN_HASH_DEFAULT = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
-const PW_HASH_KEY = "catalog_admin_pw_hash";
-// Use a custom hash saved by changePassword(), falling back to the compiled default
-let ADMIN_HASH = localStorage.getItem(PW_HASH_KEY) || ADMIN_HASH_DEFAULT;
+// ADMIN_HASH is loaded from the server so it's the same on all devices
+let ADMIN_HASH = ADMIN_HASH_DEFAULT;
+// Load the server-side hash immediately; login check awaits this promise
+let _hashReady = fetch("/admin/password-hash")
+  .then(r => r.json())
+  .then(d => { if (d.hash) ADMIN_HASH = d.hash; })
+  .catch(() => {});
 const SESSION_KEY = "catalog_admin_session";
 
 // ===== CHANGE PASSWORD =====
@@ -2401,8 +2405,25 @@ async function changePassword() {
   }
 
   const newHash = await sha256(newVal);
-  // Persist so it survives page reloads and overrides the compiled default
-  localStorage.setItem(PW_HASH_KEY, newHash);
+  // Save to server so the new password applies on ALL devices
+  btn.textContent = 'Saving…';
+  try {
+    const saveRes = await fetch('/admin/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentHash, newHash })
+    });
+    const saveData = await saveRes.json();
+    if (!saveData.success) {
+      btn.disabled = false;
+      btn.textContent = 'Change Password';
+      return cpErr(saveData.error || 'Failed to save password. Try again.');
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Change Password';
+    return cpErr('Connection error. Please try again.');
+  }
   ADMIN_HASH = newHash;  // update runtime variable immediately
 
   // Clear all fields + strength bar
@@ -2467,6 +2488,7 @@ function clearSession() {
 }
 
 async function doLogin() {
+  await _hashReady; // ensure server hash is loaded before checking
   const attempts = getAttemptData();
   const now = Date.now();
 
