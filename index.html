@@ -2387,54 +2387,87 @@ function applyLiveProducts(products) {
     return;
   }
 
-  // Subsequent pushes — reconcile diff
+  // Subsequent pushes — targeted in-place DOM patch (same strategy as reseller-products.html)
   const grid = document.getElementById('shopGrid');
   const noResults = document.getElementById('shopNoResults');
-  const prevProducts = window._allProducts || [];
-  const prevIndex = {};
-  prevProducts.forEach(p => { prevIndex[String(p.id)] = p; });
-  const newIndex = {};
-  activeProducts.forEach(p => { newIndex[String(p.id)] = p; });
-
+  const incomingIds = new Set(activeProducts.map(p => String(p.id)));
   let changed = false;
 
-  prevProducts.forEach(p => {
-    if (!newIndex[String(p.id)]) {
-      const card = grid.querySelector('.product-card[data-id="' + p.id + '"]');
-      if (card) { card.remove(); changed = true; }
+  // 1. REMOVE cards for deleted/deactivated products
+  grid.querySelectorAll('.product-card[data-id]').forEach(card => {
+    if (!incomingIds.has(card.dataset.id)) {
+      card.remove();
+      changed = true;
     }
   });
 
+  // 2. UPDATE existing cards in-place (patch only the fields that change — stock,
+  //    price, name — without destroying the whole card element so event listeners,
+  //    fav state, and scroll position are all preserved)
   activeProducts.forEach(p => {
-    const existing = prevIndex[String(p.id)];
-    const card = grid.querySelector('.product-card[data-id="' + p.id + '"]');
-    if (!existing || !card) {
-      grid.insertAdjacentHTML('afterbegin', buildProductCard(p));
-      changed = true;
-    } else if (JSON.stringify(existing) !== JSON.stringify(p)) {
-      const tmp = document.createElement('div');
-      tmp.innerHTML = buildProductCard(p);
-      card.replaceWith(tmp.firstElementChild);
+    const card = grid.querySelector('.product-card[data-id="' + String(p.id) + '"]');
+    if (!card) return; // new product — handled in step 3
+
+    // Compute stock the same way buildProductCard does
+    let stockNum = Number(p.stock) || 0;
+    if (p.sizes && p.sizes.length > 0 && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
+      stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+    }
+    const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
+
+    // Patch "Stock: X units" line
+    const stockTextEl = card.querySelector('.product-stock');
+    if (stockTextEl && stockTextEl.textContent !== 'Stock: ' + stockNum + ' units') {
+      stockTextEl.textContent = 'Stock: ' + stockNum + ' units';
       changed = true;
     }
+
+    // Patch In Stock / Out of Stock chip
+    const tagEl = card.querySelector('.product-tag');
+    if (tagEl && tagEl.textContent !== stockLabel) {
+      tagEl.textContent = stockLabel;
+      tagEl.style.color = stockNum === 0 ? 'var(--red)' : '';
+      tagEl.style.borderColor = stockNum === 0 ? 'var(--red)' : '';
+      changed = true;
+    }
+
+    // Flash card to signal change (same green outline as reseller-products)
+    if (changed) {
+      card.style.outline = '2px solid rgba(46,204,113,0.6)';
+      setTimeout(() => { card.style.outline = ''; }, 1200);
+    }
+
+    // Keep global list in sync
+    const idx = (window._allProducts || []).findIndex(x => String(x.id) === String(p.id));
+    if (idx !== -1) window._allProducts[idx] = p;
   });
+
+  // 3. ADD genuinely new products
+  const currentIds = new Set((window._allProducts || []).map(p => String(p.id)));
+  const newProducts = activeProducts.filter(p => !currentIds.has(String(p.id)));
+  if (newProducts.length > 0) {
+    newProducts.forEach(p => {
+      grid.insertAdjacentHTML('afterbegin', buildProductCard(p));
+    });
+    window._allProducts = [...(window._allProducts || []), ...newProducts];
+    changed = true;
+  }
 
   if (changed) {
-    buildProductsIndex(activeProducts);
-    window._allProducts = activeProducts;
+    // Rebuild PRODUCTS_INDEX so PD drawer always shows fresh stock/sizes
+    buildProductsIndex(window._allProducts);
     updateFavUI();
     applyFiltersAndSort();
 
-    // Refresh open PD drawer if that product changed
-    if (pdCurrentId && newIndex[String(pdCurrentId)]) {
-      const updated = newIndex[String(pdCurrentId)];
-      const prev = prevIndex[String(pdCurrentId)];
-      if (prev && JSON.stringify(prev) !== JSON.stringify(updated)) {
+    // Refresh the open PD drawer if its product's data changed
+    if (pdCurrentId) {
+      const updatedPD = (window._allProducts || []).find(p => String(p.id) === String(pdCurrentId));
+      if (updatedPD) {
         const sizeEl = document.getElementById('pdSizes');
         const stockEl = document.getElementById('pdStockInfo');
         if (sizeEl) {
           sizeEl.innerHTML = '';
-          (updated.sizes || []).forEach(s => {
+          (updatedPD.sizes || []).forEach(s => {
             const sz = typeof s === 'object' ? s : { size: s };
             const stock = sz.stock != null ? Number(sz.stock) : null;
             const oos = stock != null && stock <= 0;
@@ -2443,29 +2476,31 @@ function applyLiveProducts(products) {
             btn.className = 'pd-size' + (oos ? ' oos' : '') + (low ? ' pd-size-low' : '');
             btn.disabled = oos;
             btn.dataset.size = sz.size;
-            btn.dataset.price = sz.price || updated.basePrice || 0;
+            btn.dataset.price = sz.price || updatedPD.basePrice || 0;
             btn.innerHTML = '<span>' + sz.size + '</span>' + (low ? '<span class="pd-size-stock-hint">' + stock + ' left</span>' : '');
             if (!oos) btn.onclick = function() {
               document.querySelectorAll('.pd-size').forEach(b => b.classList.remove('selected'));
               this.classList.add('selected');
               pdSelectedSize = this.dataset.size;
               pdSelectedPrice = Number(this.dataset.price) || null;
-              document.getElementById('pdPrice').textContent = '\u20b1' + (pdSelectedPrice || Number(updated.basePrice) || 0).toLocaleString();
+              document.getElementById('pdPrice').textContent = '\u20b1' + (pdSelectedPrice || Number(updatedPD.price) || 0).toLocaleString();
             };
             if (pdSelectedSize && String(sz.size) === String(pdSelectedSize)) btn.classList.add('selected');
             sizeEl.appendChild(btn);
           });
         }
         if (stockEl) {
-          const totalStock = updated.stock != null ? Number(updated.stock) : null;
-          stockEl.textContent = totalStock != null ? (totalStock > 0 ? '\u2714 ' + totalStock + ' in stock' : '\u2715 Out of stock') : '\u2714 In Stock';
-          stockEl.style.color = totalStock != null && totalStock <= 0 ? '#e11d48' : '#27ae60';
+          let totalStock = Number(updatedPD.stock) || 0;
+          if (updatedPD.sizes && updatedPD.sizes.length > 0 && updatedPD.sizes.some(s => typeof s === 'object' && s.stock != null)) {
+            totalStock = updatedPD.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+          }
+          stockEl.textContent = totalStock > 0 ? '\u2714 ' + totalStock + ' in stock' : '\u2715 Out of stock';
+          stockEl.style.color = totalStock <= 0 ? '#e11d48' : '#27ae60';
         }
-        document.getElementById('pdPrice').textContent = '\u20b1' + (Number(updated.basePrice) || 0).toLocaleString();
       }
     }
 
-    noResults.style.display = activeProducts.length === 0 ? 'block' : 'none';
+    noResults.style.display = (window._allProducts || []).filter(p => !p.status || p.status === 'active').length === 0 ? 'block' : 'none';
   }
 }
 
