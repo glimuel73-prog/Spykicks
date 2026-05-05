@@ -500,6 +500,106 @@ app.get("/admin/order-count", (req, res) => {
     }
 });
 
+// ================= BUYER ORDERS TABLE =================
+db.exec(`
+    CREATE TABLE IF NOT EXISTS buyer_orders (
+        id TEXT PRIMARY KEY,
+        customerName TEXT,
+        contact TEXT,
+        province TEXT,
+        municipality TEXT,
+        barangay TEXT,
+        fullAddress TEXT,
+        items TEXT,
+        totalAmount REAL,
+        status TEXT DEFAULT 'pending',
+        createdAt TEXT,
+        updatedAt TEXT
+    )
+`);
+
+// ================= BUYER — PLACE ORDER =================
+app.post("/buyer/place-order", (req, res) => {
+    const { customer, items, totalAmount } = req.body;
+    if (!customer || !items || !Array.isArray(items) || items.length === 0)
+        return res.json({ success: false, error: "Missing fields" });
+    if (!customer.name || !customer.contact || !customer.province || !customer.municipality || !customer.barangay || !customer.fullAddress)
+        return res.json({ success: false, error: "Incomplete customer info" });
+
+    try {
+        const orderId = "BORDER_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7).toUpperCase();
+        const now = new Date().toISOString();
+        db.prepare(
+            `INSERT INTO buyer_orders (id, customerName, contact, province, municipality, barangay, fullAddress, items, totalAmount, status, createdAt, updatedAt)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
+        ).run(
+            orderId,
+            customer.name,
+            customer.contact,
+            customer.province,
+            customer.municipality,
+            customer.barangay,
+            customer.fullAddress,
+            JSON.stringify(items),
+            totalAmount || 0,
+            now, now
+        );
+        res.json({ success: true, orderId });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — GET ALL BUYER ORDERS =================
+app.get("/admin/buyer-orders", (req, res) => {
+    try {
+        const rows = db.prepare("SELECT * FROM buyer_orders ORDER BY createdAt DESC").all();
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        res.json({ orders });
+    } catch (err) {
+        res.json({ orders: [] });
+    }
+});
+
+// ================= ADMIN — UPDATE BUYER ORDER STATUS =================
+app.post("/admin/buyer-order-status", (req, res) => {
+    const { orderId, status } = req.body;
+    if (!orderId || !status) return res.json({ success: false, error: "Missing fields" });
+    const allowed = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (!allowed.includes(status)) return res.json({ success: false, error: "Invalid status" });
+    try {
+        const now = new Date().toISOString();
+        const result = db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ? WHERE id = ?").run(status, now, orderId);
+        if (result.changes === 0) return res.json({ success: false, error: "Order not found" });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — DELETE BUYER ORDER =================
+app.post("/admin/delete-buyer-order", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const result = db.prepare("DELETE FROM buyer_orders WHERE id = ?").run(orderId);
+        if (result.changes === 0) return res.json({ success: false, error: "Order not found" });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ================= ADMIN — BUYER ORDER COUNT (pending) =================
+app.get("/admin/buyer-order-count", (req, res) => {
+    try {
+        const row = db.prepare("SELECT COUNT(*) as count FROM buyer_orders WHERE status = 'pending'").get();
+        res.json({ count: row ? row.count : 0 });
+    } catch (err) {
+        res.json({ count: 0 });
+    }
+});
+
 // ================= START SERVER =================
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
