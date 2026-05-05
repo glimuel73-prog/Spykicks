@@ -2330,7 +2330,171 @@ async function cancelBuyerOrder(orderId, contact) {
 updateFavUI();
 updateCartBadge();
 loadSocialLinks();
-loadAdminProducts();
+
+// ════ LIVE PRODUCT UPDATES (Server-Sent Events) ════
+let _liveInitialized = false;
+
+function applyLiveProducts(products) {
+  const activeProducts = products.filter(p => !p.status || p.status === 'active');
+
+  if (!_liveInitialized) {
+    _liveInitialized = true;
+    const grid = document.getElementById('shopGrid');
+    const noResults = document.getElementById('shopNoResults');
+    const loadingEl = document.getElementById('shopLoading');
+    if (loadingEl) loadingEl.remove();
+
+    if (!activeProducts.length) {
+      noResults.style.display = 'block';
+      noResults.textContent = 'No products available yet.';
+      return;
+    }
+
+    buildProductsIndex(activeProducts);
+
+    const STATIC_CATS = ['all','new-arrivals','sneakers','apparel','accessories','bags','caps','other'];
+    const customCats = [...new Set(activeProducts.map(p => (p.category||'').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
+    const chipsContainer = document.getElementById('categoryChips');
+    chipsContainer.querySelectorAll('.chip[data-custom]').forEach(el => el.remove());
+    const otherChip = [...chipsContainer.querySelectorAll('.chip')].find(b => b.textContent.trim() === 'Other');
+    customCats.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'chip'; btn.dataset.custom = '1';
+      btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+      btn.onclick = function() { filterProducts(cat, this); };
+      if (otherChip) chipsContainer.insertBefore(btn, otherChip); else chipsContainer.appendChild(btn);
+    });
+
+    grid.insertAdjacentHTML('afterbegin', activeProducts.map(buildProductCard).join(''));
+
+    const brandBar = document.getElementById('brandBar');
+    const brandChips = document.getElementById('brandChips');
+    [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
+    const allBrands = [...new Set(activeProducts.map(p => (p.brand||'').trim()).filter(Boolean))].sort();
+    if (allBrands.length > 0) {
+      allBrands.forEach(brand => {
+        const btn = document.createElement('button');
+        btn.className = 'sort-chip'; btn.textContent = brand;
+        btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
+        brandChips.appendChild(btn);
+      });
+      brandBar.style.display = 'block';
+    } else { brandBar.style.display = 'none'; }
+
+    window._allProducts = activeProducts;
+    updateFavUI();
+    applyFiltersAndSort();
+    return;
+  }
+
+  // Subsequent pushes — reconcile diff
+  const grid = document.getElementById('shopGrid');
+  const noResults = document.getElementById('shopNoResults');
+  const prevProducts = window._allProducts || [];
+  const prevIndex = {};
+  prevProducts.forEach(p => { prevIndex[String(p.id)] = p; });
+  const newIndex = {};
+  activeProducts.forEach(p => { newIndex[String(p.id)] = p; });
+
+  let changed = false;
+
+  prevProducts.forEach(p => {
+    if (!newIndex[String(p.id)]) {
+      const card = grid.querySelector('.product-card[data-id="' + p.id + '"]');
+      if (card) { card.remove(); changed = true; }
+    }
+  });
+
+  activeProducts.forEach(p => {
+    const existing = prevIndex[String(p.id)];
+    const card = grid.querySelector('.product-card[data-id="' + p.id + '"]');
+    if (!existing || !card) {
+      grid.insertAdjacentHTML('afterbegin', buildProductCard(p));
+      changed = true;
+    } else if (JSON.stringify(existing) !== JSON.stringify(p)) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = buildProductCard(p);
+      card.replaceWith(tmp.firstElementChild);
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    buildProductsIndex(activeProducts);
+    window._allProducts = activeProducts;
+    updateFavUI();
+    applyFiltersAndSort();
+
+    // Refresh open PD drawer if that product changed
+    if (pdCurrentId && newIndex[String(pdCurrentId)]) {
+      const updated = newIndex[String(pdCurrentId)];
+      const prev = prevIndex[String(pdCurrentId)];
+      if (prev && JSON.stringify(prev) !== JSON.stringify(updated)) {
+        const sizeEl = document.getElementById('pdSizes');
+        const stockEl = document.getElementById('pdStockInfo');
+        if (sizeEl) {
+          sizeEl.innerHTML = '';
+          (updated.sizes || []).forEach(s => {
+            const sz = typeof s === 'object' ? s : { size: s };
+            const stock = sz.stock != null ? Number(sz.stock) : null;
+            const oos = stock != null && stock <= 0;
+            const low = stock != null && stock > 0 && stock <= 3;
+            const btn = document.createElement('button');
+            btn.className = 'pd-size' + (oos ? ' oos' : '') + (low ? ' pd-size-low' : '');
+            btn.disabled = oos;
+            btn.dataset.size = sz.size;
+            btn.dataset.price = sz.price || updated.basePrice || 0;
+            btn.innerHTML = '<span>' + sz.size + '</span>' + (low ? '<span class="pd-size-stock-hint">' + stock + ' left</span>' : '');
+            if (!oos) btn.onclick = function() {
+              document.querySelectorAll('.pd-size').forEach(b => b.classList.remove('selected'));
+              this.classList.add('selected');
+              pdSelectedSize = this.dataset.size;
+              pdSelectedPrice = Number(this.dataset.price) || null;
+              document.getElementById('pdPrice').textContent = '\u20b1' + (pdSelectedPrice || Number(updated.basePrice) || 0).toLocaleString();
+            };
+            if (pdSelectedSize && String(sz.size) === String(pdSelectedSize)) btn.classList.add('selected');
+            sizeEl.appendChild(btn);
+          });
+        }
+        if (stockEl) {
+          const totalStock = updated.stock != null ? Number(updated.stock) : null;
+          stockEl.textContent = totalStock != null ? (totalStock > 0 ? '\u2714 ' + totalStock + ' in stock' : '\u2715 Out of stock') : '\u2714 In Stock';
+          stockEl.style.color = totalStock != null && totalStock <= 0 ? '#e11d48' : '#27ae60';
+        }
+        document.getElementById('pdPrice').textContent = '\u20b1' + (Number(updated.basePrice) || 0).toLocaleString();
+      }
+    }
+
+    noResults.style.display = activeProducts.length === 0 ? 'block' : 'none';
+  }
+}
+
+function startLiveUpdates() {
+  const grid = document.getElementById('shopGrid');
+  const noResults = document.getElementById('shopNoResults');
+  if (!document.getElementById('shopLoading')) {
+    const loadingEl = document.createElement('div');
+    loadingEl.id = 'shopLoading';
+    loadingEl.style.cssText = 'grid-column:1/-1;padding:60px 24px;text-align:center;font-family:Arial,sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#999;background:#fff;';
+    loadingEl.textContent = 'Loading products\u2026';
+    grid.insertBefore(loadingEl, noResults);
+  }
+
+  let es;
+  function connect() {
+    es = new EventSource('/events/products');
+    es.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'products') applyLiveProducts(msg.products);
+      } catch (err) {}
+    };
+    es.onerror = () => { es.close(); setTimeout(connect, 5000); };
+  }
+  connect();
+}
+
+startLiveUpdates();
 </script>
 </body>
 </html>
