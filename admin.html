@@ -4030,6 +4030,16 @@ function renderBuyerOrdersTable() {
       ${statusOpts.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${statusLabels[s]}</option>`).join('')}
     </select>`;
 
+    const approveRejectBtns = o.status === 'pending' ? `
+      <button onclick="event.stopPropagation();approveBuyerOrder('${o.id}')" title="Approve order"
+        style="background:#16a34a;color:#fff;border:none;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:6px;cursor:pointer;transition:background .15s;white-space:nowrap;">
+        ✓ Approve
+      </button>
+      <button onclick="event.stopPropagation();rejectBuyerOrder('${o.id}')" title="Reject order"
+        style="background:#e11d48;color:#fff;border:none;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:6px;cursor:pointer;transition:background .15s;white-space:nowrap;">
+        ✕ Reject
+      </button>` : '';
+
     return `
       <tr style="cursor:pointer;" onclick="toggleBuyerOrderExpand('${expandId}')">
         <td><span style="font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;">#${o.id.replace('BORDER_','').slice(0,12)}</span></td>
@@ -4039,7 +4049,12 @@ function renderBuyerOrdersTable() {
         <td style="font-size:12px;color:var(--text-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemSummary}</td>
         <td class="price-cell">₱${Number(o.totalAmount).toLocaleString()}</td>
         <td style="font-size:12px;color:var(--text-muted);">${dateStr}</td>
-        <td onclick="event.stopPropagation()">${statusSelect}</td>
+        <td onclick="event.stopPropagation()">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            ${approveRejectBtns}
+            ${statusSelect}
+          </div>
+        </td>
         <td onclick="event.stopPropagation()">
           <button class="order-delete-btn" onclick="deleteBuyerOrder('${o.id}')" title="Delete order">🗑</button>
         </td>
@@ -4083,6 +4098,15 @@ function renderBuyerOrdersTable() {
         style="flex:1;font-family:var(--font);font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--surface);color:var(--text);">
         ${statusOpts.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${statusLabels[s]}</option>`).join('')}
       </select>`;
+      const mobileApproveReject = o.status === 'pending' ? `
+        <button onclick="approveBuyerOrder('${o.id}')"
+          style="background:#16a34a;color:#fff;border:none;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">
+          ✓ Approve
+        </button>
+        <button onclick="rejectBuyerOrder('${o.id}')"
+          style="background:#e11d48;color:#fff;border:none;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">
+          ✕ Reject
+        </button>` : '';
       return `<div class="card-row">
         <div class="card-top">
           <div style="flex:1;min-width:0;">
@@ -4097,6 +4121,7 @@ function renderBuyerOrdersTable() {
         <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;">
           <span style="font-family:var(--font);font-weight:700;font-size:16px;">₱${Number(o.totalAmount).toLocaleString()}</span>
         </div>
+        ${mobileApproveReject ? `<div style="display:flex;gap:8px;margin-bottom:8px;">${mobileApproveReject}</div>` : ''}
         <div class="card-actions">
           ${statusSelect}
           <button class="order-delete-btn" onclick="deleteBuyerOrder('${o.id}')" title="Delete">🗑</button>
@@ -4123,6 +4148,50 @@ async function updateBuyerOrderStatus(orderId, status) {
       const o = allBuyerOrders.find(x => x.id === orderId);
       if (o) o.status = status;
       showToast('Order status updated to: ' + status);
+      renderBuyerOrdersTable();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown'), true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+async function approveBuyerOrder(orderId) {
+  if (!confirm('Approve this buyer order? It will move to Processing.')) return;
+  try {
+    const res = await fetch('/admin/approve-buyer-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const o = allBuyerOrders.find(x => x.id === orderId);
+      if (o) o.status = 'processing';
+      showToast('Order approved — moved to Processing.');
+      renderBuyerOrdersTable();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown'), true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+async function rejectBuyerOrder(orderId) {
+  if (!confirm('Reject this buyer order? It will be marked as Cancelled.')) return;
+  try {
+    const res = await fetch('/admin/reject-buyer-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const o = allBuyerOrders.find(x => x.id === orderId);
+      if (o) o.status = 'cancelled';
+      showToast('Order rejected and cancelled.');
       renderBuyerOrdersTable();
     } else {
       showToast('Failed: ' + (data.error || 'Unknown'), true);
