@@ -2248,14 +2248,175 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     </div>
   </div>
 
+  <!-- CHANGE PASSWORD CARD -->
+  <div style="max-width:560px;margin:24px auto 0;width:100%;">
+    <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Security</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">Change your admin login password. The new password is saved in your browser and overrides the default.</p>
+
+      <div id="cpError" style="display:none;background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.3);color:var(--red);font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;border-radius:6px;margin-bottom:16px;"></div>
+      <div id="cpSuccess" style="display:none;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.35);color:#1a9e56;font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;border-radius:6px;margin-bottom:16px;"></div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- Current Password -->
+        <div>
+          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Current Password</label>
+          <div style="position:relative;">
+            <input type="password" id="cpCurrent" placeholder="••••••••"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+              onkeydown="if(event.key==='Enter')document.getElementById('cpNew').focus()">
+            <button type="button" onclick="cpToggle('cpCurrent',this)" tabindex="-1"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- New Password -->
+        <div>
+          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">New Password</label>
+          <div style="position:relative;">
+            <input type="password" id="cpNew" placeholder="••••••••"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+              oninput="cpStrength(this.value)"
+              onkeydown="if(event.key==='Enter')document.getElementById('cpConfirm').focus()">
+            <button type="button" onclick="cpToggle('cpNew',this)" tabindex="-1"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div style="margin-top:6px;display:flex;gap:4px;height:3px;" id="cpStrengthBars">
+            <div id="cpBar1" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+            <div id="cpBar2" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+            <div id="cpBar3" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+            <div id="cpBar4" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+          </div>
+          <div id="cpStrengthLabel" style="font-family:var(--font);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-top:4px;min-height:14px;"></div>
+        </div>
+
+        <!-- Confirm New Password -->
+        <div>
+          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Confirm New Password</label>
+          <div style="position:relative;">
+            <input type="password" id="cpConfirm" placeholder="••••••••"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+              onkeydown="if(event.key==='Enter')changePassword()">
+            <button type="button" onclick="cpToggle('cpConfirm',this)" tabindex="-1"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <button onclick="changePassword()" id="cpBtn"
+        style="width:100%;margin-top:20px;min-height:44px;background:var(--accent);color:#fff;font-family:var(--font);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer;transition:background .15s,transform .1s;"
+        onmouseover="this.style.background='var(--accent-hover)';this.style.transform='translateY(-1px)'"
+        onmouseout="this.style.background='var(--accent)';this.style.transform=''">
+        Change Password
+      </button>
+    </div>
+  </div>
+
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-const ADMIN_HASH = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
+const ADMIN_HASH_DEFAULT = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
+const PW_HASH_KEY = "catalog_admin_pw_hash";
+// Use a custom hash saved by changePassword(), falling back to the compiled default
+let ADMIN_HASH = localStorage.getItem(PW_HASH_KEY) || ADMIN_HASH_DEFAULT;
 const SESSION_KEY = "catalog_admin_session";
+
+// ===== CHANGE PASSWORD =====
+function cpToggle(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  const isText = inp.type === 'text';
+  inp.type = isText ? 'password' : 'text';
+  btn.style.color = isText ? 'var(--text-dim)' : 'var(--accent)';
+}
+
+function cpStrength(val) {
+  const bars = ['cpBar1','cpBar2','cpBar3','cpBar4'];
+  const label = document.getElementById('cpStrengthLabel');
+  if (!val) {
+    bars.forEach(id => { document.getElementById(id).style.background = 'var(--border)'; });
+    label.textContent = '';
+    return;
+  }
+  let score = 0;
+  if (val.length >= 8)  score++;
+  if (val.length >= 12) score++;
+  if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+  if (/[0-9]/.test(val) && /[^A-Za-z0-9]/.test(val)) score++;
+  const colors = ['#ff3b30','#f59e0b','#3b82f6','#2ecc71'];
+  const labels = ['Weak','Fair','Good','Strong'];
+  bars.forEach((id, i) => {
+    document.getElementById(id).style.background = i < score ? colors[score - 1] : 'var(--border)';
+  });
+  label.textContent = labels[score - 1] || '';
+  label.style.color = colors[score - 1] || 'var(--text-dim)';
+}
+
+async function changePassword() {
+  const currentVal = document.getElementById('cpCurrent').value;
+  const newVal     = document.getElementById('cpNew').value;
+  const confirmVal = document.getElementById('cpConfirm').value;
+  const errEl      = document.getElementById('cpError');
+  const okEl       = document.getElementById('cpSuccess');
+  const btn        = document.getElementById('cpBtn');
+
+  errEl.style.display = 'none';
+  okEl.style.display  = 'none';
+
+  function cpErr(msg) {
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+    // Shake the card
+    const card = errEl.closest('div[style*="border-radius:10px"]');
+    if (card) { card.style.animation='none'; card.offsetHeight; card.style.animation='shake .3s ease'; }
+  }
+
+  if (!currentVal) return cpErr('Enter your current password.');
+  if (!newVal)     return cpErr('Enter a new password.');
+  if (newVal.length < 6) return cpErr('New password must be at least 6 characters.');
+  if (newVal !== confirmVal) return cpErr('Passwords do not match.');
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+
+  const currentHash = await sha256(currentVal);
+  if (currentHash !== ADMIN_HASH) {
+    btn.disabled = false;
+    btn.textContent = 'Change Password';
+    return cpErr('Current password is incorrect.');
+  }
+
+  const newHash = await sha256(newVal);
+  // Persist so it survives page reloads and overrides the compiled default
+  localStorage.setItem(PW_HASH_KEY, newHash);
+  ADMIN_HASH = newHash;  // update runtime variable immediately
+
+  // Clear all fields + strength bar
+  document.getElementById('cpCurrent').value = '';
+  document.getElementById('cpNew').value     = '';
+  document.getElementById('cpConfirm').value = '';
+  cpStrength('');
+
+  btn.disabled = false;
+  btn.textContent = 'Change Password';
+  okEl.textContent = '✔ Password changed successfully.';
+  okEl.style.display = 'block';
+  setTimeout(() => { okEl.style.display = 'none'; }, 4000);
+}
 const SESSION_DURATION = 2 * 60 * 60 * 1000; // 2 hours
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
