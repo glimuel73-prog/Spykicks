@@ -1798,9 +1798,11 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <div class="filter-bar" style="padding:14px 32px;border-bottom:1px solid var(--border);">
         <select class="select-filter" id="buyerOrderStatusFilter" onchange="renderBuyerOrdersTable()">
           <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
+          <option value="pending">⏳ Pending</option>
+          <option value="processing">🔄 Processing</option>
+          <option value="shipped">🚚 Shipped</option>
+          <option value="delivered">✓ Delivered</option>
+          <option value="cancelled">✕ Cancelled</option>
         </select>
         <input type="text" class="search-input" placeholder="Search name / order ID…" id="buyerOrderSearch" oninput="renderBuyerOrdersTable()">
         <button class="btn-add" onclick="loadBuyerOrders()" style="background:var(--surface);color:var(--text-muted);border:1px solid var(--border);">
@@ -3736,19 +3738,32 @@ let allOrders = [];
 
 async function loadOrders() {
   try {
-    const res = await fetch('/admin/orders');
-    const data = await res.json();
-    allOrders = data.orders || [];
+    const [res1, res2] = await Promise.all([
+      fetch('/admin/orders'),
+      fetch('/admin/buyer-orders')
+    ]);
+    const data1 = await res1.json();
+    const data2 = await res2.json();
+    allOrders = data1.orders || [];
+    allBuyerOrders = data2.orders || [];
     renderOrdersTable();
-    // Update pending badge
-    const pending = allOrders.filter(o => o.status === 'pending').length;
+    // Update pending badge (reseller + buyer combined)
+    const resellerPending = allOrders.filter(o => o.status === 'pending').length;
+    const buyerPending    = allBuyerOrders.filter(o => o.status === 'pending').length;
+    const totalPending    = resellerPending + buyerPending;
     const badge = document.getElementById('pendingOrdersBadge');
     if (badge) {
-      badge.textContent = pending;
-      badge.style.display = pending > 0 ? 'inline-flex' : 'none';
+      badge.textContent = totalPending;
+      badge.style.display = totalPending > 0 ? 'inline-flex' : 'none';
     }
     const statPending = document.getElementById('statPendingOrders');
-    if (statPending) statPending.textContent = pending;
+    if (statPending) statPending.textContent = totalPending;
+    // Buyer badge
+    const buyerBadge = document.getElementById('buyerOrderBadge');
+    if (buyerBadge) {
+      buyerBadge.textContent = buyerPending;
+      buyerBadge.style.display = buyerPending > 0 ? 'inline-flex' : 'none';
+    }
   } catch(e) {
     showToast('Failed to load orders.', true);
   }
@@ -3918,6 +3933,220 @@ async function deleteOrder(orderId) {
       showToast('Order deleted.');
     } else {
       showToast('Failed to delete order: ' + (data.error || 'Unknown error'), true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+// ===== ORDERS TAB SWITCHER =====
+function switchOrdersTab(tab) {
+  const resellerPanel = document.getElementById('resellerOrdersPanel');
+  const buyerPanel    = document.getElementById('buyerOrdersPanel');
+  const btnReseller   = document.getElementById('orderTabReseller');
+  const btnBuyer      = document.getElementById('orderTabBuyer');
+
+  if (tab === 'reseller') {
+    resellerPanel.style.display = '';
+    buyerPanel.style.display    = 'none';
+    btnReseller.style.color          = 'var(--text)';
+    btnReseller.style.borderBottomColor = 'var(--text)';
+    btnBuyer.style.color             = 'var(--text-muted)';
+    btnBuyer.style.borderBottomColor = 'transparent';
+    loadOrders();
+  } else {
+    resellerPanel.style.display = 'none';
+    buyerPanel.style.display    = '';
+    btnBuyer.style.color             = 'var(--text)';
+    btnBuyer.style.borderBottomColor = 'var(--text)';
+    btnReseller.style.color          = 'var(--text-muted)';
+    btnReseller.style.borderBottomColor = 'transparent';
+    loadBuyerOrders();
+  }
+}
+
+// ===== BUYER ORDERS =====
+let allBuyerOrders = [];
+
+async function loadBuyerOrders() {
+  try {
+    const res = await fetch('/admin/buyer-orders');
+    const data = await res.json();
+    allBuyerOrders = data.orders || [];
+    renderBuyerOrdersTable();
+    // Update badge
+    const pending = allBuyerOrders.filter(o => o.status === 'pending').length;
+    const badge = document.getElementById('buyerOrderBadge');
+    if (badge) {
+      badge.textContent = pending;
+      badge.style.display = pending > 0 ? 'inline-flex' : 'none';
+    }
+  } catch(e) {
+    showToast('Failed to load buyer orders.', true);
+  }
+}
+
+function renderBuyerOrdersTable() {
+  const statusFilter = (document.getElementById('buyerOrderStatusFilter')?.value || '').toLowerCase();
+  const search       = (document.getElementById('buyerOrderSearch')?.value || '').toLowerCase();
+
+  let filtered = allBuyerOrders.filter(o => {
+    const matchStatus = !statusFilter || o.status === statusFilter;
+    const matchSearch = !search
+      || (o.customerName || '').toLowerCase().includes(search)
+      || o.id.toLowerCase().includes(search)
+      || (o.contact || '').toLowerCase().includes(search);
+    return matchStatus && matchSearch;
+  });
+
+  const tbody    = document.getElementById('buyerOrdersTableBody');
+  const emptyEl  = document.getElementById('buyerOrdersEmpty');
+  const cardTable= document.getElementById('buyerOrdersCardTable');
+  if (!tbody) return;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    if (emptyEl)   emptyEl.style.display = '';
+    if (cardTable) cardTable.innerHTML = '';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const statusOpts = ['pending','processing','shipped','delivered','cancelled'];
+  const statusColors = { pending:'var(--orange)', processing:'var(--blue)', shipped:'#8b5cf6', delivered:'var(--green)', cancelled:'var(--red)' };
+  const statusLabels = { pending:'⏳ Pending', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', cancelled:'✕ Cancelled' };
+
+  tbody.innerHTML = filtered.map(o => {
+    const d       = new Date(o.createdAt);
+    const dateStr = d.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const statusClass = o.status === 'delivered' ? 'approved' : o.status === 'cancelled' ? 'cancelled' : o.status === 'shipped' ? 'approved' : o.status === 'processing' ? 'pending' : 'pending';
+    const label   = statusLabels[o.status] || o.status;
+    const addr    = [o.barangay, o.municipality, o.province].filter(Boolean).join(', ');
+    const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty}`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
+    const expandId = 'bexpand_' + o.id.replace(/[^a-zA-Z0-9]/g,'_');
+
+    const statusSelect = `<select onchange="updateBuyerOrderStatus('${o.id}', this.value)" onclick="event.stopPropagation()"
+      style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:1px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--surface);color:var(--text);cursor:pointer;">
+      ${statusOpts.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${statusLabels[s]}</option>`).join('')}
+    </select>`;
+
+    return `
+      <tr style="cursor:pointer;" onclick="toggleBuyerOrderExpand('${expandId}')">
+        <td><span style="font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;">#${o.id.replace('BORDER_','').slice(0,12)}</span></td>
+        <td style="font-size:13px;font-weight:600;">${o.customerName}</td>
+        <td style="font-size:12px;color:var(--text-muted);">${o.contact}</td>
+        <td style="font-size:12px;color:var(--text-muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${addr}">${addr}</td>
+        <td style="font-size:12px;color:var(--text-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemSummary}</td>
+        <td class="price-cell">₱${Number(o.totalAmount).toLocaleString()}</td>
+        <td style="font-size:12px;color:var(--text-muted);">${dateStr}</td>
+        <td onclick="event.stopPropagation()">${statusSelect}</td>
+        <td onclick="event.stopPropagation()">
+          <button class="order-delete-btn" onclick="deleteBuyerOrder('${o.id}')" title="Delete order">🗑</button>
+        </td>
+      </tr>
+      <tr id="${expandId}" class="order-row-expand">
+        <td colspan="9">
+          <div class="order-items-expand">
+            <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Order Details</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin-bottom:14px;font-size:12px;">
+              <div><strong style="color:var(--text-dim);">Customer</strong><br>${o.customerName}</div>
+              <div><strong style="color:var(--text-dim);">Contact</strong><br>${o.contact}</div>
+              <div><strong style="color:var(--text-dim);">Province</strong><br>${o.province}</div>
+              <div><strong style="color:var(--text-dim);">Municipality</strong><br>${o.municipality}</div>
+              <div><strong style="color:var(--text-dim);">Barangay</strong><br>${o.barangay}</div>
+              <div><strong style="color:var(--text-dim);">Full Address</strong><br>${o.fullAddress}</div>
+            </div>
+            <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px;">Items</div>
+            ${o.items.map(i => `
+              <div class="order-item-line">
+                <span><strong>${i.name}</strong> &nbsp;·&nbsp; Size: ${i.size}${i.color ? ' &nbsp;·&nbsp; ' + i.color : ''} &nbsp;·&nbsp; Qty: ${i.qty}</span>
+                <span style="font-weight:700;">₱${(i.price * i.qty).toLocaleString()}</span>
+              </div>`).join('')}
+            <div style="display:flex;justify-content:flex-end;margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">
+              <strong style="font-size:14px;">Total: ₱${Number(o.totalAmount).toLocaleString()}</strong>
+            </div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text-dim);background:#fffbeb;border:1px solid #fbbf24;border-radius:6px;padding:8px 12px;">
+              📹 Remind customer to <strong>video while opening the parcel</strong>.
+            </div>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  // Mobile cards
+  if (cardTable) {
+    cardTable.innerHTML = filtered.map(o => {
+      const d       = new Date(o.createdAt);
+      const dateStr = d.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' });
+      const addr    = [o.barangay, o.municipality, o.province].filter(Boolean).join(', ');
+      const statusSelect = `<select onchange="updateBuyerOrderStatus('${o.id}', this.value)"
+        style="flex:1;font-family:var(--font);font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--surface);color:var(--text);">
+        ${statusOpts.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${statusLabels[s]}</option>`).join('')}
+      </select>`;
+      return `<div class="card-row">
+        <div class="card-top">
+          <div style="flex:1;min-width:0;">
+            <div style="font-family:var(--font);font-weight:700;font-size:14px;color:var(--text);">${o.customerName}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">#${o.id.replace('BORDER_','').slice(0,12)} · ${dateStr}</div>
+          </div>
+          <span class="status-pill ${o.status === 'delivered' ? 'approved' : o.status === 'cancelled' ? 'cancelled' : 'pending'}">${statusLabels[o.status]||o.status}</span>
+        </div>
+        <div class="card-field"><strong>Contact</strong>${o.contact}</div>
+        <div class="card-field"><strong>Address</strong>${addr}<br><span style="font-size:11px;color:var(--text-dim);">${o.fullAddress}</span></div>
+        <div class="card-field"><strong>Items</strong>${o.items.map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ')}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;">
+          <span style="font-family:var(--font);font-weight:700;font-size:16px;">₱${Number(o.totalAmount).toLocaleString()}</span>
+        </div>
+        <div class="card-actions">
+          ${statusSelect}
+          <button class="order-delete-btn" onclick="deleteBuyerOrder('${o.id}')" title="Delete">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function toggleBuyerOrderExpand(expandId) {
+  const row = document.getElementById(expandId);
+  if (row) row.classList.toggle('open');
+}
+
+async function updateBuyerOrderStatus(orderId, status) {
+  try {
+    const res = await fetch('/admin/buyer-order-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, status })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const o = allBuyerOrders.find(x => x.id === orderId);
+      if (o) o.status = status;
+      showToast('Order status updated to: ' + status);
+      renderBuyerOrdersTable();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown'), true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+async function deleteBuyerOrder(orderId) {
+  if (!confirm('Permanently delete this buyer order? This cannot be undone.')) return;
+  try {
+    const res = await fetch('/admin/delete-buyer-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      allBuyerOrders = allBuyerOrders.filter(o => o.id !== orderId);
+      renderBuyerOrdersTable();
+      showToast('Buyer order deleted.');
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown'), true);
     }
   } catch(e) {
     showToast('Connection error.', true);
