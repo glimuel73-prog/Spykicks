@@ -518,8 +518,26 @@
     .checkout-modal-body { padding: 16px 16px 0; }
     .checkout-modal-footer { padding: 12px 16px; }
   }
+  /* ══ ORDER HISTORY ══ */
+  .order-history-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; overflow: hidden; transition: box-shadow .2s; }
+  .order-history-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .order-history-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; flex-wrap: wrap; gap: 10px; }
+  .order-history-id { font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #999; }
+  .order-history-date { font-family: Arial,sans-serif; font-size: 12px; color: #bbb; }
+  .order-status-pill { font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
+  .order-status-pill.pending { background: #fffbeb; color: #d97706; border: 1px solid #fbbf24; }
+  .order-status-pill.processing { background: #eff6ff; color: #2563eb; border: 1px solid #93c5fd; }
+  .order-status-pill.shipped { background: #f5f3ff; color: #7c3aed; border: 1px solid #c4b5fd; }
+  .order-status-pill.delivered { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
+  .order-status-pill.cancelled { background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; }
+  .order-history-body { padding: 16px 20px; }
+  .order-history-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px dashed #f0f0f0; font-family: Arial,sans-serif; font-size: 13px; color: #444; gap: 12px; }
+  .order-history-item:last-child { border-bottom: none; }
+  .order-history-total { display: flex; justify-content: space-between; font-family: Arial,sans-serif; font-weight: 700; font-size: 15px; color: #111; padding-top: 12px; margin-top: 8px; border-top: 1px solid #e5e5e5; }
+  .order-cancel-btn { background: none; border: 1px solid #fda4af; color: #e11d48; font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 7px 16px; border-radius: 6px; cursor: pointer; transition: all .2s; }
+  .order-cancel-btn:hover { background: #e11d48; color: #fff; border-color: #e11d48; }
+
 </style>
-</head>
 <body>
 
 <!-- TICKER -->
@@ -547,6 +565,7 @@
       <button id="btnFavs" onclick="showFavorites(this)">♥ Favorites
         <span id="favNavCount" style="display:none;background:#000;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;"></span>
       </button>
+      <button id="btnOrders" onclick="showTab('orders',this)">📦 My Orders</button>
     </nav>
     <div class="header-actions">
       <button class="admin-btn" onclick="window.location.href='https://brochure-availablestocks.up.railway.app/admin.html'">
@@ -689,6 +708,32 @@
 <!-- TOAST -->
 <div class="fav-toast" id="favToast"><span class="dot"></span><span class="toast-msg"></span></div>
 
+<!-- ════ MY ORDERS PAGE ════ -->
+<div id="orders" class="content">
+  <div class="section-header">
+    <span class="section-title">📦 My Orders</span>
+    <div class="filter-chips">
+      <button class="chip active" onclick="showTab('buyer',document.getElementById('btnShop'))">← Back to Shop</button>
+    </div>
+  </div>
+
+  <!-- Contact lookup bar -->
+  <div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:20px 40px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;flex-direction:column;gap:5px;flex:1;max-width:360px;">
+      <label style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#888;">Your Contact Number</label>
+      <input type="tel" id="orderLookupContact" placeholder="09XXXXXXXXX" style="background:#f8f8f8;border:1px solid #e5e5e5;color:#111;font-family:Arial,sans-serif;font-size:14px;padding:11px 14px;border-radius:8px;outline:none;transition:border-color .2s;width:100%;" oninput="this.style.borderColor='#e5e5e5'" onkeydown="if(event.key==='Enter')lookupOrders()">
+    </div>
+    <button onclick="lookupOrders()" style="background:#000;color:#fff;font-family:Arial,sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;padding:12px 24px;border:none;cursor:pointer;border-radius:8px;transition:background .2s;margin-top:18px;">Look Up Orders</button>
+  </div>
+
+  <div id="ordersContent" style="padding:32px 40px;max-width:900px;">
+    <div id="ordersEmpty" style="text-align:center;padding:60px 24px;font-family:Arial,sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#aaa;">
+      Enter your contact number above to view your orders.
+    </div>
+    <div id="ordersList" style="display:flex;flex-direction:column;gap:16px;"></div>
+  </div>
+</div>
+
 <!-- FOOTER TRUST BADGES -->
 <div class="footer-trust">
   <div class="trust-item">
@@ -792,6 +837,7 @@
       <div class="pd-stock-info" id="pdStockInfo" style="margin-top:-10px;margin-bottom:16px;">✔ In Stock</div>
       <div id="pdOrderSection" style="margin-top:4px;">
         <button class="pd-btn-add-cart" id="pdAddToCartBtn" onclick="addToCart()">🛒 Add to Cart</button>
+        <div id="pdNoLinksNotice" style="display:none;background:#f9f9f9;border:1px solid #e5e5e5;border-radius:8px;padding:12px 16px;font-family:Arial,sans-serif;font-size:12px;color:#999;text-align:center;letter-spacing:1px;">No order links configured yet.</div>
         <div id="pdSocialBtns" style="display:flex;flex-direction:column;gap:8px;">
           <!-- populated dynamically by updatePDSocialBtns() -->
         </div>
@@ -898,8 +944,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <h3>Order Placed!</h3>
-      <p>Your order has been received. We'll contact you shortly to confirm your delivery details.</p>
+      <p>Your order has been received and is pending admin approval. We'll contact you shortly to confirm your delivery details.</p>
       <div class="co-success-order-id" id="coSuccessOrderId"></div>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#aaa;margin-bottom:16px;">Track your order anytime via <strong style="color:#111;cursor:pointer;" onclick="closeCheckout();showTab('orders',document.getElementById('btnOrders'))">My Orders</strong> tab using your contact number.</p>
       <button class="co-done-btn" onclick="closeCheckout()">Continue Shopping</button>
     </div>
 
@@ -1525,7 +1572,13 @@ function updateSocialLinks(p) {
     wrap.appendChild(a);
   });
 
-  document.getElementById('pdOrderSection').style.display = hasBtns ? '' : 'none';
+  // Always show order section (Add to Cart button should always be visible)
+  // Only hide if the product is completely out of stock
+  const orderSection = document.getElementById('pdOrderSection');
+  if (orderSection) orderSection.style.display = '';
+  // Show/hide the "no social links" notice
+  const noLinksNotice = document.getElementById('pdNoLinksNotice');
+  if (noLinksNotice) noLinksNotice.style.display = hasBtns ? 'none' : '';
 }
 
 function pdToggleFav() {
@@ -2198,7 +2251,85 @@ function renderCartOrderBtns() {
   if (noLinksEl) noLinksEl.style.display = hasBtns ? 'none' : '';
 }
 
-// ════ INIT ════
+// ════ ORDER HISTORY ════
+async function lookupOrders() {
+  const contact = document.getElementById('orderLookupContact').value.trim();
+  const emptyEl = document.getElementById('ordersEmpty');
+  const listEl  = document.getElementById('ordersList');
+  if (!contact) {
+    document.getElementById('orderLookupContact').style.borderColor = 'var(--red)';
+    return;
+  }
+  emptyEl.textContent = 'Loading…';
+  emptyEl.style.display = '';
+  listEl.innerHTML = '';
+  try {
+    const res = await fetch('/buyer/orders?contact=' + encodeURIComponent(contact));
+    const data = await res.json();
+    const orders = data.orders || [];
+    if (!orders.length) {
+      emptyEl.textContent = 'No orders found for this contact number.';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    listEl.innerHTML = orders.map(o => {
+      const d = new Date(o.createdAt);
+      const dateStr = d.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      const shortId = '#' + o.id.replace('BORDER_','').slice(0,12);
+      const statusLabels = { pending:'⏳ Pending', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', cancelled:'✕ Cancelled' };
+      const statusLabel = statusLabels[o.status] || o.status;
+      const addr = [o.barangay, o.municipality, o.province].filter(Boolean).join(', ');
+      const itemsHTML = o.items.map(i =>
+        `<div class="order-history-item">
+          <span><strong>${i.name}</strong>${i.size ? ` &nbsp;·&nbsp; Size: ${i.size}` : ''}${i.color ? ` &nbsp;·&nbsp; ${i.color}` : ''} &nbsp;·&nbsp; Qty: ${i.qty}</span>
+          <span style="flex-shrink:0;font-weight:700;">₱${(i.price*i.qty).toLocaleString()}</span>
+        </div>`).join('');
+      const canCancel = o.status === 'pending';
+      return `
+        <div class="order-history-card">
+          <div class="order-history-head">
+            <div>
+              <div class="order-history-id">${shortId}</div>
+              <div class="order-history-date">${dateStr}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="order-status-pill ${o.status}">${statusLabel}</span>
+              ${canCancel ? `<button class="order-cancel-btn" onclick="cancelBuyerOrder('${o.id}','${contact.replace(/'/g,"\\'")}')">Cancel</button>` : ''}
+            </div>
+          </div>
+          <div class="order-history-body">
+            <div style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;margin-bottom:10px;letter-spacing:1px;">📍 ${addr}${o.fullAddress ? ' — ' + o.fullAddress : ''}</div>
+            ${itemsHTML}
+            <div class="order-history-total"><span>Total</span><span>₱${Number(o.totalAmount).toLocaleString()}</span></div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    emptyEl.textContent = 'Could not load orders. Please try again.';
+  }
+}
+
+async function cancelBuyerOrder(orderId, contact) {
+  if (!confirm('Cancel this order? This cannot be undone.')) return;
+  try {
+    const res = await fetch('/buyer/cancel-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, contact })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Order cancelled.');
+      lookupOrders();
+    } else {
+      showToast(data.error || 'Failed to cancel order.');
+    }
+  } catch(e) {
+    showToast('Connection error.');
+  }
+}
+
+
 updateFavUI();
 updateCartBadge();
 loadSocialLinks();
