@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catalog</title>
+<title>Catalog — Buyer Store</title>
  <link rel="icon" type="image/png" href="/favicon.png">
 
 <style>
@@ -35,6 +35,10 @@
   .header-top { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 64px; max-width: 1400px; margin: 0 auto; }
   .logo { font-family: Arial, sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 4px; color: #000; text-transform: uppercase; text-decoration: none; }
   .logo span { color: #000; }
+  .logo-short { display: none; }
+  .logo-full { display: inline; }
+  .admin-btn { background: none; border: 1px solid #ccc; color: #666; font-family: Arial,sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 16px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 7px; border-radius: 20px; }
+  .admin-btn:hover { border-color: #000; color: #000; }
   .nav-links { display: flex; gap: 2px; }
   .nav-links button { background: none; border: none; color: #666; font-family: Arial, sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 20px; cursor: pointer; transition: color .2s, background .2s; position: relative; border-radius: 20px; }
   .nav-links button.active, .nav-links button:hover { color: #000; background: #f0f0f0; }
@@ -314,23 +318,19 @@
     .header { position: sticky; top: 0; z-index: 100; }
     .header-top { padding: 0 16px; height: auto; flex-wrap: wrap; gap: 0; }
 
-    /* Row 1: logo + actions — full width, fixed height */
-    .logo { font-size: 22px; letter-spacing: 2px; order: 1; }
-    .header-actions { order: 2; gap: 8px; margin-left: auto; height: 52px; align-items: center; }
+    /* Row 1: logo + actions */
+    .logo { font-size: 20px; letter-spacing: 2px; order: 1; flex: 1; }
+    .logo-full { display: none; }
+    .logo-short { display: inline; }
+    .header-actions { order: 2; gap: 6px; margin-left: auto; height: 52px; align-items: center; }
     .badge-pill { display: none; }
-    .header-top > span { display: none; }
-
-    /* Hide the PH text on mobile */
-    .header-actions > span:first-child { display: none; }
+    .admin-btn { padding: 6px 10px; font-size: 10px; letter-spacing: 1px; }
+    .admin-btn span { display: none; }
 
     /* Row 2: nav tabs — full-width strip below */
     .nav-links { display: flex; gap: 0; order: 3; width: 100%; border-top: 1px solid #e8e8e8; background: #fff; }
     .nav-links button { flex: 1; font-size: 12px; padding: 10px 4px; letter-spacing: 1px; border-radius: 0; }
     .nav-links button.active::after { left: 15%; right: 15%; bottom: 0; }
-
-    /* Admin button — compact on mobile */
-    .header-actions button[onclick*="admin"] { padding: 6px 10px; font-size: 10px; letter-spacing: 1px; }
-    .header-actions button[onclick*="admin"] span { display: none; }
 
     /* Hero */
     .hero { flex-direction: column; padding: 40px 20px 60px; gap: 24px; text-align: center; min-height: auto; }
@@ -402,20 +402,21 @@
 <!-- HEADER -->
 <div class="header">
   <div class="header-top">
-    <a href="#" class="logo">CATALOG & AVAILABLE STOCKS</a>
+    <a href="#" class="logo">
+      <span class="logo-full">CATALOG & AVAILABLE STOCKS</span>
+      <span class="logo-short">CATALOG</span>
+    </a>
     <nav class="nav-links">
       <button class="active" id="btnShop" onclick="showTab('buyer',this)">Shop</button>
       <button id="btnReseller" onclick="showTab('reseller',this)">Reseller</button>
-      <button id="btnFavs" onclick="showFavorites(this)">
-        ♥ Favorites
+      <button id="btnFavs" onclick="showFavorites(this)">♥ Favorites
         <span id="favNavCount" style="display:none;background:#000;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;"></span>
       </button>
     </nav>
     <div class="header-actions">
-      <span style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-muted);">PH</span>
-      <button onclick="window.location.href='https://brochure-availablestocks.up.railway.app/admin.html'" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;border-radius:20px;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">
+      <button class="admin-btn" onclick="window.location.href='https://brochure-availablestocks.up.railway.app/admin.html'">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Admin
+        <span>Admin</span>
       </button>
       <button class="fav-counter" onclick="showFavorites()" title="My Favorites">
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
