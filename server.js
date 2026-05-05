@@ -100,6 +100,39 @@ Object.entries(defaultSocials).forEach(([k, v]) => {
     if (!existing) db.prepare("INSERT INTO settings (key, value) VALUES (?, ?)").run("social_" + k, v);
 });
 
+// ================= ADMIN — GET PASSWORD HASH =================
+app.get("/admin/password-hash", (req, res) => {
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'admin_pw_hash'").get();
+        res.json({ hash: row ? row.value : null });
+    } catch (err) {
+        res.json({ hash: null });
+    }
+});
+
+// ================= ADMIN — CHANGE PASSWORD =================
+app.post("/admin/change-password", (req, res) => {
+    const { currentHash, newHash } = req.body;
+    if (!currentHash || !newHash) return res.json({ success: false, error: "Missing fields" });
+
+    // Default hash (same as compiled default in admin.html)
+    const DEFAULT_HASH = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
+
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'admin_pw_hash'").get();
+        const storedHash = row ? row.value : DEFAULT_HASH;
+
+        if (currentHash !== storedHash) {
+            return res.json({ success: false, error: "Current password is incorrect." });
+        }
+
+        db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('admin_pw_hash', ?)").run(newHash);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
 // ================= ADMIN — GET SOCIAL LINKS =================
 app.get("/admin/social-links", (req, res) => {
     try {
