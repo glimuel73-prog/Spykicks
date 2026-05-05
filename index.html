@@ -38,12 +38,18 @@
   .nav-links { display: flex; gap: 2px; }
   .nav-links button { background: none; border: none; color: #666; font-family: Arial, sans-serif; font-weight: 600; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 20px; cursor: pointer; transition: color .2s, background .2s; position: relative; border-radius: 20px; }
   .nav-links button.active, .nav-links button:hover { color: #000; background: #f0f0f0; }
-  .nav-links button.active::after { content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%; height: 2px; background: #000; border-radius: 2px; }
   .header-actions { display: flex; align-items: center; gap: 16px; }
+  .logo-short { display: none; }
+  .logo-full { display: inline; }
   .badge-pill { background: #000; color: #fff; font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; padding: 5px 14px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; }
-  .fav-counter { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 6px 14px; border: 1px solid #ccc; background: none; color: #666; font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; transition: border-color .2s, color .2s; border-radius: 20px; }
-  .fav-counter:hover { border-color: #000; color: #000; }
-  .fav-counter svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .logout-btn { background: none; border: 1px solid #d0d0d0; color: #666; font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 16px; cursor: pointer; transition: all .2s; border-radius: 4px; }
+  .logout-btn:hover { border-color: #000; color: #000; }
+  .fav-chip { display: flex; align-items: center; gap: 6px; padding: 6px 16px; border: 1px solid #d0d0d0; background: none; color: #666; font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
+  .fav-chip svg { width: 13px; height: 13px; fill: currentColor; }
+  .fav-chip:hover { border-color: #000; color: #000; }
+  .fav-chip.active { border-color: var(--red); color: var(--red); background: rgba(255,59,48,.06); }
+  .fav-count { background: var(--red); color: #fff; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
+  .fav-count.visible { display: inline-flex; }
   .fav-count-badge { background: #000; color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 10px; display: none; align-items: center; justify-content: center; padding: 0 5px; transition: transform .2s; }
   .fav-count-badge.visible { display: inline-flex; }
   .fav-count-badge.bump { transform: scale(1.35); }
@@ -310,27 +316,20 @@
 
   /* ══ MOBILE RESPONSIVE ══ */
   @media (max-width: 768px) {
-    /* Header — 2-row mobile layout */
+    /* Header — mobile layout */
     .header { position: sticky; top: 0; z-index: 100; }
-    .header-top { padding: 0 16px; height: auto; flex-wrap: wrap; gap: 0; }
-
-    /* Row 1: logo + actions — full width, fixed height */
-    .logo { font-size: 22px; letter-spacing: 2px; order: 1; }
-    .header-actions { order: 2; gap: 8px; margin-left: auto; height: 52px; align-items: center; }
+    .header-top { padding: 0 12px; height: auto; flex-wrap: wrap; gap: 0; align-items: center; }
+    .logo { font-size: 18px; letter-spacing: 2px; order: 1; line-height: 48px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 180px); }
+    .logo-full { display: none; }
+    .logo-short { display: inline; }
+    .header-actions { order: 2; gap: 5px; height: 48px; align-items: center; flex-shrink: 0; }
     .badge-pill { display: none; }
-    .header-top > span { display: none; }
-
-    /* Hide the PH text on mobile */
-    .header-actions > span:first-child { display: none; }
-
-    /* Row 2: nav tabs — full-width strip below */
-    .nav-links { display: flex; gap: 0; order: 3; width: 100%; border-top: 1px solid #e8e8e8; background: #fff; }
-    .nav-links button { flex: 1; font-size: 12px; padding: 10px 4px; letter-spacing: 1px; border-radius: 0; }
-    .nav-links button.active::after { left: 15%; right: 15%; bottom: 0; }
-
-    /* Admin button — compact on mobile */
-    .header-actions button[onclick*="admin"] { padding: 6px 10px; font-size: 10px; letter-spacing: 1px; }
-    .header-actions button[onclick*="admin"] span { display: none; }
+    .nav-links { gap: 0; }
+    .nav-links button { font-size: 11px; padding: 6px 10px; letter-spacing: 1px; }
+    .logout-btn { font-size: 10px; padding: 5px 9px; letter-spacing: 0.5px; }
+    .fav-chip { padding: 5px 9px; gap: 3px; font-size: 0; letter-spacing: 0; }
+    .fav-chip svg { width: 14px; height: 14px; }
+    .fav-count { font-size: 10px; min-width: 15px; height: 15px; }
 
     /* Hero */
     .hero { flex-direction: column; padding: 40px 20px 60px; gap: 24px; text-align: center; min-height: auto; }
@@ -402,24 +401,20 @@
 <!-- HEADER -->
 <div class="header">
   <div class="header-top">
-    <a href="#" class="logo">CATALOG & AVAILABLE STOCKS</a>
-    <nav class="nav-links">
-      <button class="active" id="btnShop" onclick="showTab('buyer',this)">Shop</button>
-      <button id="btnReseller" onclick="showTab('reseller',this)">Reseller</button>
-      <button id="btnFavs" onclick="showFavorites(this)">
-        ♥ Favorites
-        <span id="favNavCount" style="display:none;background:#000;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;"></span>
-      </button>
-    </nav>
+    <a href="#" class="logo"><span class="logo-full">CATALOG & AVAILABLE STOCKS</span><span class="logo-short">CATALOG</span></a>
     <div class="header-actions">
-      <span style="font-family:Arial,sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-muted);">PH</span>
-      <button onclick="window.location.href='https://brochure-availablestocks.up.railway.app/admin.html'" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;border-radius:20px;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">
+      <nav class="nav-links">
+        <button class="active" id="btnShop" onclick="showTab('buyer',this)">Shop</button>
+        <button id="btnReseller" onclick="showTab('reseller',this)">Reseller</button>
+      </nav>
+      <button onclick="window.location.href='https://brochure-availablestocks.up.railway.app/admin.html'" class="logout-btn" style="display:flex;align-items:center;gap:7px;">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Admin
       </button>
-      <button class="fav-counter" onclick="showFavorites()" title="My Favorites">
+      <button class="fav-chip" onclick="showFavorites()" title="My Favorites" id="favToggleBtn">
         <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <span id="favCountBadge" class="fav-count-badge">0</span>
+        Favorites
+        <span id="favCountBadge" class="fav-count" id2="favNavCount">0</span>
       </button>
     </div>
   </div>
@@ -770,17 +765,24 @@ function buildProductCard(p) {
 
   const colorDotsHTML = buildColorDots(p.colors, 14, 'color-dot');
 
+  // Compute total stock for display
+  const hasPerSizeStockCard = p.sizes && p.sizes.length > 0 && p.sizes.some(s => typeof s === 'object' && s.stock != null);
+  const totalStockCard = hasPerSizeStockCard
+    ? p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0)
+    : stockNum;
+
   return `
     <div class="product-card" data-id="${id}" data-name="${name}" data-price-raw="${price}" data-category="${cat}" data-brand="${brand.toLowerCase()}" data-brand-line="${(p.brandLine||'').toLowerCase()}" data-brand-model="${(p.brandModel||'').toLowerCase()}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" onclick="openPD('${id}')">
       ${badgeHTML}
       ${imgHTML}
-      <div class="product-category-tag">${catLabel}</div>
-      <div class="product-brand">${brand}</div>
+      <div class="product-brand" style="margin-top:14px;">${brand}</div>
       <div class="product-name">${name}</div>
       ${colorDotsHTML}
       <div class="product-footer">
         <div class="product-price">₱${price.toLocaleString()}</div>
+        <div class="product-tag">${stockLabel}</div>
       </div>
+      <div class="product-stock">Stock: ${totalStockCard} units</div>
       <button class="product-view-btn" onclick="event.stopPropagation();openPD('${id}')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         View Details
@@ -1270,9 +1272,6 @@ function updateFavUI() {
   const badge = document.getElementById("favCountBadge");
   badge.textContent = count;
   count > 0 ? badge.classList.add("visible") : badge.classList.remove("visible");
-  const navCount = document.getElementById("favNavCount");
-  navCount.textContent = count;
-  navCount.style.display = count > 0 ? "inline" : "none";
   // Sync heart buttons in shop grid
   document.querySelectorAll("#shopGrid .product-card[data-id] .fav-btn").forEach(btn => {
     const id = btn.closest(".product-card").dataset.id;
@@ -1338,8 +1337,8 @@ function showFavorites(btn) {
   document.querySelectorAll(".content").forEach(d => d.classList.remove("active"));
   document.getElementById("favorites-page").classList.add("active");
   document.querySelectorAll(".nav-links button").forEach(b => b.classList.remove("active"));
-  const target = btn || document.getElementById("btnFavs");
-  if (target) target.classList.add("active");
+  const favBtn = document.getElementById("favToggleBtn");
+  if (favBtn) favBtn.classList.add("active");
   renderFavoritesPage();
 }
 
