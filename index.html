@@ -1181,9 +1181,9 @@ async function loadAdminProducts() {
   grid.insertBefore(loadingEl, noResults);
 
   try {
-    const res = await fetch('/admin/products');
+    const res = await fetch('/products');
     const data = await res.json();
-    const products = (data.products || []).filter(p => (!p.status || p.status === 'active') && (p.publishTo === 'buyer' || p.publishTo === 'both' || !p.publishTo));
+    const products = data.products || [];
 
     // Remove loading
     loadingEl.remove();
