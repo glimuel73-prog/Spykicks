@@ -1949,25 +1949,13 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <div class="modal-section">
         <div class="modal-section-label">Pricing & Stock</div>
 
-        <div class="field-row">
-          <div class="field-group">
-            <label>Default Retail Price (₱) *</label>
-            <input type="number" id="fPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
-          </div>
-          <div class="field-group">
-            <label>Default Reseller Price (₱)</label>
-            <input type="number" id="fResellerPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label>Default Wholesale Price (₱) <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 6px;border-radius:3px;margin-left:4px;">Reseller Only</span></label>
-            <input type="number" id="fWholesalePrice" placeholder="0" style="border-color:rgba(59,130,246,0.3);">
-          </div>
-        </div>
+        <!-- Hidden price inputs — values controlled via right-column price fields -->
+        <input type="hidden" id="fPrice" value="">
+        <input type="hidden" id="fResellerPrice" value="">
+        <input type="hidden" id="fWholesalePrice" value="">
         <input type="hidden" id="fStock" value="0">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:-10px;margin-bottom:16px;">
-          These are fallback defaults — set stock per size in the Sizes section below. Wholesale price is only shown to approved resellers.
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-bottom:16px;">
+          Set stock per size in the Sizes section below. Prices are configured in the <strong style="color:var(--text-muted);">Publish To</strong> panel on the right.
         </div>
         <div class="field-row">
           <div class="field-group">
@@ -1991,7 +1979,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
       <!-- SIZES -->
       <div class="modal-section">
-        <div class="modal-section-label">Sizes — Select to Set Buyer & Reseller Prices & Stock</div>
+        <div class="modal-section-label">Sizes — Select to Set Prices &amp; Stock</div>
 
         <div class="field-group" style="margin-bottom:10px;">
           <label>Size Type</label>
@@ -2108,6 +2096,32 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             </div>
             <input type="hidden" id="fPublishTo" value="both">
           </div>
+
+          <!-- CONDITIONAL PRICE FIELDS — shown based on Publish To selection -->
+          <div id="priceFieldsWrap" style="margin-top:14px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;gap:10px;">
+            <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:2px;">Default Prices</div>
+
+            <!-- Retail price — shown for buyer + both -->
+            <div id="priceFieldRetail" class="field-group" style="margin-bottom:0;">
+              <label style="color:#3b82f6;">🛍 Default Retail Price (₱) *</label>
+              <input type="number" id="fPriceReal" placeholder="0" oninput="syncPriceField('fPriceReal','fPrice')" style="border-color:rgba(59,130,246,0.35);">
+            </div>
+
+            <!-- Reseller price — shown for reseller + both -->
+            <div id="priceFieldReseller" class="field-group" style="margin-bottom:0;">
+              <label style="color:#2ecc71;">🤝 Default Reseller Price (₱)</label>
+              <input type="number" id="fResellerPriceReal" placeholder="0" oninput="syncPriceField('fResellerPriceReal','fResellerPrice')" style="border-color:rgba(46,204,113,0.35);">
+            </div>
+
+            <!-- Wholesale price — shown for reseller + both -->
+            <div id="priceFieldWholesale" class="field-group" style="margin-bottom:0;">
+              <label>📦 Default Wholesale Price (₱) <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 6px;border-radius:3px;margin-left:4px;">Reseller Only</span></label>
+              <input type="number" id="fWholesalePriceReal" placeholder="0" oninput="syncPriceField('fWholesalePriceReal','fWholesalePrice')" style="border-color:rgba(59,130,246,0.3);">
+            </div>
+
+            <div id="priceFieldsHint" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:2px;">Fallback defaults — set per-size prices in Sizes section</div>
+          </div>
+
           <div class="field-group" style="margin-top:14px;">
             <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;display:block;">New Arrival</label>
             <label style="display:flex;align-items:center;gap:14px;cursor:pointer;" onclick="toggleNewArrival()">
@@ -3264,13 +3278,16 @@ async function openModal(id = null) {
     document.getElementById('fPrice').value = p.price || '';
     document.getElementById('fResellerPrice').value = p.resellerPrice || '';
     document.getElementById('fWholesalePrice').value = p.wholesalePrice || '';
+    document.getElementById('fPriceReal').value = p.price || '';
+    document.getElementById('fResellerPriceReal').value = p.resellerPrice || '';
+    document.getElementById('fWholesalePriceReal').value = p.wholesalePrice || '';
     document.getElementById('fStock').value = p.stock || '';
     document.getElementById('fSKU').value = p.sku || '';
     document.getElementById('fColorway').value = p.colorway || '';
     setColors(p.colors || []);
     document.getElementById('fBadge').value = p.badge || '';
     document.getElementById('fStatus').value = p.status || 'active';
-    setPublishTo(p.publishTo || 'both');
+    setPublishTo(p.publishTo || 'both'); // this also shows/hides price fields
     setNewArrival(!!p.newArrival);
 
     (p.specs || []).forEach(s => addSpec(s.key, s.val));
@@ -3288,6 +3305,9 @@ async function openModal(id = null) {
     document.getElementById('fPrice').value = '';
     document.getElementById('fResellerPrice').value = '';
     document.getElementById('fWholesalePrice').value = '';
+    document.getElementById('fPriceReal').value = '';
+    document.getElementById('fResellerPriceReal').value = '';
+    document.getElementById('fWholesalePriceReal').value = '';
     document.getElementById('fStock').value = '';
     document.getElementById('fSKU').value = '';
     document.getElementById('fColorway').value = '';
@@ -3695,6 +3715,31 @@ function setPublishTo(val) {
       inner.style.display = 'none';
     }
   });
+
+  // Show/hide price fields based on publish target
+  const showRetail    = (val === 'buyer' || val === 'both');
+  const showReseller  = (val === 'reseller' || val === 'both');
+  const showWholesale = (val === 'reseller' || val === 'both');
+
+  const el = id => document.getElementById(id);
+  el('priceFieldRetail').style.display    = showRetail    ? '' : 'none';
+  el('priceFieldReseller').style.display  = showReseller  ? '' : 'none';
+  el('priceFieldWholesale').style.display = showWholesale ? '' : 'none';
+
+  // Clear hidden fields that are not relevant so they don't get saved incorrectly
+  if (!showRetail)    { el('fPriceReal').value = '';        el('fPrice').value = ''; }
+  if (!showReseller)  { el('fResellerPriceReal').value = ''; el('fResellerPrice').value = ''; }
+  if (!showWholesale) { el('fWholesalePriceReal').value = ''; el('fWholesalePrice').value = ''; }
+
+  // Trigger refreshSizePriceDefaults so per-size table stays in sync
+  if (typeof refreshSizePriceDefaults === 'function') refreshSizePriceDefaults();
+}
+
+// Syncs a visible "real" input into the hidden field used by the rest of the code
+function syncPriceField(realId, hiddenId) {
+  const v = document.getElementById(realId).value;
+  document.getElementById(hiddenId).value = v;
+  if (typeof refreshSizePriceDefaults === 'function') refreshSizePriceDefaults();
 }
 
 function getPublishTo() {
