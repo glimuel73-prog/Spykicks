@@ -1959,9 +1959,15 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             <input type="number" id="fResellerPrice" placeholder="0" oninput="refreshSizePriceDefaults()">
           </div>
         </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label>Default Wholesale Price (₱) <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 6px;border-radius:3px;margin-left:4px;">Reseller Only</span></label>
+            <input type="number" id="fWholesalePrice" placeholder="0" style="border-color:rgba(59,130,246,0.3);">
+          </div>
+        </div>
         <input type="hidden" id="fStock" value="0">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:-10px;margin-bottom:16px;">
-          These are fallback defaults — set stock per size in the Sizes section below
+          These are fallback defaults — set stock per size in the Sizes section below. Wholesale price is only shown to approved resellers.
         </div>
         <div class="field-row">
           <div class="field-group">
@@ -2760,7 +2766,7 @@ function renderProductsTable() {
           <div class="prod-sku">${p.brand ? p.brand + ' — ' : ''}${p.sku || ''}</div>
         </div>
       </div></td>
-      <td><div class="price-cell">₱${Number(p.price).toLocaleString()}</div>${p.resellerPrice ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Reseller ₱${Number(p.resellerPrice).toLocaleString()}</div>` : ''}</td>
+      <td><div class="price-cell">₱${Number(p.price).toLocaleString()}</div>${p.resellerPrice ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Reseller ₱${Number(p.resellerPrice).toLocaleString()}</div>` : ''}${p.wholesalePrice ? `<div style="font-size:11px;color:var(--blue);margin-top:2px;font-weight:600;">Wholesale ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}</td>
       <td><span class="cat-tag">${p.category || '—'}</span></td>
       <td>${(() => { const pt = p.publishTo || 'both'; if (pt === 'buyer') return `<span style="display:inline-block;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;border:1px solid #3b82f6;color:#3b82f6;background:rgba(59,130,246,.07);">🛍 Buyer</span>`; if (pt === 'reseller') return `<span style="display:inline-block;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--green);color:var(--green);background:rgba(46,204,113,.07);">🤝 Reseller</span>`; return `<span style="display:inline-block;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;border:1px solid var(--border2);color:var(--text-muted);background:var(--surface2);">✦ Both</span>`; })()}</td>
       <td><div class="sizes-preview">${(p.sizes||[]).slice(0,5).map(s => {
@@ -3257,6 +3263,7 @@ async function openModal(id = null) {
     document.getElementById('fDescription').value = p.description || '';
     document.getElementById('fPrice').value = p.price || '';
     document.getElementById('fResellerPrice').value = p.resellerPrice || '';
+    document.getElementById('fWholesalePrice').value = p.wholesalePrice || '';
     document.getElementById('fStock').value = p.stock || '';
     document.getElementById('fSKU').value = p.sku || '';
     document.getElementById('fColorway').value = p.colorway || '';
@@ -3280,6 +3287,7 @@ async function openModal(id = null) {
     document.getElementById('fDescription').value = '';
     document.getElementById('fPrice').value = '';
     document.getElementById('fResellerPrice').value = '';
+    document.getElementById('fWholesalePrice').value = '';
     document.getElementById('fStock').value = '';
     document.getElementById('fSKU').value = '';
     document.getElementById('fColorway').value = '';
@@ -3390,6 +3398,7 @@ async function saveProduct() {
     description: document.getElementById('fDescription').value.trim(),
     price: Number(price),
     resellerPrice: Number(resellerPrice) || 0,
+    wholesalePrice: Number(document.getElementById('fWholesalePrice').value) || 0,
     stock: Number(stock) || 0,
     sku: document.getElementById('fSKU').value.trim(),
     colorway: document.getElementById('fColorway').value.trim(),
