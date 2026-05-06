@@ -2880,11 +2880,15 @@ function renderSizePriceTable() {
   const prevSizes = [...tbody.querySelectorAll('tr')].map(r => r.dataset.size);
   const isNewSize = sizes.some(s => !prevSizes.includes(s));
 
+  // Determine whether to show buyer price column based on publish target
+  const publishTarget = getPublishTo();
+  const showBuyerCol = (publishTarget === 'buyer' || publishTarget === 'both');
+
   // Rebuild header
   if (hasColors) {
     head.innerHTML = `<tr>
       <th style="min-width:60px;">Size</th>
-      <th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer ₱</th>
+      ${showBuyerCol ? `<th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer ₱</th>` : ''}
       <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller ₱</th>
       ${colors.map(c => {
         const swStyle = buildSwatchStyle(c);
@@ -2895,7 +2899,7 @@ function renderSizePriceTable() {
   } else {
     head.innerHTML = `<tr>
       <th>Size</th>
-      <th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer Price (₱)</th>
+      ${showBuyerCol ? `<th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer Price (₱)</th>` : ''}
       <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller Price (₱)</th>
       <th style="background:rgba(245,158,11,0.04);border-top:2px solid var(--orange);color:var(--orange);">📦 Stock (qty)</th>
     </tr>`;
@@ -2927,9 +2931,9 @@ function renderSizePriceTable() {
       return `
         <tr data-size="${s}">
           <td class="size-label">${s}</td>
-          <td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
+          ${showBuyerCol ? `<td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
             data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
-            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
+            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>` : ''}
           <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
             data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
             oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
@@ -2940,9 +2944,9 @@ function renderSizePriceTable() {
       return `
         <tr data-size="${s}">
           <td class="size-label">${s}</td>
-          <td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
+          ${showBuyerCol ? `<td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
             data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
-            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>
+            oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>` : ''}
           <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
             data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
             oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
@@ -3763,8 +3767,9 @@ function setPublishTo(val) {
   if (!showReseller)  { el('fResellerPriceReal').value = ''; el('fResellerPrice').value = ''; }
   if (!showWholesale) { el('fWholesalePriceReal').value = ''; el('fWholesalePrice').value = ''; }
 
-  // Trigger refreshSizePriceDefaults so per-size table stays in sync
-  if (typeof refreshSizePriceDefaults === 'function') refreshSizePriceDefaults();
+  // Rebuild size/price table so buyer column shows/hides correctly
+  if (typeof renderSizePriceTable === 'function') renderSizePriceTable();
+  else if (typeof refreshSizePriceDefaults === 'function') refreshSizePriceDefaults();
 }
 
 // Syncs a visible "real" input into the hidden field used by the rest of the code
