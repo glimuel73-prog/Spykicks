@@ -2880,16 +2880,17 @@ function renderSizePriceTable() {
   const prevSizes = [...tbody.querySelectorAll('tr')].map(r => r.dataset.size);
   const isNewSize = sizes.some(s => !prevSizes.includes(s));
 
-  // Determine whether to show buyer price column based on publish target
+  // Determine whether to show buyer / reseller price columns based on publish target
   const publishTarget = getPublishTo();
-  const showBuyerCol = (publishTarget === 'buyer' || publishTarget === 'both');
+  const showBuyerCol    = (publishTarget === 'buyer'    || publishTarget === 'both');
+  const showResellerCol = (publishTarget === 'reseller' || publishTarget === 'both');
 
   // Rebuild header
   if (hasColors) {
     head.innerHTML = `<tr>
       <th style="min-width:60px;">Size</th>
       ${showBuyerCol ? `<th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer ₱</th>` : ''}
-      <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller ₱</th>
+      ${showResellerCol ? `<th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller ₱</th>` : ''}
       ${colors.map(c => {
         const swStyle = buildSwatchStyle(c);
         const swatch = `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;${swStyle}vertical-align:middle;margin-right:5px;flex-shrink:0;"></span>`;
@@ -2900,7 +2901,7 @@ function renderSizePriceTable() {
     head.innerHTML = `<tr>
       <th>Size</th>
       ${showBuyerCol ? `<th style="background:rgba(59,130,246,0.04);border-top:2px solid #3b82f6;color:#3b82f6;">🛍 Buyer Price (₱)</th>` : ''}
-      <th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller Price (₱)</th>
+      ${showResellerCol ? `<th style="background:rgba(46,204,113,0.04);border-top:2px solid var(--green);color:var(--green);">🤝 Reseller Price (₱)</th>` : ''}
       <th style="background:rgba(245,158,11,0.04);border-top:2px solid var(--orange);color:var(--orange);">📦 Stock (qty)</th>
     </tr>`;
   }
@@ -2934,9 +2935,9 @@ function renderSizePriceTable() {
           ${showBuyerCol ? `<td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
             data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
             oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>` : ''}
-          <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
+          ${showResellerCol ? `<td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
             data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
-            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
+            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>` : ''}
           ${colorCells}
         </tr>`;
     } else {
@@ -2947,9 +2948,9 @@ function renderSizePriceTable() {
           ${showBuyerCol ? `<td style="background:rgba(59,130,246,0.03);"><input class="size-price-input" type="number" placeholder="Buyer ₱"
             data-size="${s}" data-ptype="retailPrice" value="${retailVal}"
             oninput="updateSizePrice('${s}','retailPrice',this.value)"></td>` : ''}
-          <td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
+          ${showResellerCol ? `<td style="background:rgba(46,204,113,0.03);"><input class="size-price-input" type="number" placeholder="Reseller ₱"
             data-size="${s}" data-ptype="resellerPrice" value="${resellerVal}"
-            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>
+            oninput="updateSizePrice('${s}','resellerPrice',this.value)"></td>` : ''}
           <td style="background:rgba(245,158,11,0.03);"><input class="size-price-input" type="number" placeholder="0" min="0"
             data-size="${s}" data-ptype="stock" value="${stockVal}"
             oninput="updateSizePrice('${s}','stock',this.value)"></td>
