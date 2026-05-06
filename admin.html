@@ -2003,7 +2003,14 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <div class="size-price-wrap" id="sizePriceWrap">
           <div class="size-price-wrap-header">
             <span>💰 Set Prices &amp; Stock Per Size / Color</span>
-            <span class="count-badge" id="sizePriceCount">0 sizes</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button onclick="applyDefaultPricesToAll()" title="Copy default prices to all sizes"
+                style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border:1px solid rgba(59,130,246,0.4);border-radius:4px;background:rgba(59,130,246,0.07);color:#3b82f6;cursor:pointer;transition:all .15s;white-space:nowrap;"
+                onmouseover="this.style.background='rgba(59,130,246,0.15)'" onmouseout="this.style.background='rgba(59,130,246,0.07)'">
+                ↓ Apply Defaults to All
+              </button>
+              <span class="count-badge" id="sizePriceCount">0 sizes</span>
+            </div>
           </div>
           <div style="overflow-x:auto;">
             <table class="size-price-table" id="sizePriceTable">
@@ -2119,7 +2126,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
               <input type="number" id="fWholesalePriceReal" placeholder="0" oninput="syncPriceField('fWholesalePriceReal','fWholesalePrice')" style="border-color:rgba(59,130,246,0.3);">
             </div>
 
-            <div id="priceFieldsHint" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:2px;">Fallback defaults — set per-size prices in Sizes section</div>
+            <div id="priceFieldsHint" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);margin-top:2px;">Auto-fills all sizes — manually edit per size below if needed</div>
           </div>
 
           <div class="field-group" style="margin-top:14px;">
@@ -2964,26 +2971,51 @@ function updateSizeColorStock(size, color, value) {
 
 // Called when default price fields change — refreshes the table to show new defaults
 function refreshSizePriceDefaults() {
-  const defRetail = Number(document.getElementById('fPrice').value) || 0;
+  const defRetail   = Number(document.getElementById('fPrice').value) || 0;
   const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
-  // Only update rows that still have 0/blank (not manually set by user)
+  // Update each size independently — only skip a price type if the user manually edited it
   const sizes = getCheckedSizes();
   sizes.forEach(s => {
-    const row = sizePrices[s];
-    if (!row || (!row._manualRetail && !row._manualReseller)) {
-      if (!sizePrices[s]) sizePrices[s] = {};
-      if (!sizePrices[s]._manualRetail) {
-        sizePrices[s].retailPrice = defRetail;
-        const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="retailPrice"]`);
-        if (input && !input._dirty) input.value = defRetail || '';
-      }
-      if (!sizePrices[s]._manualReseller) {
-        sizePrices[s].resellerPrice = defReseller;
-        const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="resellerPrice"]`);
-        if (input && !input._dirty) input.value = defReseller || '';
-      }
+    if (!sizePrices[s]) sizePrices[s] = { retailPrice: 0, resellerPrice: 0, stock: 0, colorStock: {} };
+    if (!sizePrices[s]._manualRetail) {
+      sizePrices[s].retailPrice = defRetail;
+      const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="retailPrice"]`);
+      if (input) input.value = defRetail || '';
+    }
+    if (!sizePrices[s]._manualReseller) {
+      sizePrices[s].resellerPrice = defReseller;
+      const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="resellerPrice"]`);
+      if (input) input.value = defReseller || '';
     }
   });
+}
+
+// Force-apply default prices to ALL sizes (overrides manual edits)
+function applyDefaultPricesToAll() {
+  const defRetail   = Number(document.getElementById('fPrice').value) || 0;
+  const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
+  if (!defRetail && !defReseller) {
+    showToast('Set a default price first (Retail or Reseller).', true);
+    return;
+  }
+  const sizes = getCheckedSizes();
+  if (!sizes.length) { showToast('Select at least one size first.', true); return; }
+  sizes.forEach(s => {
+    if (!sizePrices[s]) sizePrices[s] = { retailPrice: 0, resellerPrice: 0, stock: 0, colorStock: {} };
+    if (defRetail) {
+      sizePrices[s].retailPrice    = defRetail;
+      sizePrices[s]._manualRetail  = false;
+      const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="retailPrice"]`);
+      if (input) input.value = defRetail;
+    }
+    if (defReseller) {
+      sizePrices[s].resellerPrice    = defReseller;
+      sizePrices[s]._manualReseller  = false;
+      const input = document.querySelector(`.size-price-input[data-size="${s}"][data-ptype="resellerPrice"]`);
+      if (input) input.value = defReseller;
+    }
+  });
+  showToast(`✓ Default prices applied to all ${sizes.length} size${sizes.length > 1 ? 's' : ''}.`);
 }
 
 function updateSizePrice(size, priceType, value) {
