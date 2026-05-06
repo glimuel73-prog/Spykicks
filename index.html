@@ -2335,7 +2335,11 @@ loadSocialLinks();
 let _liveInitialized = false;
 
 function applyLiveProducts(products) {
-  const activeProducts = products.filter(p => !p.status || p.status === 'active');
+  const activeProducts = products.filter(p => {
+    if (p.status && p.status !== 'active') return false;
+    const pt = p.publishTo || 'both';
+    return pt === 'buyer' || pt === 'both';
+  });
 
   if (!_liveInitialized) {
     _liveInitialized = true;
