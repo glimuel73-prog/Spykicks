@@ -2081,24 +2081,24 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <div class="field-group" style="margin-bottom:0;">
             <label style="margin-bottom:10px;display:block;">Publish To</label>
             <div style="display:flex;flex-direction:column;gap:8px;" id="publishToGroup">
-              <label id="ptLabelBuyer" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" onclick="setPublishTo('buyer')">
-                <input type="radio" name="fPublishTo" id="fPublishBuyer" value="buyer" style="display:none;">
+              <label id="ptLabelBuyer" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" for="fPublishBuyer">
+                <input type="radio" name="fPublishToRadio" id="fPublishBuyer" value="buyer" style="display:none;" onchange="setPublishTo('buyer')">
                 <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;" id="ptDotBuyer"><div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:none;" id="ptDotBuyerInner"></div></div>
                 <div>
                   <div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);">🛍 Buyer Page</div>
                   <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:1px;">Visible on the public store (index)</div>
                 </div>
               </label>
-              <label id="ptLabelReseller" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" onclick="setPublishTo('reseller')">
-                <input type="radio" name="fPublishTo" id="fPublishReseller" value="reseller" style="display:none;">
+              <label id="ptLabelReseller" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" for="fPublishReseller">
+                <input type="radio" name="fPublishToRadio" id="fPublishReseller" value="reseller" style="display:none;" onchange="setPublishTo('reseller')">
                 <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;" id="ptDotReseller"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);display:none;" id="ptDotResellerInner"></div></div>
                 <div>
                   <div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);">🤝 Reseller Page</div>
                   <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:1px;">Visible only to approved resellers</div>
                 </div>
               </label>
-              <label id="ptLabelBoth" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" onclick="setPublishTo('both')">
-                <input type="radio" name="fPublishTo" id="fPublishBoth" value="both" style="display:none;">
+              <label id="ptLabelBoth" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" for="fPublishBoth">
+                <input type="radio" name="fPublishToRadio" id="fPublishBoth" value="both" style="display:none;" onchange="setPublishTo('both')">
                 <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;" id="ptDotBoth"><div style="width:8px;height:8px;border-radius:50%;background:#000;display:none;" id="ptDotBothInner"></div></div>
                 <div>
                   <div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);">✦ Both Pages</div>
@@ -3675,13 +3675,15 @@ function toggleNewArrival() {
 function setPublishTo(val) {
   document.getElementById('fPublishTo').value = val;
   const opts = ['buyer', 'reseller', 'both'];
-  const colors = { buyer: '#3b82f6', reseller: 'var(--green)', both: '#000' };
   const borderColors = { buyer: '#3b82f6', reseller: '#2ecc71', both: '#000' };
   opts.forEach(o => {
-    const label = document.getElementById('ptLabel' + o.charAt(0).toUpperCase() + o.slice(1));
-    const dot = document.getElementById('ptDot' + o.charAt(0).toUpperCase() + o.slice(1));
-    const inner = document.getElementById('ptDot' + o.charAt(0).toUpperCase() + o.slice(1) + 'Inner');
+    const cap = o.charAt(0).toUpperCase() + o.slice(1);
+    const label = document.getElementById('ptLabel' + cap);
+    const dot = document.getElementById('ptDot' + cap);
+    const inner = document.getElementById('ptDot' + cap + 'Inner');
+    const radio = document.getElementById('fPublish' + cap);
     if (o === val) {
+      if (radio) radio.checked = true;
       label.style.borderColor = borderColors[o];
       label.style.background = 'var(--surface2)';
       dot.style.borderColor = borderColors[o];
