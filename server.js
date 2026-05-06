@@ -306,7 +306,11 @@ app.get("/reseller-products", (req, res) => {
         const rows = db.prepare("SELECT data FROM products").all();
         const products = rows
             .map(r => JSON.parse(r.data))
-            .filter(p => (!p.status || p.status === "active") && (p.publishTo === "reseller" || p.publishTo === "both" || !p.publishTo));
+            .filter(p => {
+                const active = !p.status || p.status === "active";
+                const pt = p.publishTo || "both"; // treat missing as 'both' (legacy)
+                return active && (pt === "reseller" || pt === "both");
+            });
         res.json({ authorized: true, products });
     } catch (err) {
         res.json({ authorized: false });
