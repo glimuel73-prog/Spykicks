@@ -206,6 +206,25 @@ app.get("/social-links", (req, res) => {
 });
 
 
+// ================= PUBLIC — BUYER PRODUCTS =================
+// Only returns active products that are published to 'buyer' or 'both'.
+// Products with publishTo === 'reseller' are excluded here.
+app.get("/products", (req, res) => {
+    try {
+        const rows = db.prepare("SELECT data FROM products").all();
+        const products = rows
+            .map(r => JSON.parse(r.data))
+            .filter(p => {
+                const active = !p.status || p.status === "active";
+                const pt = p.publishTo || "both"; // treat missing as 'both' (legacy)
+                return active && (pt === "buyer" || pt === "both");
+            });
+        res.json({ products });
+    } catch (err) {
+        res.json({ products: [] });
+    }
+});
+
 app.post("/admin/delete-product", (req, res) => {
     const { id } = req.body;
     try {
