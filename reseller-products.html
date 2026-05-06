@@ -658,6 +658,7 @@
         <span class="pd-men-tag" id="pdGenderTag" style="display:none;"></span>
       </div>
       <div class="pd-price" id="pdPrice">₱0</div>
+      <div id="pdWholesalePrice" style="display:none;font-size:13px;font-weight:700;letter-spacing:1px;color:#3b82f6;margin-top:-8px;margin-bottom:4px;"></div>
       <div class="pd-divider"></div>
       <div id="pdColorsSection" style="display:none;margin-bottom:16px;">
         <div class="pd-desc-title" style="margin-bottom:10px;">Color — <span id="pdSelectedColorLabel" style="font-size:11px;font-weight:400;color:#888;text-transform:none;letter-spacing:0;">Select a color</span></div>
@@ -1095,7 +1096,10 @@
           <div class="product-name">${p.name}</div>
           ${buildColorDots_r(p.colors, 14, 'color-dot')}
           <div class="product-footer">
-            <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+            <div>
+              <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+              ${p.wholesalePrice ? `<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#3b82f6;margin-top:2px;">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
+            </div>
             <div class="product-tag">${stockLabel}</div>
           </div>
           <div class="product-stock">Stock: ${stockNum} units</div>
@@ -1249,6 +1253,14 @@
     document.getElementById("pdBrand").textContent = product.brand || "Reseller Collection";
     document.getElementById("pdName").textContent = product.name;
     document.getElementById("pdPrice").textContent = `₱${displayPrice}`;
+    // Wholesale price — only shown in reseller view
+    const pdWholesaleEl = document.getElementById("pdWholesalePrice");
+    if (product.wholesalePrice) {
+      pdWholesaleEl.textContent = `Wholesale: ₱${Number(product.wholesalePrice).toLocaleString()}`;
+      pdWholesaleEl.style.display = '';
+    } else {
+      pdWholesaleEl.style.display = 'none';
+    }
     const gTag = document.getElementById("pdGenderTag");
     if (product.gender) {
       const gLabel = product.gender === 'male' ? "♂ Men's" : product.gender === 'female' ? "♀ Women's" : "⚥ Unisex";
@@ -2134,7 +2146,10 @@
                 <div class="product-name">${p.name}</div>
                 ${buildColorDots_r(p.colors, 14, 'color-dot')}
                 <div class="product-footer">
-                  <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+                  <div>
+                    <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+                    ${p.wholesalePrice ? `<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#3b82f6;margin-top:2px;">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
+                  </div>
                   <div class="product-tag">${stockLabel}</div>
                 </div>
                 <div class="product-stock">Stock: ${stockNum} units</div>
