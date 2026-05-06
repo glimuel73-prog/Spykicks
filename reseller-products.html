@@ -2030,7 +2030,11 @@
           const msg = JSON.parse(event.data);
           if (msg.type !== 'products') return;
 
-          const incoming = (msg.products || []).filter(p => !p.status || p.status === 'active');
+          const incoming = (msg.products || []).filter(p => {
+            if (p.status && p.status !== 'active') return false;
+            const pt = p.publishTo || 'both';
+            return pt === 'reseller' || pt === 'both';
+          });
           const incomingIds = new Set(incoming.map(p => String(p.id)));
 
           // --- On the first message: just mark initialised, sync stock, don't add/remove cards ---
