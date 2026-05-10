@@ -258,7 +258,6 @@
   .pd-size:hover:not(:disabled) { border-color: #000; color: #000; }
   .pd-size.selected { background: #000; color: #fff; border-color: #000; }
   .pd-size.selected .pd-size-stock-hint { color: #aaa; }
-  .pd-size.oos { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
   .pd-size-out { opacity: .4; cursor: not-allowed; border-color: #ffcccc; background: #fff8f8; color: #ccc; text-decoration: line-through; }
   .pd-size-low { border-color: #fbbf24; color: #92400e; background: #fffbeb; }
   .pd-size-low:hover:not(:disabled) { border-color: #f59e0b; background: #fef3c7; }
@@ -2490,11 +2489,11 @@ function applyLiveProducts(products) {
             const oos = stock != null && stock <= 0;
             const low = stock != null && stock > 0 && stock <= 3;
             const btn = document.createElement('button');
-            btn.className = 'pd-size' + (oos ? ' oos' : '') + (low ? ' pd-size-low' : '');
+            btn.className = 'pd-size' + (oos ? ' pd-size-out' : '') + (low ? ' pd-size-low' : '');
             btn.disabled = oos;
             btn.dataset.size = sz.size;
             btn.dataset.price = sz.price || updatedPD.basePrice || 0;
-            btn.innerHTML = '<span>' + sz.size + '</span>' + (low ? '<span class="pd-size-stock-hint">' + stock + ' left</span>' : '');
+            btn.innerHTML = sz.size + (oos ? '<span class="pd-size-stock-hint">✕</span>' : low ? '<span class="pd-size-stock-hint">' + stock + ' left</span>' : '');
             if (!oos) btn.onclick = function() {
               document.querySelectorAll('.pd-size').forEach(b => b.classList.remove('selected'));
               this.classList.add('selected');
