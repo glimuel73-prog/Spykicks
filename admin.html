@@ -1315,6 +1315,96 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .sizes-grid .size-check label { width: 46px; height: 46px; font-size: 11px; }
 }
 
+/* ── ORDERS TAB — mobile ── */
+@media (max-width: 900px) {
+  #page-orders .section-hdr { margin-bottom: 0; padding-bottom: 4px; }
+
+  /* Tab bar: remove 32px side padding */
+  #page-orders > div[style*="padding:0 32px"] {
+    padding: 0 4px !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #orderTabReseller, #orderTabBuyer {
+    padding: 12px 16px !important;
+    font-size: 10px !important;
+    letter-spacing: 2px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Filter bar: full-width stacked column */
+  #resellerOrdersPanel .filter-bar,
+  #buyerOrdersPanel .filter-bar {
+    padding: 12px 16px !important;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #resellerOrdersPanel .filter-bar .select-filter,
+  #resellerOrdersPanel .filter-bar .search-input,
+  #buyerOrdersPanel .filter-bar .select-filter,
+  #buyerOrdersPanel .filter-bar .search-input {
+    width: 100%;
+    font-size: 16px !important;
+  }
+  #resellerOrdersPanel .filter-bar .btn-add,
+  #buyerOrdersPanel .filter-bar .btn-add {
+    width: 100%;
+    justify-content: center;
+    min-height: 42px;
+  }
+
+  /* Hide desktop tables, show card lists */
+  #ordersTable { display: none !important; }
+  #buyerOrdersTable { display: none !important; }
+  #ordersCardTable {
+    display: flex !important;
+    padding: 16px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #buyerOrdersCardTable {
+    display: flex !important;
+    padding: 16px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Order card polish */
+  .card-row { border-radius: 10px; padding: 14px; gap: 8px; }
+  .card-field { font-size: 13px; line-height: 1.5; }
+  .card-actions { flex-wrap: wrap; gap: 6px; }
+  .card-actions > select { flex: 1; min-height: 42px; font-size: 14px !important; }
+  .card-actions > button { min-height: 42px; }
+  .order-delete-btn { min-width: 42px; }
+  .status-pill { font-size: 10px; padding: 3px 10px; }
+  #ordersEmpty, #buyerOrdersEmpty { padding: 48px 24px; }
+}
+
+/* ── SETTINGS TAB — mobile ── */
+@media (max-width: 900px) {
+  #page-settings { padding: 20px 16px 80px !important; }
+
+  /* Remove centered max-width — go full screen width */
+  #page-settings > div[style*="max-width"] {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Card padding */
+  .settings-card { padding: 18px 16px !important; border-radius: 10px !important; }
+
+  /* All text inputs in settings: >=16px prevents iOS auto-zoom */
+  #page-settings input,
+  #page-settings select { font-size: 16px !important; }
+
+  /* Taller, easier-to-tap action buttons */
+  .settings-save-btn { min-height: 48px !important; font-size: 14px !important; }
+  #cpBtn { min-height: 48px !important; font-size: 14px !important; }
+}
+
+
 
 .new-arrival-pill {
   display: inline-flex;
