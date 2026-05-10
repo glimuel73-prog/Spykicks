@@ -1313,6 +1313,15 @@ function openPD(id) {
   pdSelectedSize = null;
   _pdCurrentImgIdx = 0;
 
+  // Always reset the Add to Cart button when opening any product
+  const _cartBtn = document.getElementById('pdAddToCartBtn');
+  if (_cartBtn) {
+    _cartBtn.textContent = '🛒 Add to Cart';
+    _cartBtn.classList.remove('pd-btn-added');
+    _cartBtn.disabled = false;
+    _cartBtn.style.background = '';
+  }
+
   document.getElementById("pdBreadCat").textContent = p.category;
   document.getElementById("pdBreadName").textContent = p.name;
   document.getElementById("pdTopRated").style.display = p.topRated ? "" : "none";
