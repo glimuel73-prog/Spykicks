@@ -1383,7 +1383,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 /* ── SETTINGS TAB — mobile ── */
 @media (max-width: 900px) {
-  #page-settings { padding: 20px 16px 80px !important; }
+  #page-settings { padding: 16px 16px 80px !important; margin-top: 0 !important; }
+  #page-settings > div { margin-top: 0 !important; }
 
   /* Remove centered max-width — go full screen width */
   #page-settings > div[style*="max-width"] {
@@ -2315,10 +2316,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 <!-- SETTINGS PAGE -->
 <div id="page-settings" class="page" style="max-width:100%;">
-
-  <div class="section-hdr" style="margin-bottom:20px;">
-    <h2>Settings</h2>
-  </div>
 
   <div style="max-width:600px;margin:0;width:100%;display:flex;flex-direction:column;gap:20px;">
 
