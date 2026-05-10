@@ -714,7 +714,7 @@
     </div>
   </div>
   <!-- CART FOOTER -->
-  <div id="cartFooter" class="cart-footer">
+  <div id="cartFooter" class="cart-footer" style="display:none;">
     <div class="cart-subtotal">
       <span>Subtotal</span>
       <strong id="cartTotal">₱0</strong>
@@ -1674,7 +1674,7 @@
     document.getElementById("cartTabOrders").classList.toggle("active", !isCart);
     document.getElementById("cartPanel").style.display = isCart ? "" : "none";
     document.getElementById("ordersPanel").style.display = isCart ? "none" : "";
-    document.getElementById("cartFooter").style.display = isCart ? "" : "none";
+    document.getElementById("cartFooter").style.display = (isCart && cart.length > 0) ? "" : "none";
     if (!isCart) loadOrderHistory();
   }
 
