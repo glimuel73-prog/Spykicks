@@ -3429,6 +3429,8 @@ async function saveProduct() {
   let price = Number(document.getElementById('fPrice').value) || 0;
   let resellerPrice = Number(document.getElementById('fResellerPrice').value) || 0;
 
+  const publishTo = getPublishTo();
+
   if (selectedSizes.length > 0) {
     const retailPrices = selectedSizes.map(s => s.retailPrice).filter(p => p > 0);
     const resellerPrices = selectedSizes.map(s => s.resellerPrice).filter(p => p > 0);
@@ -3439,8 +3441,13 @@ async function saveProduct() {
     if (!document.getElementById('fPrice').value) price = retailPrices.length ? Math.min(...retailPrices) : 0;
   }
 
-  if (!name || !price || !category) {
-    showToast('Please fill in required fields (name, category, and at least one price).', true);
+  // When publishing to reseller only, retail price is not required — reseller price is.
+  // When publishing to buyer or both, retail price is required.
+  const priceValid = publishTo === 'reseller' ? (resellerPrice > 0) : (price > 0);
+
+  if (!name || !priceValid || !category) {
+    const priceLabel = publishTo === 'reseller' ? 'reseller price' : 'retail price';
+    showToast(`Please fill in required fields (name, category, and at least one ${priceLabel}).`, true);
     return;
   }
 
