@@ -1403,9 +1403,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .settings-save-btn { min-height: 48px !important; font-size: 14px !important; }
   #cpBtn { min-height: 48px !important; font-size: 14px !important; }
 }
-
-
-
 .new-arrival-pill {
   display: inline-flex;
   align-items: center;
@@ -2323,8 +2320,10 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     <h2>Settings</h2>
   </div>
 
+  <div style="max-width:600px;margin:0;width:100%;display:flex;flex-direction:column;gap:20px;">
+
   <!-- SOCIAL LINKS CARD -->
-  <div style="max-width:560px;margin:0 auto;width:100%;">
+  <div style="width:100%;">
     <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Social Media Links</div>
     <div class="settings-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;overflow:hidden;">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">These links appear in the store footer and product order buttons. Leave blank to hide a platform.</p>
@@ -2424,8 +2423,10 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     </div>
   </div>
 
+  </div><!-- /social card wrapper -->
+
   <!-- CHANGE PASSWORD CARD -->
-  <div style="max-width:560px;margin:24px auto 0;width:100%;">
+  <div style="width:100%;">
     <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Security</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">Change your admin login password. The new password is saved in your browser and overrides the default.</p>
@@ -2498,7 +2499,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         Change Password
       </button>
     </div>
-  </div>
+  </div><!-- /security card wrapper -->
+
+  </div><!-- /settings flex container -->
 
 </div>
 
