@@ -1187,24 +1187,15 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     transition: transform .25s ease, visibility .25s ease;
     z-index: 200;
   }
-  .sidebar.open {
-    transform: translateX(0);
-    visibility: visible;
-  }
+  .sidebar.open { transform: translateX(0); visibility: visible; }
   .main { margin-left: 0 !important; width: 100%; }
-  body { display: block; } /* remove flex — sidebar is fixed, main fills full width */
-  .topbar {
-    padding: 0 16px;
-    gap: 10px;
-    width: 100%;
-    box-sizing: border-box;
-  }
+  body { display: block; }
+  .topbar { padding: 0 16px; gap: 10px; width: 100%; box-sizing: border-box; }
   .hamburger { display: flex; }
   .topbar-title { flex: 1; }
-  /* Hide the inline "Add Product" button — replaced by FAB */
   #addProductBtn { display: none !important; }
   .fab-add { display: flex; }
-  .page { padding: 20px 16px 80px; /* bottom padding so FAB never covers content */ }
+  .page { padding: 20px 16px 80px; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .stat-value { font-size: 32px; }
   .section-hdr { flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -1214,40 +1205,94 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .products-table { display: none; }
   .resellers-table { display: none; }
   .card-table { display: flex; }
-  /* Modal full-screen on mobile */
+
+  /* ── MODAL: full-screen single-column scroll ── */
   .modal-overlay { align-items: stretch; }
-  .modal-drawer { width: 100%; height: 100vh; height: 100dvh; border-left: none; border-radius: 0; overflow: hidden; display: flex; flex-direction: column; }
-  .modal-body { display: flex; flex-direction: column; overflow: hidden; }
-  .modal-body-left { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 16px; flex: 1; border-right: none; border-bottom: 1px solid var(--border); }
-  .modal-body-right { overflow-y: auto; padding: 20px 16px; flex-shrink: 0; }
-  .modal-header { padding: 0 16px; flex-shrink: 0; }
-  .modal-footer {
-    padding: 14px 16px;
-    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
-    gap: 8px;
-    justify-content: stretch;
-    min-height: 64px;
-    flex-shrink: 0;
+  .modal-drawer {
+    width: 100%; height: 100vh; height: 100dvh;
+    border-left: none; border-radius: 0; overflow: hidden;
+    display: flex; flex-direction: column;
   }
-  .modal-footer .btn-cancel { flex: 1; min-height: 44px; font-size: 13px; }
-  .modal-footer .btn-save { flex: 2; min-height: 44px; font-size: 13px; }
-  .field-row, .field-row-3 { grid-template-columns: 1fr; }
+  .modal-header { padding: 0 14px; height: 54px; flex-shrink: 0; }
+  /* Hide the Save button duplicated in the header — footer has it */
+  .modal-header .btn-save { display: none !important; }
+  .modal-step-indicator { display: none; }
+
+  /* Single scrollable column */
+  .modal-body {
+    display: block;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+  }
+  .modal-body-left { padding: 16px 14px 0; border-right: none; border-bottom: none; overflow: visible; }
+  .modal-body-right { padding: 0 14px 16px; background: transparent; overflow: visible; }
+  /* Divider between left and right panels */
+  .modal-body-right::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 16px;
+  }
+  /* Hide tips box — not useful on mobile */
+  .modal-tips-box { display: none !important; }
+
+  /* Prevent iOS auto-zoom — all inputs must be at least 16px */
+  .field-group input,
+  .field-group textarea,
+  .field-group select,
+  .size-price-input,
+  .color-tag-input { font-size: 16px !important; }
+
+  /* Compact spacing */
+  .field-group { margin-bottom: 14px; }
+  .field-row, .field-row-3 { grid-template-columns: 1fr; gap: 0; }
+  .field-group label { font-size: 9px; }
+
+  /* Size grid */
+  .sizes-grid { gap: 6px; }
+  .sizes-grid .size-check label { width: 52px; height: 52px; font-size: 12px; }
+
+  /* Size/price table */
+  .size-price-wrap { margin-top: 14px; }
+  .size-price-wrap-header { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
+  .size-price-table { table-layout: fixed; }
+  .size-price-table th, .size-price-table td { padding: 7px 6px; font-size: 11px; }
+  .size-price-table .size-label { font-size: 13px; width: 44px; }
+  .size-price-input { font-size: 14px !important; padding: 6px 6px !important; width: 100% !important; min-width: 0; }
+
+  /* Image upload zone */
+  .image-upload-zone { padding: 20px 16px !important; }
+  .upload-icon { font-size: 28px !important; }
+  .upload-text { font-size: 13px !important; }
+
+  /* Publish To radio cards */
+  #publishToGroup label { padding: 10px 12px; gap: 8px; }
+  #priceFieldsWrap { padding: 12px; gap: 8px; margin-top: 10px; }
+
+  /* Footer */
+  .modal-footer {
+    padding: 12px 14px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    gap: 8px; justify-content: stretch;
+    min-height: 60px; flex-shrink: 0;
+  }
+  .modal-footer .btn-cancel { flex: 1; min-height: 46px; font-size: 13px; }
+  .modal-footer .btn-save { flex: 2; min-height: 46px; font-size: 14px; }
+
+  /* Other pages */
   .login-box { width: calc(100vw - 32px); padding: 32px 24px; }
   .confirm-box { width: calc(100vw - 32px); padding: 28px 20px; }
-  .size-price-table th, .size-price-table td { padding: 8px; }
-  .size-price-input { font-size: 13px; padding: 7px 8px; }
-  /* Settings page */
   #page-settings { padding: 20px 16px 80px; }
   #page-settings > div[style*="max-width"] { max-width: 100% !important; }
   .settings-card { padding: 20px 16px !important; border-radius: 8px !important; }
   .settings-save-btn { min-height: 48px; font-size: 14px !important; }
-  /* Quick actions — stay in a row, just reduce padding */
   .quick-actions-grid { flex-direction: row !important; }
   .quick-action-item { padding: 16px 6px !important; flex: 1; border-right: 1px solid var(--border) !important; border-bottom: none !important; }
   .quick-action-item:last-child { border-right: none !important; }
   .quick-action-icon { width: 40px !important; height: 40px !important; }
   .quick-action-label { font-size: 8px !important; letter-spacing: .5px !important; }
-  /* Management grid — keep 2-col but fix text */
   .management-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
   .management-item { padding: 14px 12px; gap: 10px; }
   .mgmt-icon { width: 38px !important; height: 38px !important; border-radius: 8px !important; flex-shrink: 0; }
@@ -1257,35 +1302,17 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .mgmt-arrow svg { width: 12px !important; height: 12px !important; }
 }
 
-@media (max-width: 768px) {
-  .modal-body {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-  }
-  .modal-body-left {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding: 20px 16px;
-  }
-  .modal-body-right {
-    padding: 20px 16px;
-    background: var(--surface2);
-  }
-  .modal-header { padding: 0 16px; }
-  .modal-step-indicator { display: none; }
-  .modal-footer { padding: 12px 16px; }
-}
-
 @media (max-width: 480px) {
-  /* Hard-hide sidebar on small phones — belt and suspenders */
   .sidebar:not(.open) { display: none !important; }
   .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .stat-card { padding: 14px; }
   .stat-value { font-size: 26px; }
   .stat-label { font-size: 9px; }
-  .sizes-grid .size-check label { width: 48px; height: 48px; font-size: 11px; }
-  /* Prevent iOS auto-zoom on input focus in settings */
   #page-settings input[type="url"] { font-size: 16px !important; }
+  .modal-body-left, .modal-body-right { padding-left: 12px; padding-right: 12px; }
+  .modal-header { padding: 0 12px; }
+  .modal-footer { padding-left: 12px; padding-right: 12px; }
+  .sizes-grid .size-check label { width: 46px; height: 46px; font-size: 11px; }
 }
 
 
@@ -2146,7 +2173,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </div>
 
             <!-- QUICK TIP -->
-        <div style="margin-top:auto;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:11px;color:var(--text-dim);line-height:1.6;">
+        <div class="modal-tips-box" style="margin-top:auto;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:11px;color:var(--text-dim);line-height:1.6;">
           <div style="font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;font-size:10px;">💡 Tips</div>
           <div>• Upload multiple images for better showcase</div>
           <div style="margin-top:4px;">• Set per-size prices in the Sizes section</div>
