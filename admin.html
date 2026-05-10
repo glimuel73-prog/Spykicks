@@ -1383,8 +1383,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 /* ── SETTINGS TAB — mobile ── */
 @media (max-width: 900px) {
-  #page-settings { padding: 16px 16px 80px !important; margin-top: 0 !important; }
-  #page-settings > div { margin-top: 0 !important; }
+  #page-settings { padding: 20px 16px 80px !important; }
 
   /* Remove centered max-width — go full screen width */
   #page-settings > div[style*="max-width"] {
@@ -1953,6 +1952,193 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
   </div>
 
+
+<!-- SETTINGS PAGE -->
+<div id="page-settings" class="page" style="max-width:100%;">
+
+  <div style="max-width:600px;margin:0;width:100%;display:flex;flex-direction:column;gap:20px;">
+
+  <!-- SOCIAL LINKS CARD -->
+  <div style="width:100%;">
+    <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Social Media Links</div>
+    <div class="settings-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;overflow:hidden;">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">These links appear in the store footer and product order buttons. Leave blank to hide a platform.</p>
+
+      <!-- Each platform row -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- Facebook -->
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Facebook</span>
+          </div>
+          <div style="position:relative;">
+            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
+            <input type="url" id="sl_facebook" placeholder="https://facebook.com/yourpage"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+        <!-- Instagram -->
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="url(#igGrad2)"><defs><linearGradient id="igGrad2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Instagram</span>
+          </div>
+          <div style="position:relative;">
+            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
+            <input type="url" id="sl_instagram" placeholder="https://instagram.com/yourhandle"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+        <!-- TikTok -->
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text)"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.73a4.85 4.85 0 01-1.01-.04z"/></svg>
+            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">TikTok</span>
+          </div>
+          <div style="position:relative;">
+            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
+            <input type="url" id="sl_tiktok" placeholder="https://tiktok.com/@yourhandle"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+        <!-- Twitter / X -->
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text)"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629 5.905-5.629zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">X (Twitter)</span>
+          </div>
+          <div style="position:relative;">
+            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
+            <input type="url" id="sl_twitter" placeholder="https://x.com/yourhandle"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+        <!-- Shopee -->
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#EE4D2D"><path d="M12 1a5 5 0 00-5 5H4.5A1.5 1.5 0 003 7.5v13A1.5 1.5 0 004.5 22h15a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0019.5 6H17a5 5 0 00-5-5zm0 2a3 3 0 013 3H9a3 3 0 013-3zm0 7a4 4 0 110 8 4 4 0 010-8zm0 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
+            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Shopee</span>
+          </div>
+          <div style="position:relative;">
+            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
+            <input type="url" id="sl_shopee" placeholder="https://shopee.ph/yourshop"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+        <!-- Lazada -->
+        <div>
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F146D"><rect width="24" height="24" rx="4" fill="#0F146D"/><text x="3" y="18" font-size="13" font-weight="900" fill="white" font-family="Arial">L</text></svg>
+            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Lazada</span>
+          </div>
+          <div style="position:relative;">
+            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
+            <input type="url" id="sl_lazada" placeholder="https://lazada.com.ph/shop/yourshop"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+        </div>
+
+      </div><!-- /platform rows -->
+
+      <button class="settings-save-btn btn-save" onclick="saveSocialLinks()" style="width:100%;margin-top:20px;min-height:44px;font-size:13px;">
+        Save Social Links
+      </button>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD CARD -->
+  <div style="width:100%;">
+    <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Security</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">Change your admin login password. The new password is saved in your browser and overrides the default.</p>
+
+      <div id="cpError" style="display:none;background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.3);color:var(--red);font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;border-radius:6px;margin-bottom:16px;"></div>
+      <div id="cpSuccess" style="display:none;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.35);color:#1a9e56;font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;border-radius:6px;margin-bottom:16px;"></div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- Current Password -->
+        <div>
+          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Current Password</label>
+          <div style="position:relative;">
+            <input type="password" id="cpCurrent" placeholder="••••••••"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+              onkeydown="if(event.key==='Enter')document.getElementById('cpNew').focus()">
+            <button type="button" onclick="cpToggle('cpCurrent',this)" tabindex="-1"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- New Password -->
+        <div>
+          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">New Password</label>
+          <div style="position:relative;">
+            <input type="password" id="cpNew" placeholder="••••••••"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+              oninput="cpStrength(this.value)"
+              onkeydown="if(event.key==='Enter')document.getElementById('cpConfirm').focus()">
+            <button type="button" onclick="cpToggle('cpNew',this)" tabindex="-1"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div style="margin-top:6px;display:flex;gap:4px;height:3px;" id="cpStrengthBars">
+            <div id="cpBar1" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+            <div id="cpBar2" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+            <div id="cpBar3" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+            <div id="cpBar4" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
+          </div>
+          <div id="cpStrengthLabel" style="font-family:var(--font);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-top:4px;min-height:14px;"></div>
+        </div>
+
+        <!-- Confirm New Password -->
+        <div>
+          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Confirm New Password</label>
+          <div style="position:relative;">
+            <input type="password" id="cpConfirm" placeholder="••••••••"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+              onkeydown="if(event.key==='Enter')changePassword()">
+            <button type="button" onclick="cpToggle('cpConfirm',this)" tabindex="-1"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <button onclick="changePassword()" id="cpBtn"
+        style="width:100%;margin-top:20px;min-height:44px;background:var(--accent);color:#fff;font-family:var(--font);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer;transition:background .15s,transform .1s;"
+        onmouseover="this.style.background='var(--accent-hover)';this.style.transform='translateY(-1px)'"
+        onmouseout="this.style.background='var(--accent)';this.style.transform=''">
+        Change Password
+      </button>
+    </div>
+  </div><!-- /security card wrapper -->
+
+  </div><!-- /settings flex container -->
+
+</div>
+
 <!-- FLOATING ADD BUTTON (mobile, products page only) -->
 <button class="fab-add" id="fabAddBtn" onclick="openModal()" style="display:none;" aria-label="Add Product">+</button>
 </div><!-- /main -->
@@ -2312,192 +2498,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <button class="btn-save" style="background:var(--green);" onclick="submitAddReseller()">Add & Approve</button>
     </div>
   </div>
-</div>
-
-<!-- SETTINGS PAGE -->
-<div id="page-settings" class="page" style="max-width:100%;">
-
-  <div style="max-width:600px;margin:0;width:100%;display:flex;flex-direction:column;gap:20px;">
-
-  <!-- SOCIAL LINKS CARD -->
-  <div style="width:100%;">
-    <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Social Media Links</div>
-    <div class="settings-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;overflow:hidden;">
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">These links appear in the store footer and product order buttons. Leave blank to hide a platform.</p>
-
-      <!-- Each platform row -->
-      <div style="display:flex;flex-direction:column;gap:14px;">
-
-        <!-- Facebook -->
-        <div>
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Facebook</span>
-          </div>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
-            <input type="url" id="sl_facebook" placeholder="https://facebook.com/yourpage"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-        </div>
-
-        <!-- Instagram -->
-        <div>
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="url(#igGrad2)"><defs><linearGradient id="igGrad2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Instagram</span>
-          </div>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
-            <input type="url" id="sl_instagram" placeholder="https://instagram.com/yourhandle"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-        </div>
-
-        <!-- TikTok -->
-        <div>
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text)"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.73a4.85 4.85 0 01-1.01-.04z"/></svg>
-            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">TikTok</span>
-          </div>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
-            <input type="url" id="sl_tiktok" placeholder="https://tiktok.com/@yourhandle"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-        </div>
-
-        <!-- Twitter / X -->
-        <div>
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text)"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629 5.905-5.629zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">X (Twitter)</span>
-          </div>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
-            <input type="url" id="sl_twitter" placeholder="https://x.com/yourhandle"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-        </div>
-
-        <!-- Shopee -->
-        <div>
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="#EE4D2D"><path d="M12 1a5 5 0 00-5 5H4.5A1.5 1.5 0 003 7.5v13A1.5 1.5 0 004.5 22h15a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0019.5 6H17a5 5 0 00-5-5zm0 2a3 3 0 013 3H9a3 3 0 013-3zm0 7a4 4 0 110 8 4 4 0 010-8zm0 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
-            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Shopee</span>
-          </div>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
-            <input type="url" id="sl_shopee" placeholder="https://shopee.ph/yourshop"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-        </div>
-
-        <!-- Lazada -->
-        <div>
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F146D"><rect width="24" height="24" rx="4" fill="#0F146D"/><text x="3" y="18" font-size="13" font-weight="900" fill="white" font-family="Arial">L</text></svg>
-            <span style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);">Lazada</span>
-          </div>
-          <div style="position:relative;">
-            <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-family:var(--font);font-size:12px;pointer-events:none;">🔗</div>
-            <input type="url" id="sl_lazada" placeholder="https://lazada.com.ph/shop/yourshop"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:10px 12px 10px 34px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-          </div>
-        </div>
-
-      </div><!-- /platform rows -->
-
-      <button class="settings-save-btn btn-save" onclick="saveSocialLinks()" style="width:100%;margin-top:20px;min-height:44px;font-size:13px;">
-        Save Social Links
-      </button>
-    </div>
-  </div>
-
-  <!-- CHANGE PASSWORD CARD -->
-  <div style="width:100%;">
-    <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Security</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;">
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">Change your admin login password. The new password is saved in your browser and overrides the default.</p>
-
-      <div id="cpError" style="display:none;background:rgba(255,59,48,.08);border:1px solid rgba(255,59,48,.3);color:var(--red);font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;border-radius:6px;margin-bottom:16px;"></div>
-      <div id="cpSuccess" style="display:none;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.35);color:#1a9e56;font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;border-radius:6px;margin-bottom:16px;"></div>
-
-      <div style="display:flex;flex-direction:column;gap:14px;">
-
-        <!-- Current Password -->
-        <div>
-          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Current Password</label>
-          <div style="position:relative;">
-            <input type="password" id="cpCurrent" placeholder="••••••••"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
-              onkeydown="if(event.key==='Enter')document.getElementById('cpNew').focus()">
-            <button type="button" onclick="cpToggle('cpCurrent',this)" tabindex="-1"
-              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- New Password -->
-        <div>
-          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">New Password</label>
-          <div style="position:relative;">
-            <input type="password" id="cpNew" placeholder="••••••••"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
-              oninput="cpStrength(this.value)"
-              onkeydown="if(event.key==='Enter')document.getElementById('cpConfirm').focus()">
-            <button type="button" onclick="cpToggle('cpNew',this)" tabindex="-1"
-              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-          <!-- Strength bar -->
-          <div style="margin-top:6px;display:flex;gap:4px;height:3px;" id="cpStrengthBars">
-            <div id="cpBar1" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
-            <div id="cpBar2" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
-            <div id="cpBar3" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
-            <div id="cpBar4" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
-          </div>
-          <div id="cpStrengthLabel" style="font-family:var(--font);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-top:4px;min-height:14px;"></div>
-        </div>
-
-        <!-- Confirm New Password -->
-        <div>
-          <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Confirm New Password</label>
-          <div style="position:relative;">
-            <input type="password" id="cpConfirm" placeholder="••••••••"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:11px 42px 11px 14px;border-radius:6px;outline:none;transition:border-color .2s;"
-              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
-              onkeydown="if(event.key==='Enter')changePassword()">
-            <button type="button" onclick="cpToggle('cpConfirm',this)" tabindex="-1"
-              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex;align-items:center;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-      <button onclick="changePassword()" id="cpBtn"
-        style="width:100%;margin-top:20px;min-height:44px;background:var(--accent);color:#fff;font-family:var(--font);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer;transition:background .15s,transform .1s;"
-        onmouseover="this.style.background='var(--accent-hover)';this.style.transform='translateY(-1px)'"
-        onmouseout="this.style.background='var(--accent)';this.style.transform=''">
-        Change Password
-      </button>
-    </div>
-  </div><!-- /security card wrapper -->
-
-  </div><!-- /settings flex container -->
-
 </div>
 
 <!-- TOAST -->
