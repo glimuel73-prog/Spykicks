@@ -451,6 +451,7 @@
   .pd-btn-add-cart:hover { background: #333; }
   .pd-btn-add-cart:active { transform: scale(0.98); }
   .pd-btn-add-cart.pd-btn-added { background: #27ae60 !important; }
+  .pd-btn-add-cart.pd-btn-added:disabled { background: #27ae60 !important; opacity: 1; cursor: default; }
 
   /* ══ CART CHECKOUT BUTTON ══ */
   .cart-checkout-btn { width: 100%; background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 16px; border: none; cursor: pointer; border-radius: 8px; transition: background .2s; }
@@ -2128,12 +2129,21 @@ function addToCart() {
       image: (p.images && p.images[0]) || ''
     });
   }
-  saveCart();
-
+  // Show feedback first so the button paints before the cart re-renders
   const btn = document.getElementById('pdAddToCartBtn');
   btn.textContent = '✓ Added to Cart!';
   btn.classList.add('pd-btn-added');
-  setTimeout(() => { btn.textContent = '🛒 Add to Cart'; btn.classList.remove('pd-btn-added'); }, 1800);
+  btn.disabled = true;
+
+  // Defer save + re-render to next paint frame so feedback is always visible
+  requestAnimationFrame(() => {
+    saveCart();
+    setTimeout(() => {
+      btn.textContent = '🛒 Add to Cart';
+      btn.classList.remove('pd-btn-added');
+      btn.disabled = false;
+    }, 1500);
+  });
 }
 
 function renderCartItems() {
