@@ -291,7 +291,6 @@
   .pd-btn-select:hover { background: #333; }
   .pd-btn-select:active { transform: scale(0.98); }
   .pd-btn-added { background: #27ae60 !important; }
-  .pd-btn-added:disabled { background: #27ae60 !important; opacity: 1; cursor: default; }
   .pd-instant { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
   .pd-instant::before { content: '⚡'; font-size: 13px; }
   .pd-close { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid #ddd; color: #888; font-size: 18px; width: 36px; height: 36px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; font-family: Arial,sans-serif; border-radius: 50%; }
@@ -1248,15 +1247,6 @@
 
   function openPD(product, productId, category, badge, displayPrice) {
     pdSelectedSize = null; pdSelectedPrice = null; pdCurrentProduct = product; pdSelectedStock = null; pdSelectedColor = null;
-
-    // Always reset the Add to Cart button when opening any product
-    const _cartBtn = document.getElementById('pdAddToCartBtn');
-    if (_cartBtn) {
-      _cartBtn.textContent = '🛒 Add to Cart';
-      _cartBtn.classList.remove('pd-btn-added');
-      _cartBtn.disabled = false;
-      _cartBtn.style.background = '';
-    }
     pdCurrentProduct._displayPrice = displayPrice; // store for social links
     document.getElementById("pdBreadName").textContent = product.name;
     document.getElementById("pdBreadCat").textContent = category.charAt(0).toUpperCase() + category.slice(1);
@@ -1747,21 +1737,12 @@
         image: (p.images && p.images[0]) || ""
       });
     }
-    // Show feedback first so the button paints before the cart re-renders
+    saveCart();
+
     const btn = document.getElementById("pdAddToCartBtn");
     btn.textContent = "✓ Added to Cart!";
     btn.classList.add("pd-btn-added");
-    btn.disabled = true;
-
-    // Defer save + re-render to next paint frame so feedback is always visible
-    requestAnimationFrame(() => {
-      saveCart();
-      setTimeout(() => {
-        btn.textContent = "🛒 Add to Cart";
-        btn.classList.remove("pd-btn-added");
-        btn.disabled = false;
-      }, 1500);
-    });
+    setTimeout(() => { btn.textContent = "🛒 Add to Cart"; btn.classList.remove("pd-btn-added"); }, 1800);
   }
 
   function renderCartItems() {
