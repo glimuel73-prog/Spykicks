@@ -18,7 +18,6 @@
   --sidebar-hover: #1e1e1e;
   --sidebar-active-bg: #fff;
   --sidebar-active-text: #000;
-  /* Main area - light theme */
   --bg: #f5f5f5;
   --surface: #ffffff;
   --surface2: #f9f9f9;
@@ -47,7 +46,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ===== SIDEBAR ===== */
 .sidebar {
   width: var(--sidebar-w);
   background: var(--sidebar-bg);
@@ -155,7 +153,6 @@ body {
 }
 .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
-/* ===== MAIN ===== */
 .main {
   margin-left: var(--sidebar-w);
   flex: 1;
@@ -164,7 +161,6 @@ body {
   min-height: 100vh;
 }
 
-/* ===== TOP BAR ===== */
 .topbar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
@@ -209,11 +205,9 @@ body {
 .btn-add:hover { background: var(--accent-hover); transform: translateY(-1px); }
 .btn-add svg { width: 14px; height: 14px; }
 
-/* ===== CONTENT PAGES ===== */
 .page { display: none; padding: 32px; }
 .page.active { display: block; }
 
-/* ===== STATS ROW ===== */
 .stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -289,7 +283,6 @@ body {
 .stat-link:hover { color: var(--text); }
 .stat-link svg { width: 12px; height: 12px; }
 
-/* ===== SECTION HEADER ===== */
 .section-hdr {
   display: flex;
   align-items: center;
@@ -341,7 +334,6 @@ body {
 }
 .select-filter:focus { border-color: var(--accent); }
 
-/* ===== PRODUCTS TABLE ===== */
 .products-table {
   width: 100%;
   border-collapse: collapse;
@@ -486,7 +478,6 @@ body {
 .btn-delete { color: var(--red); border-color: rgba(255,59,48,0.3); }
 .btn-delete:hover { background: var(--red); color: white; border-color: var(--red); }
 
-/* ===== EMPTY STATE ===== */
 .empty-state {
   text-align: center;
   padding: 80px 24px;
@@ -503,7 +494,6 @@ body {
   color: var(--text-dim);
 }
 
-/* ===== MODAL ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -532,7 +522,6 @@ body {
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* Full-screen top bar */
 .modal-header {
   padding: 0 32px;
   height: 60px;
@@ -595,7 +584,6 @@ body {
 
 .modal-close:hover { border-color: var(--red); color: var(--red); }
 
-/* Two-column body */
 .modal-body {
   flex: 1;
   display: grid;
@@ -658,7 +646,6 @@ body {
 .field-group input::placeholder,
 .field-group textarea::placeholder { color: var(--text-dim); font-size: 13px; }
 
-/* SIZES */
 .sizes-grid {
   display: flex;
   flex-wrap: wrap;
@@ -711,7 +698,6 @@ body {
 }
 .size-check input[type=checkbox]:checked + label .price-dot { display: block; }
 
-/* SIZE PRICE TABLE */
 .size-price-wrap {
   margin-top: 20px;
   border: 1px solid var(--border);
@@ -817,7 +803,6 @@ td:nth-child(4) .size-price-input:focus { border-color: var(--orange); box-shado
 td:nth-child(2) .size-price-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
 td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow: 0 0 0 2px rgba(46,204,113,0.15); }
 
-/* SPECS */
 .specs-list { display: flex; flex-direction: column; gap: 10px; }
 
 .spec-row {
@@ -878,7 +863,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 .btn-add-spec:hover { border-color: var(--accent); color: var(--accent); }
 
-/* COLOR TAGS */
 .color-tags-wrap { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px; background: var(--bg); border: 1px solid var(--border2); border-radius: 6px; min-height: 46px; cursor: text; }
 .color-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 10px 4px 6px; font-family: var(--font); font-size: 12px; letter-spacing: 1px; color: var(--text); }
 .color-tag-swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); flex-shrink: 0; }
@@ -887,7 +871,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .color-tag-input { border: none; outline: none; background: transparent; font-family: var(--font); font-size: 12px; color: var(--text); min-width: 120px; flex: 1; padding: 2px 4px; }
 .color-tag-input::placeholder { color: var(--text-dim); }
 
-/* IMAGE UPLOAD */
 .image-upload-zone {
   border: 1px dashed var(--border2);
   border-radius: 8px;
@@ -943,7 +926,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 .img-preview-del:hover { background: var(--red); }
 
-/* SECTION DIVIDER */
 .modal-section {
   margin-bottom: 28px;
 }
@@ -971,7 +953,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   border-radius: 2px;
 }
 
-/* FOOTER */
 .modal-footer {
   padding: 16px 32px;
   border-top: 1px solid var(--border);
@@ -1016,7 +997,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 }
 .btn-save:hover { background: var(--accent-hover); transform: translateY(-1px); }
 
-/* TOAST */
 .toast {
   position: fixed;
   bottom: 32px;
@@ -1041,7 +1021,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.error { background: var(--red); color: white; }
 
-/* DELETE CONFIRM */
 .confirm-overlay {
   position: fixed;
   inset: 0;
@@ -1081,7 +1060,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 .confirm-box .confirm-actions { display: flex; gap: 12px; justify-content: center; }
 
-/* RESELLERS PAGE */
 .resellers-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .resellers-table th { background: var(--surface2); font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
 .resellers-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
@@ -1104,7 +1082,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .status-pill.rejected { color: var(--red); border-color: var(--red); background: rgba(255,59,48,.08); }
 .status-pill.cancelled { color: #888; border-color: #bbb; background: #f5f5f5; }
 
-/* ===== ORDERS PAGE ===== */
 .order-row-expand { display:none; background:var(--surface2); }
 .order-row-expand.open { display:table-row; }
 .order-items-expand { padding:12px 16px; }
@@ -1117,7 +1094,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .order-delete-btn { background:none; border:1px solid var(--border2); color:var(--text-dim); font-family:var(--font); font-weight:700; font-size:11px; letter-spacing:.5px; text-transform:uppercase; padding:6px 10px; border-radius:5px; cursor:pointer; transition:all .15s; }
 .order-delete-btn:hover { border-color:var(--red); color:var(--red); }
 
-/* ══ HAMBURGER BUTTON ══ */
 .hamburger {
   display: none;
   background: none;
@@ -1144,7 +1120,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 }
 .sidebar-backdrop.open { display: block; }
 
-/* ══ CARD TABLE (mobile product/reseller rows) ══ */
 .card-table { display: none; flex-direction: column; gap: 8px; }
 .card-row { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .card-row:hover { background: var(--surface2); }
@@ -1154,7 +1129,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .card-field { font-size: 12px; color: var(--text-muted); }
 .card-field strong { display: block; font-family: var(--font); font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
 
-/* ══ FLOATING ADD BUTTON (mobile) ══ */
 .fab-add {
   display: none;
   position: fixed;
@@ -1179,7 +1153,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .fab-add:hover { transform: scale(1.08); background: var(--accent-hover); }
 .fab-add:active { transform: scale(0.95); }
 
-/* ══ RESPONSIVE ══ */
 @media (max-width: 900px) {
   .sidebar {
     transform: translateX(-100%);
@@ -1206,7 +1179,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .resellers-table { display: none; }
   .card-table { display: flex; }
 
-  /* ── MODAL: full-screen single-column scroll ── */
   .modal-overlay { align-items: stretch; }
   .modal-drawer {
     width: 100%; height: 100vh; height: 100dvh;
@@ -1214,11 +1186,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     display: flex; flex-direction: column;
   }
   .modal-header { padding: 0 14px; height: 54px; flex-shrink: 0; }
-  /* Hide the Save button duplicated in the header — footer has it */
   .modal-header .btn-save { display: none !important; }
   .modal-step-indicator { display: none; }
 
-  /* Single scrollable column */
   .modal-body {
     display: block;
     overflow-y: auto;
@@ -1227,7 +1197,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   }
   .modal-body-left { padding: 16px 14px 0; border-right: none; border-bottom: none; overflow: visible; }
   .modal-body-right { padding: 0 14px 16px; background: transparent; overflow: visible; }
-  /* Divider between left and right panels */
   .modal-body-right::before {
     content: '';
     display: block;
@@ -1235,26 +1204,21 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     background: var(--border);
     margin: 0 0 16px;
   }
-  /* Hide tips box — not useful on mobile */
   .modal-tips-box { display: none !important; }
 
-  /* Prevent iOS auto-zoom — all inputs must be at least 16px */
   .field-group input,
   .field-group textarea,
   .field-group select,
   .size-price-input,
   .color-tag-input { font-size: 16px !important; }
 
-  /* Compact spacing */
   .field-group { margin-bottom: 14px; }
   .field-row, .field-row-3 { grid-template-columns: 1fr; gap: 0; }
   .field-group label { font-size: 9px; }
 
-  /* Size grid */
   .sizes-grid { gap: 6px; }
   .sizes-grid .size-check label { width: 52px; height: 52px; font-size: 12px; }
 
-  /* Size/price table */
   .size-price-wrap { margin-top: 14px; }
   .size-price-wrap-header { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
   .size-price-table { table-layout: fixed; }
@@ -1262,16 +1226,13 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .size-price-table .size-label { font-size: 13px; width: 44px; }
   .size-price-input { font-size: 14px !important; padding: 6px 6px !important; width: 100% !important; min-width: 0; }
 
-  /* Image upload zone */
   .image-upload-zone { padding: 20px 16px !important; }
   .upload-icon { font-size: 28px !important; }
   .upload-text { font-size: 13px !important; }
 
-  /* Publish To radio cards */
   #publishToGroup label { padding: 10px 12px; gap: 8px; }
   #priceFieldsWrap { padding: 12px; gap: 8px; margin-top: 10px; }
 
-  /* Footer */
   .modal-footer {
     padding: 12px 14px;
     padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
@@ -1281,7 +1242,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .modal-footer .btn-cancel { flex: 1; min-height: 46px; font-size: 13px; }
   .modal-footer .btn-save { flex: 2; min-height: 46px; font-size: 14px; }
 
-  /* Other pages */
   .login-box { width: calc(100vw - 32px); padding: 32px 24px; }
   .confirm-box { width: calc(100vw - 32px); padding: 28px 20px; }
   #page-settings { padding: 20px 16px 80px; }
@@ -1315,11 +1275,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   .sizes-grid .size-check label { width: 46px; height: 46px; font-size: 11px; }
 }
 
-/* ── ORDERS TAB — mobile ── */
 @media (max-width: 900px) {
   #page-orders .section-hdr { margin-bottom: 0; padding-bottom: 4px; }
 
-  /* Tab bar: remove 32px side padding */
   #page-orders > div[style*="padding:0 32px"] {
     padding: 0 4px !important;
     overflow-x: auto;
@@ -1333,7 +1291,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     flex-shrink: 0;
   }
 
-  /* Filter bar: full-width stacked column */
   #resellerOrdersPanel .filter-bar,
   #buyerOrdersPanel .filter-bar {
     padding: 12px 16px !important;
@@ -1354,7 +1311,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     min-height: 42px;
   }
 
-  /* Hide desktop tables, show card lists */
   #ordersTable { display: none !important; }
   #buyerOrdersTable { display: none !important; }
   #ordersCardTable {
@@ -1370,7 +1326,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     gap: 10px;
   }
 
-  /* Order card polish */
   .card-row { border-radius: 10px; padding: 14px; gap: 8px; }
   .card-field { font-size: 13px; line-height: 1.5; }
   .card-actions { flex-wrap: wrap; gap: 6px; }
@@ -1381,25 +1336,20 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   #ordersEmpty, #buyerOrdersEmpty { padding: 48px 24px; }
 }
 
-/* ── SETTINGS TAB — mobile ── */
 @media (max-width: 900px) {
   #page-settings { padding: 20px 16px 80px !important; }
 
-  /* Remove centered max-width — go full screen width */
   #page-settings > div[style*="max-width"] {
     max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
 
-  /* Card padding */
   .settings-card { padding: 18px 16px !important; border-radius: 10px !important; }
 
-  /* All text inputs in settings: >=16px prevents iOS auto-zoom */
   #page-settings input,
   #page-settings select { font-size: 16px !important; }
 
-  /* Taller, easier-to-tap action buttons */
   .settings-save-btn { min-height: 48px !important; font-size: 14px !important; }
   #cpBtn { min-height: 48px !important; font-size: 14px !important; }
 }
@@ -1420,7 +1370,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   margin-left: 6px;
 }
 
-/* ===== LOGIN SCREEN ===== */
 #loginScreen {
   position: fixed; inset: 0; background: var(--bg);
   z-index: 9999; display: flex; align-items: center; justify-content: center;
@@ -1457,7 +1406,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .login-lockout span { color: var(--red); }
 .login-attempts { text-align: right; font-family: var(--font); font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-top: 10px; }
 
-/* ===== QUICK ACTIONS ===== */
 .quick-actions-grid {
   display: flex;
   justify-content: center;
@@ -1504,7 +1452,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   color: var(--text);
 }
 
-/* ===== MANAGEMENT OVERVIEW GRID ===== */
 .management-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1546,7 +1493,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 </head>
 <body>
 
-<!-- ===== LOGIN SCREEN ===== -->
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo">Catalog <span>Admin</span></div>
@@ -1573,7 +1519,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
 </div>
 
-<!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sidebar-logo">
     <div class="brand">Catalog<br></br><span>Admin</span></div>
@@ -1614,11 +1559,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
 </nav>
 
-<!-- MAIN -->
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 <div class="main">
 
-  <!-- TOP BAR -->
   <div class="topbar">
     <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -1637,9 +1580,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
   <div style="display:none;" id="topbarTitle"></div>
 
-  <!-- DASHBOARD PAGE -->
   <div id="page-dashboard" class="page active">
-    <!-- Stats Row -->
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-card-top">
@@ -1701,7 +1642,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="section-hdr"><h2>Quick Actions</h2></div>
     <div class="quick-actions-grid" style="margin-bottom:32px;">
       <div class="quick-action-item" onclick="openModal()">
@@ -1725,7 +1665,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </div>
     </div>
 
-    <!-- Management Overview -->
     <div class="section-hdr"><h2>Management Overview</h2></div>
     <div class="management-grid">
       <div class="management-item" onclick="showPage('products', document.querySelector('.nav-item[onclick*=products]'))">
@@ -1771,14 +1710,12 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </div>
     </div>
 
-    <!-- Footer -->
     <div style="margin-top:40px; padding-top:20px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
       <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);">© 2026 Catalog. All rights reserved.</div>
       <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);">Version 1.0.0</div>
     </div>
   </div>
 
-  <!-- PRODUCTS PAGE -->
   <div id="page-products" class="page">
     <div class="section-hdr">
       <h2>All Products</h2>
@@ -1813,11 +1750,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>
       <p>No products found</p>
     </div>
-    <!-- MOBILE CARD TABLE (products) -->
     <div class="card-table" id="productsCardTable"></div>
   </div>
 
-  <!-- RESELLERS PAGE -->
   <div id="page-resellers" class="page">
     <div class="section-hdr">
       <h2>Reseller Applications</h2>
@@ -1829,7 +1764,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </div>
     </div>
 
-    <!-- Tab bar -->
     <div style="display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);width:fit-content;">
       <button id="tabPending" onclick="switchResellerTab('pending')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:10px 24px;border:none;cursor:pointer;background:yellow;color:var(--black);font-weight:700;transition:all .15s;">Pending</button>
       <button id="tabApproved" onclick="switchResellerTab('approved')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:10px 24px;border:none;cursor:pointer;background:var(--surface2);color:var(--text-muted);font-weight:700;transition:all .15s;">Approved</button>
@@ -1853,17 +1787,14 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </tr>
       </tbody>
     </table>
-    <!-- MOBILE CARD TABLE (resellers) -->
     <div class="card-table" id="resellersCardTable"></div>
   </div>
 
-  <!-- ORDERS PAGE -->
   <div id="page-orders" class="page">
     <div class="section-hdr">
       <h2>Orders</h2>
     </div>
 
-    <!-- Order type tabs -->
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;background:var(--surface);padding:0 32px;">
       <button id="orderTabReseller" onclick="switchOrdersTab('reseller')" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 28px;border:none;cursor:pointer;background:none;color:var(--text);border-bottom:2px solid var(--text);margin-bottom:-2px;transition:all .15s;">Reseller Orders</button>
       <button id="orderTabBuyer" onclick="switchOrdersTab('buyer')" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 28px;border:none;cursor:pointer;background:none;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;">
@@ -1872,7 +1803,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       </button>
     </div>
 
-    <!-- RESELLER ORDERS PANEL -->
     <div id="resellerOrdersPanel">
       <div class="filter-bar" style="padding:14px 32px;border-bottom:1px solid var(--border);">
         <select class="select-filter" id="orderStatusFilter" onchange="renderOrdersTable()">
@@ -1908,7 +1838,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <div class="card-table" id="ordersCardTable"></div>
     </div>
 
-    <!-- BUYER ORDERS PANEL -->
     <div id="buyerOrdersPanel" style="display:none;">
       <div class="filter-bar" style="padding:14px 32px;border-bottom:1px solid var(--border);">
         <select class="select-filter" id="buyerOrderStatusFilter" onchange="renderBuyerOrdersTable()">
@@ -1926,7 +1855,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </button>
       </div>
 
-      <!-- Desktop table -->
       <table class="products-table" id="buyerOrdersTable" style="display:table;">
         <thead>
           <tr>
@@ -1953,21 +1881,17 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
 
 
-<!-- SETTINGS PAGE -->
 <div id="page-settings" class="page" style="max-width:100%;">
 
   <div style="max-width:600px;margin:0;width:100%;display:flex;flex-direction:column;gap:20px;">
 
-  <!-- SOCIAL LINKS CARD -->
   <div style="width:100%;">
     <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Social Media Links</div>
     <div class="settings-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;overflow:hidden;">
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">These links appear in the store footer and product order buttons. Leave blank to hide a platform.</p>
 
-      <!-- Each platform row -->
       <div style="display:flex;flex-direction:column;gap:14px;">
 
-        <!-- Facebook -->
         <div>
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -1981,7 +1905,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-        <!-- Instagram -->
         <div>
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="url(#igGrad2)"><defs><linearGradient id="igGrad2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#f09433"/><stop offset="50%" stop-color="#dc2743"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -1995,7 +1918,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-        <!-- TikTok -->
         <div>
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text)"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.73a4.85 4.85 0 01-1.01-.04z"/></svg>
@@ -2009,7 +1931,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-        <!-- Twitter / X -->
         <div>
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--text)"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629 5.905-5.629zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -2023,7 +1944,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-        <!-- Shopee -->
         <div>
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#EE4D2D"><path d="M12 1a5 5 0 00-5 5H4.5A1.5 1.5 0 003 7.5v13A1.5 1.5 0 004.5 22h15a1.5 1.5 0 001.5-1.5v-13A1.5 1.5 0 0019.5 6H17a5 5 0 00-5-5zm0 2a3 3 0 013 3H9a3 3 0 013-3zm0 7a4 4 0 110 8 4 4 0 010-8zm0 2a2 2 0 100 4 2 2 0 000-4z"/></svg>
@@ -2037,7 +1957,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-        <!-- Lazada -->
         <div>
           <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#0F146D"><rect width="24" height="24" rx="4" fill="#0F146D"/><text x="3" y="18" font-size="13" font-weight="900" fill="white" font-family="Arial">L</text></svg>
@@ -2051,7 +1970,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-      </div><!-- /platform rows -->
+      </div>
 
       <button class="settings-save-btn btn-save" onclick="saveSocialLinks()" style="width:100%;margin-top:20px;min-height:44px;font-size:13px;">
         Save Social Links
@@ -2059,7 +1978,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     </div>
   </div>
 
-  <!-- CHANGE PASSWORD CARD -->
   <div style="width:100%;">
     <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Security</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 24px 20px;">
@@ -2070,7 +1988,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
       <div style="display:flex;flex-direction:column;gap:14px;">
 
-        <!-- Current Password -->
         <div>
           <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Current Password</label>
           <div style="position:relative;">
@@ -2085,7 +2002,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-        <!-- New Password -->
         <div>
           <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">New Password</label>
           <div style="position:relative;">
@@ -2099,7 +2015,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
-          <!-- Strength bar -->
           <div style="margin-top:6px;display:flex;gap:4px;height:3px;" id="cpStrengthBars">
             <div id="cpBar1" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
             <div id="cpBar2" style="flex:1;border-radius:2px;background:var(--border);transition:background .2s;"></div>
@@ -2109,7 +2024,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <div id="cpStrengthLabel" style="font-family:var(--font);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-top:4px;min-height:14px;"></div>
         </div>
 
-        <!-- Confirm New Password -->
         <div>
           <label style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);display:block;margin-bottom:6px;">Confirm New Password</label>
           <div style="position:relative;">
@@ -2133,17 +2047,15 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         Change Password
       </button>
     </div>
-  </div><!-- /security card wrapper -->
+  </div>
 
-  </div><!-- /settings flex container -->
+  </div>
 
 </div>
 
-<!-- FLOATING ADD BUTTON (mobile, products page only) -->
 <button class="fab-add" id="fabAddBtn" onclick="openModal()" style="display:none;" aria-label="Add Product">+</button>
-</div><!-- /main -->
+</div>
 
-<!-- ===== PRODUCT MODAL ===== -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-drawer" id="modalDrawer">
     <div class="modal-header">
@@ -2168,10 +2080,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     </div>
 
     <div class="modal-body">
-      <!-- LEFT COLUMN: all form fields -->
       <div class="modal-body-left">
 
-      <!-- BASIC INFO -->
       <div class="modal-section">
         <div class="modal-section-label">Basic Info</div>
 
@@ -2180,7 +2090,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <input type="text" id="fName" placeholder="e.g. Air Max 90 OG">
         </div>
 
-        <!-- BRAND 3-LEVEL TEXT INPUTS -->
         <div class="field-group">
           <label>Brand <span style="color:var(--text-dim);font-weight:400;letter-spacing:0;text-transform:none;font-size:10px;">— optional levels below</span></label>
           <div style="display:flex;flex-direction:column;gap:8px;">
@@ -2246,11 +2155,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </div>
       </div>
 
-      <!-- PRICING & STOCK -->
       <div class="modal-section">
         <div class="modal-section-label">Pricing & Stock</div>
 
-        <!-- Hidden price inputs — values controlled via right-column price fields -->
         <input type="hidden" id="fPrice" value="">
         <input type="hidden" id="fResellerPrice" value="">
         <input type="hidden" id="fWholesalePrice" value="">
@@ -2278,7 +2185,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </div>
       </div>
 
-      <!-- SIZES -->
       <div class="modal-section">
         <div class="modal-section-label">Sizes — Select to Set Prices &amp; Stock</div>
 
@@ -2300,7 +2206,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-        <!-- Per-size pricing table -->
         <div class="size-price-wrap" id="sizePriceWrap">
           <div class="size-price-wrap-header">
             <span>💰 Set Prices &amp; Stock Per Size / Color</span>
@@ -2332,19 +2237,16 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         </div>
       </div>
 
-      <!-- SPECS -->
       <div class="modal-section">
         <div class="modal-section-label">Specifications</div>
         <div class="specs-list" id="specsList"></div>
         <button class="btn-add-spec" onclick="addSpec()">+ Add Specification</button>
       </div>
 
-      </div><!-- /modal-body-left -->
+      </div>
 
-      <!-- RIGHT COLUMN: Images + Visibility -->
       <div class="modal-body-right">
 
-        <!-- IMAGES -->
         <div class="modal-section" style="margin-bottom:0;">
           <div class="modal-section-label">Product Images</div>
 
@@ -2358,7 +2260,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <div class="image-previews" id="imagePreviews"></div>
         </div>
 
-        <!-- VISIBILITY -->
         <div class="modal-section" style="margin-bottom:0;">
           <div class="modal-section-label">Visibility</div>
           <div class="field-group">
@@ -2373,7 +2274,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
               <option value="archived">Archived</option>
             </select>
           </div>
-          <!-- PUBLISH TO -->
           <div class="field-group" style="margin-bottom:0;">
             <label style="margin-bottom:10px;display:block;">Publish To</label>
             <div style="display:flex;flex-direction:column;gap:8px;" id="publishToGroup">
@@ -2405,23 +2305,19 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             <input type="hidden" id="fPublishTo" value="both">
           </div>
 
-          <!-- CONDITIONAL PRICE FIELDS — shown based on Publish To selection -->
           <div id="priceFieldsWrap" style="margin-top:14px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;gap:10px;">
             <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:2px;">Default Prices</div>
 
-            <!-- Retail price — shown for buyer + both -->
             <div id="priceFieldRetail" class="field-group" style="margin-bottom:0;">
               <label style="color:#3b82f6;">🛍 Default Retail Price (₱) *</label>
               <input type="number" id="fPriceReal" placeholder="0" oninput="syncPriceField('fPriceReal','fPrice')" style="border-color:rgba(59,130,246,0.35);">
             </div>
 
-            <!-- Reseller price — shown for reseller + both -->
             <div id="priceFieldReseller" class="field-group" style="margin-bottom:0;">
               <label style="color:#2ecc71;">🤝 Default Reseller Price (₱)</label>
               <input type="number" id="fResellerPriceReal" placeholder="0" oninput="syncPriceField('fResellerPriceReal','fResellerPrice')" style="border-color:rgba(46,204,113,0.35);">
             </div>
 
-            <!-- Wholesale price — shown for reseller + both -->
             <div id="priceFieldWholesale" class="field-group" style="margin-bottom:0;">
               <label>📦 Default Wholesale Price (₱) <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:2px 6px;border-radius:3px;margin-left:4px;">Reseller Only</span></label>
               <input type="number" id="fWholesalePriceReal" placeholder="0" oninput="syncPriceField('fWholesalePriceReal','fWholesalePrice')" style="border-color:rgba(59,130,246,0.3);">
@@ -2446,7 +2342,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           </div>
         </div>
 
-            <!-- QUICK TIP -->
         <div class="modal-tips-box" style="margin-top:auto;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:11px;color:var(--text-dim);line-height:1.6;">
           <div style="font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;font-size:10px;">💡 Tips</div>
           <div>• Upload multiple images for better showcase</div>
@@ -2454,9 +2349,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <div style="margin-top:4px;">• Wholesale price is only visible to resellers</div>
         </div>    
 
-      </div><!-- /modal-body-right -->
+      </div>
 
-    </div><!-- /modal-body -->
+    </div>
 
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
@@ -2465,7 +2360,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
 </div>
 
-<!-- DELETE CONFIRM -->
+
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
     <h3>Delete Product?</h3>
@@ -2477,7 +2372,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
 </div>
 
-<!-- ADD RESELLER MODAL -->
+
 <div class="modal-overlay" id="addResellerOverlay" style="align-items:center;justify-content:center;background:rgba(0,0,0,0.5);">
   <div class="modal-drawer" style="width:440px;max-width:calc(100vw - 32px);height:auto;max-height:80vh;border-radius:12px;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.2);animation:modalFadeIn .2s ease;">
     <div class="modal-header" style="border-radius:12px 12px 0 0;">
@@ -2500,21 +2395,21 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
 </div>
 
-<!-- TOAST -->
+
 <div class="toast" id="toast"></div>
 
 <script>
 const ADMIN_HASH_DEFAULT = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
-// ADMIN_HASH is loaded from the server so it's the same on all devices
+
 let ADMIN_HASH = ADMIN_HASH_DEFAULT;
-// Load the server-side hash immediately; login check awaits this promise
+
 let _hashReady = fetch("/admin/password-hash")
   .then(r => r.json())
   .then(d => { if (d.hash) ADMIN_HASH = d.hash; })
   .catch(() => {});
 const SESSION_KEY = "catalog_admin_session";
 
-// ===== CHANGE PASSWORD =====
+
 function cpToggle(inputId, btn) {
   const inp = document.getElementById(inputId);
   const isText = inp.type === 'text';
@@ -2558,7 +2453,7 @@ async function changePassword() {
   function cpErr(msg) {
     errEl.textContent = msg;
     errEl.style.display = 'block';
-    // Shake the card
+
     const card = errEl.closest('div[style*="border-radius:10px"]');
     if (card) { card.style.animation='none'; card.offsetHeight; card.style.animation='shake .3s ease'; }
   }
@@ -2579,7 +2474,7 @@ async function changePassword() {
   }
 
   const newHash = await sha256(newVal);
-  // Save to server so the new password applies on ALL devices
+
   btn.textContent = 'Saving…';
   try {
     const saveRes = await fetch('/admin/change-password', {
@@ -2598,9 +2493,9 @@ async function changePassword() {
     btn.textContent = 'Change Password';
     return cpErr('Connection error. Please try again.');
   }
-  ADMIN_HASH = newHash;  // update runtime variable immediately
+  ADMIN_HASH = newHash;
 
-  // Clear all fields + strength bar
+
   document.getElementById('cpCurrent').value = '';
   document.getElementById('cpNew').value     = '';
   document.getElementById('cpConfirm').value = '';
@@ -2612,7 +2507,7 @@ async function changePassword() {
   okEl.style.display = 'block';
   setTimeout(() => { okEl.style.display = 'none'; }, 4000);
 }
-const SESSION_DURATION = 2 * 60 * 60 * 1000; // 2 hours
+const SESSION_DURATION = 2 * 60 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
 
@@ -2621,7 +2516,6 @@ async function sha256(msg) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
 }
 
-// deleteProduct is handled by confirmDelete() below — this stub is kept for safety
 async function deleteProduct(id) {
   await fetch("/admin/delete-product", {
     method: "POST",
@@ -2662,7 +2556,7 @@ function clearSession() {
 }
 
 async function doLogin() {
-  await _hashReady; // ensure server hash is loaded before checking
+  await _hashReady;
   const attempts = getAttemptData();
   const now = Date.now();
 
@@ -2677,14 +2571,14 @@ async function doLogin() {
   const hash = await sha256(pw);
 
   if (hash === ADMIN_HASH) {
-    // Correct — clear attempts, create session
+
     saveAttemptData({ count: 0, lockedUntil: 0 });
     createSession();
     document.getElementById("loginScreen").classList.add("hidden");
     document.getElementById("loginInput").value = "";
     renderDashboard();
   } else {
-    // Wrong password
+
     attempts.count = (attempts.count || 0) + 1;
     const remaining = MAX_ATTEMPTS - attempts.count;
 
@@ -2703,7 +2597,7 @@ async function doLogin() {
       document.getElementById("loginAttempts").textContent = "";
       document.getElementById("loginInput").value = "";
       document.getElementById("loginInput").focus();
-      // Shake animation
+
       const box = document.querySelector(".login-box");
       box.style.animation = "none";
       box.offsetHeight;
@@ -2744,12 +2638,12 @@ function togglePw() {
   inp.type = inp.type === "password" ? "text" : "password";
 }
 
-// Add shake keyframe dynamically
+
 const shakeStyle = document.createElement("style");
 shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }`;
 document.head.appendChild(shakeStyle);
 
-// Session auto-logout watcher
+
 setInterval(() => {
   try {
     const s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
@@ -2761,28 +2655,28 @@ setInterval(() => {
       document.getElementById("loginInput").focus();
     }
   } catch {}
-}, 30000); // check every 30s
+}, 30000); 
 
-// Logout clears session
+
 const _origLogout = window.logout;
 function adminLogout() {
   clearSession();
   window.location.href = "https://brochure-availablestocks.up.railway.app/index.html";
 }
 
-// ===== DATA STORE =====
+
 let products = [];
 let editingId = null;
 let deleteId = null;
 let imageDataURLs = [];
 
-// ===== LOAD PRODUCTS FROM BACKEND =====
+
 async function loadProductsFromBackend() {
   try {
     const res = await fetch('/admin/products');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    // DB is always the source of truth — never fall back to localStorage as a source
+ 
     products = data.products || [];
   } catch (err) {
     console.warn('Backend unreachable:', err.message);
@@ -2793,7 +2687,7 @@ async function loadProductsFromBackend() {
   renderDashboard();
 }
 
-// ===== NAVIGATION =====
+
 function showPage(page, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2815,7 +2709,7 @@ function showPage(page, el) {
   if (page === 'orders') loadOrders();
 }
 
-// ===== DASHBOARD =====
+
 function renderDashboard() {
   function effectiveStock(p) {
     if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
@@ -2852,18 +2746,18 @@ async function loadPendingOrderCount() {
   } catch { }
 }
 
-// ===== PRODUCTS TABLE =====
+
 function renderProductsTable() {
-  // Rebuild category filter to include any custom categories from products
+
   const KNOWN_CATS = ['sneakers','apparel','accessories','bags','caps','other'];
   const customCats = [...new Set(products.map(p => p.category).filter(c => c && !KNOWN_CATS.includes(c)))];
   const catFilter = document.getElementById('catFilter');
   const currentCat = catFilter.value;
-  // Remove old custom options (those not in KNOWN_CATS)
+
   [...catFilter.options].forEach(o => {
     if (o.value && !KNOWN_CATS.includes(o.value) && o.value !== '') catFilter.removeChild(o);
   });
-  // Add custom ones before last option
+ 
   customCats.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c;
@@ -2924,7 +2818,7 @@ function renderProductsTable() {
 }
 
 function stockPill(stock, sizes) {
-  // If sizes have per-size stock data, use the sum; otherwise fall back to global stock
+
   let n = Number(stock) || 0;
   if (sizes && sizes.length && sizes.some(s => typeof s === 'object' && s.stock != null)) {
     const total = sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
@@ -2935,11 +2829,11 @@ function stockPill(stock, sizes) {
   return `<span class="stock-pill in-stock">${n} units</span>`;
 }
 
-// ===== SIZE GRID =====
+
 const FOOTWEAR_SIZES = ['35','36','37','38','39','40','41','42','43','44','45'];
 const APPAREL_SIZES = ['XS','S','M','L','XL','2XL','3XL'];
 
-// Stores per-size prices: { '8': { retailPrice: 1500, resellerPrice: 1200 }, ... }
+
 let sizePrices = {};
 
 function renderSizeGrid() {
@@ -2988,19 +2882,17 @@ function renderSizePriceTable() {
   const defRetail = Number(document.getElementById('fPrice').value) || 0;
   const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
 
-  // Get current colors from color tags
   const colors = getColors();
   const hasColors = colors.length > 0;
 
   const prevSizes = [...tbody.querySelectorAll('tr')].map(r => r.dataset.size);
   const isNewSize = sizes.some(s => !prevSizes.includes(s));
 
-  // Determine whether to show buyer / reseller price columns based on publish target
   const publishTarget = getPublishTo();
   const showBuyerCol    = (publishTarget === 'buyer'    || publishTarget === 'both');
   const showResellerCol = (publishTarget === 'reseller' || publishTarget === 'both');
 
-  // Rebuild header
+
   if (hasColors) {
     head.innerHTML = `<tr>
       <th style="min-width:60px;">Size</th>
@@ -3021,7 +2913,7 @@ function renderSizePriceTable() {
     </tr>`;
   }
 
-  // Seed sizePrices with defaults for new rows
+
   sizes.forEach(s => {
     if (!sizePrices[s]) {
       sizePrices[s] = { retailPrice: defRetail || 0, resellerPrice: defReseller || 0, stock: 0, colorStock: {} };
@@ -3073,7 +2965,7 @@ function renderSizePriceTable() {
     }
   }).join('');
 
-  // Scroll the price table into view if new sizes were added
+
   if (isNewSize) {
     setTimeout(() => {
       wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -3085,15 +2977,15 @@ function updateSizeColorStock(size, color, value) {
   if (!sizePrices[size]) sizePrices[size] = { retailPrice: 0, resellerPrice: 0, stock: 0, colorStock: {} };
   if (!sizePrices[size].colorStock) sizePrices[size].colorStock = {};
   sizePrices[size].colorStock[color] = Number(value) || 0;
-  // Update aggregate stock = sum of all color stocks for this size
+
   sizePrices[size].stock = Object.values(sizePrices[size].colorStock).reduce((a, b) => a + b, 0);
 }
 
-// Called when default price fields change — refreshes the table to show new defaults
+
 function refreshSizePriceDefaults() {
   const defRetail   = Number(document.getElementById('fPrice').value) || 0;
   const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
-  // Update each size independently — only skip a price type if the user manually edited it
+
   const sizes = getCheckedSizes();
   sizes.forEach(s => {
     if (!sizePrices[s]) sizePrices[s] = { retailPrice: 0, resellerPrice: 0, stock: 0, colorStock: {} };
@@ -3110,7 +3002,7 @@ function refreshSizePriceDefaults() {
   });
 }
 
-// Force-apply default prices to ALL sizes (overrides manual edits)
+
 function applyDefaultPricesToAll() {
   const defRetail   = Number(document.getElementById('fPrice').value) || 0;
   const defReseller = Number(document.getElementById('fResellerPrice').value) || 0;
@@ -3141,7 +3033,7 @@ function applyDefaultPricesToAll() {
 function updateSizePrice(size, priceType, value) {
   if (!sizePrices[size]) sizePrices[size] = {};
   sizePrices[size][priceType] = Number(value) || 0;
-  // Mark as manually set so default-refresh won't overwrite it
+
   if (priceType === 'retailPrice') sizePrices[size]._manualRetail = true;
   if (priceType === 'resellerPrice') sizePrices[size]._manualReseller = true;
 }
@@ -3155,7 +3047,7 @@ function getCheckedSizes() {
   return [...document.querySelectorAll('#sizeGridWrap input[type=checkbox]:checked')].map(cb => cb.value);
 }
 
-// Returns array of { size, retailPrice, resellerPrice, stock, colorStock }
+
 function getSelectedSizes() {
   const baseRetail = Number(document.getElementById('fPrice').value) || 0;
   const baseReseller = Number(document.getElementById('fResellerPrice').value) || 0;
@@ -3163,7 +3055,6 @@ function getSelectedSizes() {
   return getCheckedSizes().map(s => {
     const sp = sizePrices[s] || {};
     const colorStock = (colors.length > 0 && sp.colorStock) ? sp.colorStock : {};
-    // stock = sum of color stocks if colors exist, else explicit stock field
     const stock = colors.length > 0
       ? Object.values(colorStock).reduce((a, b) => a + b, 0)
       : (sp.stock || 0);
@@ -3180,11 +3071,11 @@ function getSelectedSizes() {
 function setSelectedSizes(sizes) {
   if (!sizes || !sizes.length) return;
 
-  // Support both old format (array of strings) and new format (array of objects)
+
   const isOldFormat = typeof sizes[0] === 'string';
   const sizeLabels = isOldFormat ? sizes : sizes.map(s => s.size);
 
-  // Rebuild sizePrices from saved data
+
   sizePrices = {};
   if (!isOldFormat) {
     sizes.forEach(s => {
@@ -3218,7 +3109,7 @@ function setSelectedSizes(sizes) {
   }, 10);
 }
 
-// ===== COLOR TAGS =====
+
 const COLOR_NAME_MAP = {
   red:'#e53935',crimson:'#c62828',rose:'#e91e63',pink:'#f48fb1',
   orange:'#fb8c00',amber:'#ffb300',yellow:'#fdd835',gold:'#f9a825',
@@ -3236,7 +3127,7 @@ const COLOR_NAME_MAP = {
 function colorToCSS(name) {
   const key = name.trim().toLowerCase();
   if (COLOR_NAME_MAP[key]) return COLOR_NAME_MAP[key];
-  // Handle combination colors: "Black/White", "Red/Blue/White", "Black-White", etc.
+
   const parts = key.split(/\s*[\/\-]\s*/).map(p => p.trim()).filter(Boolean);
   if (parts.length >= 2) {
     const hexes = parts.map(p => {
@@ -3246,7 +3137,7 @@ function colorToCSS(name) {
     if (hexes.length === 2) {
       return `linear-gradient(to right, ${hexes[0]} 50%, ${hexes[1]} 50%)`;
     }
-    // 3+ colors: divide evenly
+
     const pct = 100 / hexes.length;
     const stops = hexes.map((h, i) => `${h} ${(i * pct).toFixed(1)}%, ${h} ${((i + 1) * pct).toFixed(1)}%`).join(', ');
     return `linear-gradient(to right, ${stops})`;
@@ -3277,7 +3168,7 @@ function handleColorTagKey(e) {
 }
 
 function handleColorTagInput(input) {
-  // Allow adding via comma mid-typing
+
   if (input.value.includes(',')) {
     const parts = input.value.split(',');
     parts.slice(0, -1).forEach(p => { if (p.trim()) addColorTag(p.trim()); });
@@ -3289,7 +3180,7 @@ function addColorTag(name) {
   if (!name) return;
   const wrap = document.getElementById('colorTagsWrap');
   const input = document.getElementById('colorTagInput');
-  // Prevent duplicates
+
   const existing = [...wrap.querySelectorAll('.color-tag')].map(t => t.dataset.color.toLowerCase());
   if (existing.includes(name.toLowerCase())) return;
 
@@ -3301,7 +3192,7 @@ function addColorTag(name) {
   tag.innerHTML = `<span class="color-tag-swatch" style="${swatchStyle}"></span>${name}<button class="color-tag-remove" onclick="this.parentElement.remove();renderSizePriceTable();" title="Remove">×</button>`;
   wrap.insertBefore(tag, input);
 
-  // Refresh table to add new color column
+
   renderSizePriceTable();
 }
 
@@ -3321,7 +3212,7 @@ function clearColorTags() {
   renderSizePriceTable();
 }
 
-// ===== SPECS =====
+
 function addSpec(key = '', val = '') {
   const list = document.getElementById('specsList');
   const row = document.createElement('div');
@@ -3343,7 +3234,7 @@ function getSpecs() {
   }).filter(s => s.key && s.val);
 }
 
-// ===== IMAGES =====
+
 async function handleImages(input) {
   const files = [...input.files];
   input.value = '';
@@ -3359,7 +3250,7 @@ async function handleImages(input) {
     renderImagePreviews();
 
     try {
-      // Extract base64 payload from the data URL (strip "data:image/...;base64,")
+
       const base64 = tempUrl.split(',')[1];
       const mimeType = file.type;
       const res = await fetch('/admin/upload-image', {
@@ -3396,7 +3287,7 @@ function removeImage(idx) {
   renderImagePreviews();
 }
 
-// ===== MODAL OPEN/CLOSE =====
+
 async function openModal(id = null) {
   editingId = id;
   imageDataURLs = [];
@@ -3405,15 +3296,13 @@ async function openModal(id = null) {
   document.getElementById('imagePreviews').innerHTML = '';
 
   if (id) {
-    // Edit mode — always fetch a fresh copy from DB so stock is current
-    // (order approvals may have deducted stock since the page last loaded)
+
     let p = products.find(x => x.id === id);
     try {
       const freshRes = await fetch('/admin/product/' + id);
       const freshData = await freshRes.json();
       if (freshData.product) {
         p = freshData.product;
-        // Update local copy too so the table reflects it
         const idx = products.findIndex(x => x.id === id);
         if (idx !== -1) products[idx] = p;
       }
@@ -3439,7 +3328,7 @@ async function openModal(id = null) {
     setColors(p.colors || []);
     document.getElementById('fBadge').value = p.badge || '';
     document.getElementById('fStatus').value = p.status || 'active';
-    setPublishTo(p.publishTo || 'both'); // this also shows/hides price fields
+    setPublishTo(p.publishTo || 'both');
     setNewArrival(!!p.newArrival);
 
     (p.specs || []).forEach(s => addSpec(s.key, s.val));
@@ -3482,7 +3371,7 @@ function closeModal() {
   editingId = null;
 }
 
-// ===== CUSTOM CATEGORY =====
+
 function toggleCustomCategory() {
   const sel = document.getElementById('fCategory');
   const inp = document.getElementById('fCategoryCustom');
@@ -3496,7 +3385,7 @@ function toggleCustomCategory() {
 }
 
 function syncCustomCategory() {
-  // keep the custom input value live; actual category read at save time
+
 }
 
 function getSelectedCategory() {
@@ -3516,13 +3405,13 @@ function setCategory(val) {
     inp.style.display = 'none';
     inp.value = '';
   } else {
-    // It's a custom value — add as option if missing, then select it
+
     let opt = sel.querySelector(`option[value="${CSS.escape(val)}"]`);
     if (!opt) {
       opt = document.createElement('option');
       opt.value = val;
       opt.textContent = val.charAt(0).toUpperCase() + val.slice(1);
-      // Insert before the "Custom…" option
+ 
       const customOpt = sel.querySelector('option[value="__custom__"]');
       sel.insertBefore(opt, customOpt);
     }
@@ -3532,7 +3421,7 @@ function setCategory(val) {
   }
 }
 
-// ===== SAVE =====
+
 async function saveProduct() {
   const name = document.getElementById('fName').value.trim();
   const category = getSelectedCategory();
@@ -3540,7 +3429,7 @@ async function saveProduct() {
 
   const selectedSizes = getSelectedSizes();
 
-  // Derive price: use manual input, or auto-calculate from size prices
+
   let price = Number(document.getElementById('fPrice').value) || 0;
   let resellerPrice = Number(document.getElementById('fResellerPrice').value) || 0;
 
@@ -3549,15 +3438,15 @@ async function saveProduct() {
   if (selectedSizes.length > 0) {
     const retailPrices = selectedSizes.map(s => s.retailPrice).filter(p => p > 0);
     const resellerPrices = selectedSizes.map(s => s.resellerPrice).filter(p => p > 0);
-    // Use min price for display (lowest available size price)
+
     if (retailPrices.length > 0 && !price) price = Math.min(...retailPrices);
     if (resellerPrices.length > 0 && !resellerPrice) resellerPrice = Math.min(...resellerPrices);
-    // If no manual global price, set from sizes
+
     if (!document.getElementById('fPrice').value) price = retailPrices.length ? Math.min(...retailPrices) : 0;
   }
 
-  // When publishing to reseller only, retail price is not required — reseller price is.
-  // When publishing to buyer or both, retail price is required.
+
+
   const priceValid = publishTo === 'reseller' ? (resellerPrice > 0) : (price > 0);
 
   if (!name || !priceValid || !category) {
@@ -3601,7 +3490,7 @@ async function saveProduct() {
   }
 
   try {
-    // Use single-product save so stock on OTHER products is never overwritten
+
     await saveOneProduct(product);
     closeModal();
     renderProductsTable();
@@ -3641,7 +3530,7 @@ async function duplicateProduct(id) {
   }
 }
 
-// ===== DELETE =====
+
 function askDelete(id) {
   deleteId = id;
   document.getElementById('confirmOverlay').classList.add('open');
@@ -3673,7 +3562,7 @@ async function confirmDelete() {
   showToast('Product deleted.');
 }
 
-// ===== RESELLERS =====
+
 let allResellers = [];
 let resellerTab = 'pending';
 
@@ -3793,8 +3682,6 @@ async function submitAddReseller() {
   } catch { showToast('Failed to add reseller.', true); }
 }
 
-// ===== STORAGE =====
-// saveProducts() — bulk save the whole local array (legacy, kept for compatibility)
 function saveProducts() {
   const productsForStorage = products.map(p => ({ ...p }));
   fetch('/admin/save-products', {
@@ -3809,7 +3696,7 @@ function saveProducts() {
   });
 }
 
-// saveOneProduct(product) — save only ONE product so other products stocks are never touched
+
 async function saveOneProduct(product) {
   const res = await fetch('/admin/save-product', {
     method: 'POST',
@@ -3821,7 +3708,7 @@ async function saveOneProduct(product) {
   if (!data.success) throw new Error(data.error || 'Save failed');
 }
 
-// ===== TOAST =====
+
 function showToast(msg, error = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -3831,7 +3718,7 @@ function showToast(msg, error = false) {
 }
 
 
-// ===== NEW ARRIVAL TOGGLE =====
+
 function toggleNewArrival() {
   const current = document.getElementById('fNewArrival').value === '1';
   const newVal = !current;
@@ -3850,7 +3737,7 @@ function toggleNewArrival() {
   }
 }
 
-// ===== PUBLISH TO =====
+
 function setPublishTo(val) {
   document.getElementById('fPublishTo').value = val;
   const opts = ['buyer', 'reseller', 'both'];
@@ -3875,7 +3762,7 @@ function setPublishTo(val) {
     }
   });
 
-  // Show/hide price fields based on publish target
+
   const showRetail    = (val === 'buyer' || val === 'both');
   const showReseller  = (val === 'reseller' || val === 'both');
   const showWholesale = (val === 'reseller' || val === 'both');
@@ -3885,17 +3772,17 @@ function setPublishTo(val) {
   el('priceFieldReseller').style.display  = showReseller  ? '' : 'none';
   el('priceFieldWholesale').style.display = showWholesale ? '' : 'none';
 
-  // Clear hidden fields that are not relevant so they don't get saved incorrectly
+
   if (!showRetail)    { el('fPriceReal').value = '';        el('fPrice').value = ''; }
   if (!showReseller)  { el('fResellerPriceReal').value = ''; el('fResellerPrice').value = ''; }
   if (!showWholesale) { el('fWholesalePriceReal').value = ''; el('fWholesalePrice').value = ''; }
 
-  // Rebuild size/price table so buyer column shows/hides correctly
+
   if (typeof renderSizePriceTable === 'function') renderSizePriceTable();
   else if (typeof refreshSizePriceDefaults === 'function') refreshSizePriceDefaults();
 }
 
-// Syncs a visible "real" input into the hidden field used by the rest of the code
+
 function syncPriceField(realId, hiddenId) {
   const v = document.getElementById(realId).value;
   document.getElementById(hiddenId).value = v;
@@ -3922,7 +3809,7 @@ function setNewArrival(val) {
   }
 }
 
-// ===== GENDER =====
+
 function updateGenderUI() {
   ['Male','Female','Unisex'].forEach(g => {
     const lbl = document.getElementById('genderLabel' + g);
@@ -3948,7 +3835,7 @@ function setGender(val) {
   updateGenderUI();
 }
 
-// ===== ESC KEY =====
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeModal();
@@ -3956,22 +3843,22 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ===== CLOSE OVERLAY ON BACKDROP CLICK =====
+
 document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 });
-// Prevent taps inside the drawer from bubbling up to the overlay (mobile fix)
+
 document.getElementById('modalDrawer').addEventListener('click', e => {
   e.stopPropagation();
 });
 
-// ===== SIDEBAR TOGGLE (MOBILE) =====
+
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
   const isOpen = sidebar.classList.toggle('open');
   backdrop.classList.toggle('open');
-  // On very small screens the sidebar may be display:none — force show when opening
+
   if (isOpen) sidebar.style.display = 'flex';
   else sidebar.style.display = '';
 }
@@ -3983,14 +3870,14 @@ function closeSidebar() {
   document.getElementById('sidebarBackdrop').classList.remove('open');
 }
 
-// Close sidebar when a nav item is clicked on mobile
+
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
     if (window.innerWidth <= 900) closeSidebar();
   });
 });
 
-// ===== MOBILE CARD TABLE — PRODUCTS =====
+
 function renderProductsCards(filtered) {
   const wrap = document.getElementById('productsCardTable');
   if (!wrap) return;
@@ -4032,7 +3919,7 @@ function renderProductsCards(filtered) {
   }).join('');
 }
 
-// ===== MOBILE CARD TABLE — RESELLERS =====
+
 function renderResellersCards(filtered) {
   const wrap = document.getElementById('resellersCardTable');
   if (!wrap) return;
@@ -4061,7 +3948,7 @@ function renderResellersCards(filtered) {
   `).join('');
 }
 
-// ===== BRAND 3-LEVEL TEXT INPUTS WITH AUTOCOMPLETE =====
+
 
 function getBrandsFromProducts() {
   return [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))].sort();
@@ -4102,7 +3989,7 @@ function onBrandTextInput(picked) {
   } else {
     hideSuggestBox('brandSuggestBox');
   }
-  // Clear downstream
+
   document.getElementById('fBrandLine').value = '';
   document.getElementById('fBrandModel').value = '';
 }
@@ -4119,14 +4006,13 @@ function onLineTextInput(picked) {
   document.getElementById('fBrandModel').value = '';
 }
 
-// Hide suggest boxes on outside click
+
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#fBrand') && !e.target.closest('#brandSuggestBox')) hideSuggestBox('brandSuggestBox');
   if (!e.target.closest('#fBrandLine') && !e.target.closest('#lineSuggestBox')) hideSuggestBox('lineSuggestBox');
   if (!e.target.closest('#fBrandModel') && !e.target.closest('#modelSuggestBox')) hideSuggestBox('modelSuggestBox');
 });
 
-// Focus: show existing suggestions
 document.addEventListener('focusin', (e) => {
   if (e.target.id === 'fBrand') {
     const brands = getBrandsFromProducts();
@@ -4161,7 +4047,7 @@ function setBrandCascade(brand, line, model) {
   document.getElementById('fBrandModel').value = model || '';
 }
 
-// ===== SOCIAL LINKS SETTINGS =====
+
 async function loadSocialLinks() {
   try {
     const res = await fetch('/admin/social-links');
@@ -4196,7 +4082,7 @@ async function saveSocialLinks() {
   }
 }
 
-// ===== ORDERS MANAGEMENT =====
+
 let allOrders = [];
 
 async function loadOrders() {
@@ -4210,7 +4096,7 @@ async function loadOrders() {
     allOrders = data1.orders || [];
     allBuyerOrders = data2.orders || [];
     renderOrdersTable();
-    // Update pending badge (reseller + buyer combined)
+
     const resellerPending = allOrders.filter(o => o.status === 'pending').length;
     const buyerPending    = allBuyerOrders.filter(o => o.status === 'pending').length;
     const totalPending    = resellerPending + buyerPending;
@@ -4221,7 +4107,7 @@ async function loadOrders() {
     }
     const statPending = document.getElementById('statPendingOrders');
     if (statPending) statPending.textContent = totalPending;
-    // Buyer badge
+
     const buyerBadge = document.getElementById('buyerOrderBadge');
     if (buyerBadge) {
       buyerBadge.textContent = buyerPending;
@@ -4298,7 +4184,7 @@ function renderOrdersTable() {
       </tr>`;
   }).join('');
 
-  // Mobile cards
+
   if (cardTable) {
     cardTable.innerHTML = filtered.map(o => {
       const d = new Date(o.createdAt);
@@ -4357,7 +4243,7 @@ async function approveOrder(orderId) {
 
 function promptRejectOrder(orderId) {
   const reason = prompt('Reason for rejection (optional):') ?? null;
-  if (reason === null) return; // cancelled
+  if (reason === null) return; 
   rejectOrder(orderId, reason);
 }
 
@@ -4402,7 +4288,7 @@ async function deleteOrder(orderId) {
   }
 }
 
-// ===== ORDERS TAB SWITCHER =====
+
 function switchOrdersTab(tab) {
   const resellerPanel = document.getElementById('resellerOrdersPanel');
   const buyerPanel    = document.getElementById('buyerOrdersPanel');
@@ -4428,7 +4314,7 @@ function switchOrdersTab(tab) {
   }
 }
 
-// ===== BUYER ORDERS =====
+
 let allBuyerOrders = [];
 
 async function loadBuyerOrders() {
@@ -4437,7 +4323,7 @@ async function loadBuyerOrders() {
     const data = await res.json();
     allBuyerOrders = data.orders || [];
     renderBuyerOrdersTable();
-    // Update badge
+
     const pending = allBuyerOrders.filter(o => o.status === 'pending').length;
     const badge = document.getElementById('buyerOrderBadge');
     if (badge) {
@@ -4551,7 +4437,7 @@ function renderBuyerOrdersTable() {
       </tr>`;
   }).join('');
 
-  // Mobile cards
+
   if (cardTable) {
     cardTable.innerHTML = filtered.map(o => {
       const d       = new Date(o.createdAt);
@@ -4685,15 +4571,12 @@ async function deleteBuyerOrder(orderId) {
   }
 }
 
-// ===== INIT =====
-renderSizeGrid();
-checkSession(); // hide login screen if valid session exists
-loadProductsFromBackend(); // load from backend DB, fall back to localStorage
 
-// ===== SSE — LIVE PRODUCT UPDATES =====
-// Connects to the server-sent-events stream so product list / stock counts
-// update automatically whenever any client (admin or reseller) makes a change,
-// without requiring a manual page refresh.
+renderSizeGrid();
+checkSession(); 
+loadProductsFromBackend();
+
+
 (function initSSE() {
   let es;
   let reconnectDelay = 3000;
@@ -4705,8 +4588,6 @@ loadProductsFromBackend(); // load from backend DB, fall back to localStorage
       try {
         const msg = JSON.parse(event.data);
         if (msg.type === 'products') {
-          // Only update if the product modal is NOT open (to avoid clobbering
-          // an in-progress edit form with stale data from the stream).
           const modalOpen = document.getElementById('modalOverlay')?.classList.contains('open');
           if (!modalOpen) {
             products = msg.products || [];
@@ -4716,7 +4597,7 @@ loadProductsFromBackend(); // load from backend DB, fall back to localStorage
 
 
         }
-      } catch (e) { /* ignore malformed frames */ }
+      } catch (e) { }
     };
 
     es.onopen = () => {
@@ -4732,8 +4613,7 @@ loadProductsFromBackend(); // load from backend DB, fall back to localStorage
 
   connect();
 
-  // Also refresh orders count whenever products change (stock deductions happen together)
-  // by listening to a custom DOM event we fire after SSE updates
+
   document.addEventListener('sseProductsUpdated', () => {
     loadPendingOrderCount();
   });
