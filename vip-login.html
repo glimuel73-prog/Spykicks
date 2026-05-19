@@ -35,7 +35,6 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* LEFT PANEL */
   .left-panel {
     background: var(--black);
     display: flex;
@@ -152,7 +151,6 @@
     text-transform: uppercase;
   }
 
-  /* RIGHT PANEL */
   .right-panel {
     display: flex;
     flex-direction: column;
@@ -257,14 +255,13 @@
     .left-panel { display: none; }
     .right-panel { padding: 40px 24px; min-height: 100vh; }
     .btn-primary { font-size: 14px; padding: 18px 24px; }
-    .form-group input { font-size: 16px; /* prevents iOS zoom */ padding: 16px 18px; }
+    .form-group input { font-size: 16px; padding: 16px 18px; }
     .back-link { margin-top: 32px; font-size: 13px; }
   }
 </style>
 </head>
 <body>
 
-<!-- LEFT PANEL -->
 <div class="left-panel">
   <a href="https://brochure-availablestocks.up.railway.app/index.html" class="logo">CATALOG & AVAILABLE STOCKS</a>
 
@@ -277,7 +274,6 @@
   <div class="left-footer">© 2026 Catalog</div>
 </div>
 
-<!-- RIGHT PANEL -->
 <div class="right-panel">
   <div class="form-label">Reseller Login</div>
   <div id="errorMsg" class="error-msg"></div>
@@ -297,14 +293,12 @@ if (window.location.protocol === 'file:') {
 }
 
 window.onload = async () => {
-  // If already logged in, go straight to dashboard
   const saved = localStorage.getItem("resellerEmail");
   if (saved) {
     window.location.href = "https://brochure-availablestocks.up.railway.app/reseller-products.html";
     return;
   }
 
-  // Pre-fill email from URL param (from admin approval link or elsewhere)
   const params = new URLSearchParams(window.location.search);
   const email = params.get("email");
   if (email) {
