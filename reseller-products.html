@@ -28,13 +28,11 @@
   }
   body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-  /* TICKER */
   .ticker { background: black; overflow: hidden; white-space: nowrap; padding: 6px 0; }
   .ticker-inner { display: inline-flex; gap: 32px; animation: ticker 18s linear infinite; }
   .ticker-inner span { font-family: Arial,sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: white; }
   @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-  /* HEADER */
   .header { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
   .header-top { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 64px; max-width: 1400px; margin: 0 auto; }
   .logo { font-family: Arial,sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 4px; color: var(--black); text-transform: uppercase; text-decoration: none; }
@@ -46,7 +44,6 @@
   .logout-btn { background: none; border: 1px solid var(--border-dark); color: var(--text-muted); font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 16px; cursor: pointer; transition: all .2s; border-radius: 4px; }
   .logout-btn:hover { border-color: var(--red); color: var(--red); }
 
-  /* HERO */
   .hero { background: #111111; border-bottom: none; padding: 80px 40px; max-width: 100%; margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 40px; }
   .hero-inner { max-width: 1400px; margin: 0 auto; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 40px; }
   .hero-text p { color: #888; font-family: Arial,sans-serif; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 16px; }
@@ -58,12 +55,10 @@
   .hero-stat .big { font-family: Arial,sans-serif; font-weight: 900; font-size: 72px; color: #ffffff; line-height: 1; }
   .hero-stat .label { font-size: 11px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; font-family: Arial,sans-serif; }
 
-  /* SECTION HEADER */
   .section-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px 18px; width: 100%; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; background: var(--bg2); }
   .section-title { font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: var(--text); }
   .badge-pill { background: var(--black); color: var(--white); font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
 
-  /* CATEGORY + FILTER ROW */
   .filter-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 40px; width: 100%; border-bottom: 1px solid var(--border); background: var(--white); flex-wrap: wrap; gap: 12px; }
   .cat-chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .cat-chip { padding: 6px 18px; border: 1px solid var(--border-dark); background: none; color: var(--text-muted); font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
@@ -77,7 +72,6 @@
   .fav-count { background: var(--red); color: var(--white); font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
   .fav-count.visible { display: inline-flex; }
 
-  /* PRODUCT GRID */
   .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: var(--border); width: 100%; margin: 1px 0 0; }
   .product-card { background: var(--white); padding: 24px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
   .product-card:hover { background: var(--bg2); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
@@ -100,12 +94,10 @@
   .pd-color-dot:hover { transform: scale(1.15); box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
   .pd-color-dot.selected { outline: 2px solid #111; outline-offset: 3px; transform: scale(1.15); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
   .pd-selected-color-label { font-size: 12px; color: #555; font-family: Arial, sans-serif; letter-spacing: 1px; margin-top: 6px; min-height: 18px; }
-  /* VIEW DETAILS BUTTON */
   .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: #111; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 12px; border: none; cursor: pointer; transition: background .2s; margin-top: auto; border-radius: 4px; }
   .product-view-btn:hover { background: #333; }
   .product-view-btn svg { width: 14px; height: 14px; }
 
-  /* CARD IMAGE WRAPPER + DOWNLOAD OVERLAY */
   .img-card-wrap { position: relative; }
   .img-card-wrap:hover .img-dl-btn { opacity: 1; }
   .img-dl-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.72); color: #fff; border: none; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity .2s, background .15s; z-index: 4; }
@@ -116,14 +108,12 @@
   .img-zoom-btn svg { width: 15px; height: 15px; }
   .img-card-wrap:hover .img-zoom-btn { opacity: 1; }
 
-  /* PD main image action buttons */
   .pd-img-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
   .pd-img-action-btn { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.12); color: #444; font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; padding: 7px 14px; border-radius: 6px; cursor: pointer; transition: background .15s, color .15s; }
   .pd-img-action-btn:hover { background: #111; color: #fff; border-color: #111; }
   .pd-img-action-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
   .pd-main-img { cursor: zoom-in; }
 
-  /* LIGHTBOX */
   .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 2000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
   .lightbox-overlay.open { display: flex; }
   .lightbox-img-wrap { position: relative; max-width: 90vw; max-height: 80vh; display: flex; align-items: center; justify-content: center; }
@@ -141,14 +131,12 @@
   .lightbox-dl-btn svg { width: 14px; height: 14px; }
   .lightbox-counter { font-family: Arial,sans-serif; font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 2px; text-transform: uppercase; }
 
-  /* CART BUTTON */
   .cart-btn { position: relative; background: var(--black); color: var(--white); border: none; font-family: Arial,sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 18px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 4px; transition: background .2s; }
   .cart-btn:hover { background: #333; }
   .cart-btn svg { width: 16px; height: 16px; }
   .cart-badge { position: absolute; top: -6px; right: -6px; background: var(--red); color: var(--white); font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
   .cart-badge.visible { display: inline-flex; }
 
-  /* CART DRAWER */
   .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 600; opacity: 0; pointer-events: none; transition: opacity .3s; }
   .cart-overlay.open { opacity: 1; pointer-events: all; }
   .cart-drawer { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: 480px; background: var(--white); z-index: 601; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: -8px 0 48px rgba(0,0,0,0.18); }
@@ -189,7 +177,6 @@
   .cart-checkout-btn:hover { background: #333; }
   .cart-checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-  /* ORDER HISTORY */
   .order-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
   .order-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
   .order-id { font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
@@ -208,27 +195,23 @@
   .order-cancel-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
   .order-status-pill.cancelled { color: #555; border-color: #bbb; background: #f5f5f5; }
 
-  /* FAV BUTTON */
   .fav-btn { position: absolute; top: 14px; left: 14px; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; z-index: 2; padding: 0; border-radius: 50%; }
   .fav-btn:hover { border-color: var(--red); color: var(--red); }
   .fav-btn.active { background: var(--red); border-color: var(--red); color: var(--white); }
   .fav-btn svg { width: 14px; height: 14px; fill: currentColor; transition: transform .15s; }
   .fav-btn.active svg { transform: scale(1.15); }
 
-  /* FAVORITES EMPTY */
   .fav-empty { display: none; grid-column: 1 / -1; padding: 60px 24px; text-align: center; }
   .fav-empty p { font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-top: 12px; }
   .fav-empty-icon { font-size: 36px; opacity: .2; }
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
 
-  /* SEARCH */
   .search-wrap { position: relative; }
   .search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; fill: none; stroke: var(--text-dim); stroke-width: 2; pointer-events: none; }
   .search-input { background: var(--bg2); border: 1px solid var(--border-dark); color: var(--text); font-family: Arial,sans-serif; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 14px 8px 34px; outline: none; width: 210px; transition: border-color .2s, width .25s; border-radius: 20px; }
   .search-input:focus { border-color: var(--black); width: 255px; background: var(--white); }
   .search-input::placeholder { color: var(--text-dim); letter-spacing: 2px; }
 
-  /* SORT BAR */
   .sort-bar { display: flex; align-items: center; gap: 12px; padding: 12px 40px; border-bottom: 1px solid var(--border); background: var(--white); flex-wrap: wrap; width: 100%; }
   .sort-label { font-family: Arial,sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; flex-shrink: 0; }
   .sort-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
@@ -236,10 +219,8 @@
   .sort-chip.active, .sort-chip:hover { border-color: var(--black); color: var(--white); background: var(--black); }
   .visible-count-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; flex-shrink: 0; }
 
-  /* BRAND BAR */
   .brand-bar { align-items: center; gap: 8px; padding: 10px 40px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-wrap: wrap; width: 100%; }
 
-  /* STATES */
   #loading, #unauthorized, #mainContent { display: none; }
   .state-box { max-width: 1400px; margin: 80px auto; padding: 0 40px; text-align: center; }
   .state-box h2 { font-family: Arial,sans-serif; font-weight: 900; font-size: 48px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
@@ -248,7 +229,6 @@
   .loading-spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--black); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* PRODUCT DETAIL MODAL */
   .pd-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 500; opacity: 0; pointer-events: none; transition: opacity .3s; }
   .pd-overlay.open { opacity: 1; pointer-events: all; }
   .pd-drawer { position: fixed; top: 0; right: 0; height: 100%; width: 100%; max-width: 860px; background: #f4f4f4; z-index: 501; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow: hidden; border-radius: 20px 0 0 20px; box-shadow: -8px 0 48px rgba(0,0,0,0.18); }
@@ -316,22 +296,18 @@
     .pd-thumb { width: 52px; height: 52px; }
   }
 
-  /* FOOTER TRUST BADGES */
   .footer-trust { background: #111; border-top: 1px solid #1e1e1e; padding: 28px 60px; display: flex; align-items: center; justify-content: center; gap: 60px; max-width: 100%; flex-wrap: wrap; }
   .trust-item { display: flex; align-items: center; gap: 16px; }
   .trust-item svg { width: 36px; height: 36px; stroke: #555; fill: none; stroke-width: 1.5; flex-shrink: 0; }
   .trust-item-text strong { display: block; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #fff; margin-bottom: 2px; }
   .trust-item-text span { font-size: 12px; color: #555; letter-spacing: .5px; }
-  /* FOOTER */
   .footer { background: #111; border-top: 1px solid #222; padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; max-width: 100%; margin-left: auto; margin-right: auto; }
   .footer-logo { font-family: Arial,sans-serif; font-weight: 900; font-size: 22px; letter-spacing: 4px; color: #fff; }
   .footer-logo span { color: #fff; }
   .footer-copy { font-size: 11px; color: #555; letter-spacing: 2px; text-transform: uppercase; font-family: Arial,sans-serif; }
 
-  /* ══ MOBILE RESPONSIVE ══ */
   @media (max-width: 768px) {
 
-    /* ── Header ── */
     .header-top { padding: 0 12px; height: auto; flex-wrap: wrap; gap: 0; align-items: center; }
     .logo {
       font-size: 18px;
@@ -348,17 +324,13 @@
     .logo-short { display: inline; }
     .header-actions { order: 2; gap: 5px; height: 48px; align-items: center; flex-shrink: 0; }
     .reseller-badge { display: none; }
-    /* Cart button — icon + badge only, no text */
     .cart-btn { padding: 7px 9px; gap: 0; font-size: 0; letter-spacing: 0; min-width: 34px; justify-content: center; }
     .cart-btn svg { width: 17px; height: 17px; }
-    /* Favorites — icon + count only */
     .fav-chip { padding: 5px 9px; gap: 3px; font-size: 0; letter-spacing: 0; }
     .fav-chip svg { width: 14px; height: 14px; }
     .fav-count { font-size: 10px; min-width: 15px; height: 15px; }
-    /* Logout — compact */
     .logout-btn { font-size: 10px; padding: 5px 9px; letter-spacing: 0.5px; }
 
-    /* ── Hero ── */
     .hero { flex-direction: column; padding: 28px 16px 32px; gap: 16px; }
     .hero-inner { flex-direction: column; text-align: center; gap: 12px; }
     .hero-text p { font-size: 10px; letter-spacing: 3px; margin-bottom: 8px; }
@@ -368,30 +340,25 @@
     .hero-stat .big { font-size: 40px; }
     .hero-stat .label { font-size: 10px; }
 
-    /* ── Section header ── */
     .section-header { padding: 12px 14px 10px; flex-direction: column; align-items: flex-start; gap: 8px; }
     .cat-chips { gap: 5px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 2px; max-width: 100%; }
     .cat-chips::-webkit-scrollbar { display: none; }
     .cat-chip { padding: 5px 12px; font-size: 10px; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Sort bar ── */
     .sort-bar { padding: 8px 14px; gap: 6px; flex-wrap: wrap; }
     .sort-label { display: none; }
     .sort-chips { gap: 4px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
     .sort-chips::-webkit-scrollbar { display: none; }
     .sort-chip { padding: 4px 10px; font-size: 10px; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
     .visible-count-label { display: none; }
-    /* Search — full width below chips */
     .search-wrap { width: 100%; order: 10; }
     .search-input { width: 100% !important; font-size: 12px; }
     .search-input:focus { width: 100% !important; }
 
-    /* ── Gender bar ── */
     .gender-bar-reseller { padding: 8px 14px !important; gap: 6px !important; }
     .gender-bar-reseller .cat-chips,
     .gender-bar-reseller > div { overflow-x: auto; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
 
-    /* ── Brand bar ── */
     .brand-bar { padding: 8px 14px !important; }
     #brandLevel1,
     #brandLevel2,
@@ -403,7 +370,6 @@
     #lineChips::-webkit-scrollbar,
     #modelChips::-webkit-scrollbar { display: none; }
 
-    /* ── Product grid ── */
     .product-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; }
     .product-card { padding: 12px; }
     .product-img-placeholder { height: 210px; border-radius: 3px; }
@@ -420,7 +386,6 @@
     .fav-btn svg { width: 12px; height: 12px; }
     .product-view-btn { font-size: 10px; letter-spacing: 1px; padding: 9px 8px; border-radius: 3px; }
 
-    /* ── Product detail drawer — slide up from bottom ── */
     .pd-drawer { max-width: 100%; top: auto; bottom: 0; height: 92dvh; border-radius: 24px 24px 0 0; transform: translateY(100%); }
     .pd-drawer.open { transform: translateY(0); }
     .pd-inner { flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -439,7 +404,6 @@
     .pd-size.selected { transform: scale(1.06); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
     .pd-btn-select { padding: 14px; font-size: 12px; border-radius: 10px; }
 
-    /* ── Cart drawer ── */
     .cart-drawer { max-width: 100%; }
     .cart-header { padding: 16px 18px; }
     .cart-body { padding: 12px 16px; }
@@ -450,11 +414,9 @@
     .cart-item-meta { font-size: 10px; }
     .cart-item-price { font-size: 14px; }
 
-    /* ── Footer ── */
     .footer-trust { flex-direction: column; gap: 20px; padding: 20px 16px; }
     .footer { flex-direction: column; gap: 10px; padding: 20px 16px; text-align: center; }
 
-    /* ── State box ── */
     .state-box { padding: 0 16px; margin-top: 60px; }
     .state-box h2 { font-size: 32px; }
   }
@@ -470,7 +432,6 @@
 </head>
 <body>
 
-<!-- TICKER -->
 <div class="ticker">
   <div class="ticker-inner">
     <span>Available Stocks</span><span>•</span>
@@ -484,7 +445,6 @@
   </div>
 </div>
 
-<!-- HEADER -->
 <div class="header">
   <div class="header-top">
     <a class="logo"><span class="logo-full">CATALOG & AVAILABLE STOCKS</span><span class="logo-short">CATALOG</span></a>
@@ -505,23 +465,19 @@
   </div>
 </div>
 
-<!-- LOADING -->
 <div id="loading" class="state-box">
   <div class="loading-spinner"></div>
   <p>Loading reseller products...</p>
 </div>
 
-<!-- UNAUTHORIZED -->
 <div id="unauthorized" class="state-box">
   <h2 style="color:var(--red);">Access<span style="display:block;">Denied.</span></h2>
   <p>You are not an approved reseller.</p>
   <a href="https://brochure-availablestocks.up.railway.app/index.html">← Back to Store</a>
 </div>
 
-<!-- MAIN CONTENT -->
 <div id="mainContent">
 
-  <!-- HERO -->
   <div class="hero">
     <div class="hero-inner">
     <div class="hero-text">
@@ -536,7 +492,6 @@
     </div>
   </div>
 
-  <!-- SECTION HEADER: title + category chips (matches index.html layout) -->
   <div class="section-header">
     <span class="section-title">Reseller Catalog</span>
     <div class="cat-chips" id="catChips">
@@ -551,7 +506,6 @@
     </div>
   </div>
 
-  <!-- SORT BAR -->
   <div class="sort-bar">
     <span class="sort-label">Sort by</span>
     <div class="sort-chips" id="sortChips">
@@ -567,7 +521,6 @@
     </div>
   </div>
 
-  <!-- GENDER FILTER ROW -->
   <div style="display:flex;align-items:center;gap:8px;padding:10px 40px;width:100%;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;" class="gender-bar-reseller">
     <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Gender</span>
     <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;-webkit-overflow-scrolling:touch;"  class="gender-chips-inner">
@@ -578,28 +531,23 @@
     </div>
   </div>
 
-  <!-- BRAND BAR (3-level: Brand → Line → Model) -->
   <div id="brandBar" style="display:none;background:#fff;border-bottom:1px solid #e8e8e8;">
-    <!-- Level 1: Brands -->
     <div id="brandLevel1" style="display:flex;align-items:center;gap:8px;padding:10px 40px;flex-wrap:wrap;border-bottom:1px solid #f0f0f0;">
       <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
       <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
       </div>
     </div>
-    <!-- Level 2: Lines (shown when a brand is selected and has lines) -->
     <div id="brandLevel2" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 56px;flex-wrap:wrap;background:#fafafa;border-bottom:1px solid #f0f0f0;">
       <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#bbb;flex-shrink:0;">Line</span>
       <div id="lineChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
-    <!-- Level 3: Models (shown when a line is selected and has models) -->
     <div id="brandLevel3" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 72px;flex-wrap:wrap;background:#f5f5f5;">
       <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#ccc;flex-shrink:0;">Model</span>
       <div id="modelChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
   </div>
 
-  <!-- PRODUCT GRID -->
   <div class="product-grid" id="productGrid">
     <div class="fav-empty" id="favEmpty">
       <div class="fav-empty-icon">♥</div>
@@ -610,7 +558,7 @@
 
 </div>
 
-<!-- LIGHTBOX -->
+
 <div class="lightbox-overlay" id="lightboxOverlay" onclick="lightboxBgClick(event)">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <button class="lightbox-nav prev" id="lbPrev" onclick="lightboxNav(-1)">‹</button>
@@ -625,7 +573,6 @@
   <div class="lightbox-counter" id="lbCounter"></div>
 </div>
 
-<!-- PRODUCT DETAIL MODAL -->
 <div class="pd-overlay" id="pdOverlay" onclick="closePD()"></div>
 <div class="pd-drawer" id="pdDrawer">
   <div class="pd-top-bar">
@@ -680,14 +627,12 @@
           🛒 Add to Cart
         </button>
         <div id="pdSocialBtns" style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
-          <!-- populated by updateSocialLinks() -->
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- CART OVERLAY + DRAWER -->
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
   <div class="cart-header">
@@ -698,7 +643,6 @@
     <button class="cart-tab active" id="cartTabCart" onclick="switchCartTab('cart')">Cart</button>
     <button class="cart-tab" id="cartTabOrders" onclick="switchCartTab('orders')">Order History</button>
   </div>
-  <!-- CART PANEL -->
   <div id="cartPanel" class="cart-body">
     <div id="cartEmpty" class="cart-empty">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -706,7 +650,6 @@
     </div>
     <div id="cartItemsList"></div>
   </div>
-  <!-- ORDERS PANEL -->
   <div id="ordersPanel" class="cart-body" style="display:none;">
     <div id="ordersLoading" style="text-align:center;padding:40px;font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#999;">Loading orders...</div>
     <div id="ordersList"></div>
@@ -715,7 +658,6 @@
       <p>No orders yet</p>
     </div>
   </div>
-  <!-- CART FOOTER -->
   <div id="cartFooter" class="cart-footer" style="display:none;">
     <div class="cart-subtotal">
       <span>Subtotal</span>
@@ -726,8 +668,6 @@
   </div>
 </div>
 
-<!-- FOOTER -->
-<!-- FOOTER TRUST BADGES -->
 <div class="footer-trust">
   <div class="trust-item">
     <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3l4 4-4 4"/><path d="M8 21l-4-4 4-4"/></svg>
@@ -752,7 +692,6 @@
   </div>
 </div>
 
-<!-- ABOUT SECTION -->
 <div style="background:#111;border-top:1px solid #222;padding:56px 40px;">
   <div style="max-width:720px;margin:0 auto;text-align:center;">
     <div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#555;margin-bottom:18px;">About Us</div>
@@ -770,11 +709,9 @@
   </div>
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
   <div class="footer-logo">CATALOG & AVAILABLE STOCKS</div>
   <div style="display:flex;align-items:center;gap:12px;" id="footerSocials">
-    <!-- populated by renderFooterSocials() -->
   </div>
   <div class="footer-copy">© 2026 CATALOG & AVAILABLE STOCKS. All rights reserved.</div>
 </div>
@@ -783,7 +720,6 @@
   const email = localStorage.getItem("resellerEmail");
   if (!email) window.location.href = "https://brochure-availablestocks.up.railway.app/vip-login.html";
 
-  // Color name → CSS map
   const COLOR_NAME_MAP_R = {
     red:'#e53935',crimson:'#c62828',rose:'#e91e63',pink:'#f48fb1',
     orange:'#fb8c00',amber:'#ffb300',yellow:'#fdd835',gold:'#f9a825',
@@ -805,7 +741,6 @@
     if (!colors || !colors.length) return '';
     const dots = colors.map(c => {
       const label = c.trim();
-      // Check for double color: "black/white", "red-blue", "navy / white", etc.
       const splitMatch = label.match(/^(.+?)\s*[\/\-]\s*(.+)$/);
       let bgStyle, border;
       if (splitMatch) {
@@ -824,7 +759,7 @@
     if (className === 'color-dot') {
       return `<div class="product-colors" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">${dots}</div>`;
     }
-    return dots; // bare dots for pd-colors container
+    return dots;
   }
 
   const FAV_KEY = `catalog_favs_${email}`;
@@ -837,8 +772,6 @@
   let activeLine = "all";
   let activeModel = "all";
 
-  // Categories assigned to products (cycle through for demo)
-  // The server provides products without categories, so we assign them here
   const CATEGORIES = ["sneakers", "apparel", "accessories", "bags", "other"];
   const BADGES     = ["Exclusive", "Hot", "New", "", "Exclusive"];
 
@@ -859,7 +792,7 @@
     else { favorites.splice(idx, 1); btn.classList.remove("active"); }
     saveFavs();
     updateFavCount();
-    if (showingFavs) applyView(); // re-render if in favorites mode
+    if (showingFavs) applyView();
   }
 
   function filterGender(gender, btn) {
@@ -966,11 +899,9 @@
     showingFavs = !showingFavs;
     const btn = document.getElementById("favToggleBtn");
     btn.classList.toggle("active", showingFavs);
-    // Deactivate category chips when in fav mode
     if (showingFavs) {
       document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     } else {
-      // Restore category chip
       document.querySelectorAll("#catChips .cat-chip").forEach(c => {
         if (c.textContent.trim().toLowerCase().startsWith(currentCat === "all" ? "all" : currentCat)) c.classList.add("active");
       });
@@ -985,7 +916,6 @@
     const noResults = document.getElementById("noResults");
     const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
 
-    // Filter
     cards.forEach(card => {
       const id = card.dataset.id;
       const cat = card.dataset.cat;
@@ -1006,7 +936,6 @@
       card.style.display = show ? "" : "none";
     });
 
-    // Sort visible cards
     const grid = document.getElementById("productGrid");
     const visible = cards.filter(c => c.style.display !== "none");
     visible.sort((a, b) => {
@@ -1042,7 +971,6 @@
       document.getElementById("productCount").textContent = data.products.length + "+";
       document.getElementById("visibleCount").textContent = data.products.length + " items";
 
-      // Store products globally for 3-level brand filtering
       window._resellerProducts = data.products;
 
       const grid = document.getElementById("productGrid");
@@ -1054,13 +982,11 @@
         const productId = p.id || `product_${i}`;
         const isFav = favorites.includes(productId);
         const hasImg = p.images && p.images.length > 0;
-        // Sum per-size stocks if available (matches admin logic), else fall back to global p.stock
         let stockNum = Number(p.stock) || 0;
         if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
           stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
         }
         const stockLabel = stockNum === 0 ? "Out of Stock" : "In Stock";
-        // Use first size's resellerPrice as the card display price, fallback to p.resellerPrice then p.price
         let displayPrice = p.resellerPrice || p.price;
         if (p.sizes && p.sizes.length > 0 && typeof p.sizes[0] === 'object') {
           displayPrice = p.sizes[0].resellerPrice || p.resellerPrice || p.price;
@@ -1121,7 +1047,6 @@
           openPD(p, String(productId), category, badge, displayPrice);
         });
 
-        // Image zoom/download buttons
         const zoomBtn = card.querySelector(".img-zoom-btn");
         if (zoomBtn) {
           zoomBtn.addEventListener("click", function(e) {
@@ -1149,7 +1074,6 @@
         grid.appendChild(card);
       });
 
-      // ── Inject custom category chips (not in the static list) ──
       const STATIC_CATS = ['all', 'new-arrivals', 'sneakers', 'apparel', 'accessories', 'bags', 'caps', 'other'];
       const customCats = [...new Set(
         data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c))
@@ -1167,7 +1091,6 @@
         else chipsContainer.appendChild(btn);
       });
 
-      // ── Inject brand filter chips ──
       const brands = [...new Set(data.products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
       const brandBar = document.getElementById('brandBar');
       const brandChips = document.getElementById('brandChips');
@@ -1196,7 +1119,6 @@
     }
   };
 
-  // ════ PRODUCT DETAIL DRAWER ════
   const SIZES_BY_CAT = {
     sneakers:    [{s:"6",p:0},{s:"6.5",p:0},{s:"7",p:0},{s:"7.5",p:0},{s:"8",p:0},{s:"8.5",p:0},{s:"9",p:0},{s:"9.5",p:0},{s:"10",p:0},{s:"10.5",p:0},{s:"11",p:0}],
     apparel:     [{s:"XS",p:0},{s:"S",p:0},{s:"M",p:0},{s:"L",p:0},{s:"XL",p:0},{s:"2XL",p:0},{s:"3XL",p:0}],
@@ -1206,7 +1128,6 @@
     limited:     [{s:"7",p:0},{s:"7.5",p:0},{s:"8",p:5},{s:"8.5",p:5},{s:"9",p:10},{s:"9.5",p:10},{s:"10",p:15}],
   };
 
-  // Social media links — fetched dynamically from /social-links
   const SOCIAL_LINKS = { facebook: "", instagram: "", tiktok: "", twitter: "", shopee: "", lazada: "" };
 
   async function loadSocialLinks() {
@@ -1215,7 +1136,7 @@
       const data = await res.json();
       Object.assign(SOCIAL_LINKS, data.links || {});
       renderFooterSocials();
-    } catch(e) { /* fail silently */ }
+    } catch(e) {  }
   }
 
   function renderFooterSocials() {
@@ -1255,7 +1176,6 @@
     document.getElementById("pdBrand").textContent = product.brand || "Reseller Collection";
     document.getElementById("pdName").textContent = product.name;
     document.getElementById("pdPrice").textContent = `₱${displayPrice}`;
-    // Wholesale price — only shown in reseller view
     const pdWholesaleEl = document.getElementById("pdWholesalePrice");
     if (product.wholesalePrice) {
       pdWholesaleEl.textContent = `Wholesale: ₱${Number(product.wholesalePrice).toLocaleString()}`;
@@ -1271,7 +1191,6 @@
     const cb = document.getElementById("pdCornerBadge");
     if (badge) { cb.textContent = badge; cb.style.display = ""; } else cb.style.display = "none";
 
-    // Images
     const mainImg = document.querySelector(".pd-main-img");
     const thumbsEl = document.querySelector(".pd-thumbs");
     if (product.images && product.images.length > 0) {
@@ -1281,7 +1200,6 @@
         <div class="pd-thumb ${i===0?'active':''}" onclick="pdSwitchImg(this,'${src}')">
           <img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:2px;" alt="">
         </div>`).join('');
-      // Action buttons
       let actionsEl = document.querySelector('.pd-img-actions');
       if (!actionsEl) {
         actionsEl = document.createElement('div');
@@ -1302,11 +1220,9 @@
       if (actionsEl) actionsEl.innerHTML = '';
     }
 
-    // Description
     const descEl = document.getElementById("pdDesc");
     if (descEl) descEl.textContent = product.description || RESELLER_DESCS[0];
 
-    // Colors — interactive selectable dots
     const pdColorsEl = document.getElementById("pdColors");
     const pdColorsSection = document.getElementById("pdColorsSection");
     const pdColorLabel = document.getElementById("pdSelectedColorLabel");
@@ -1337,7 +1253,6 @@
     }
 
 
-    // Sizes — carry per-size stock, use resellerPrice
     let sizes;
     if (product.sizes && product.sizes.length > 0) {
       if (typeof product.sizes[0] === 'object') {
@@ -1357,13 +1272,11 @@
       }));
     }
 
-    // Compute total stock: sum per-size if available, else use product.stock
     const hasPerSizeStock = sizes.some(s => s.stock !== null);
     const totalStock = hasPerSizeStock
       ? sizes.reduce((sum, s) => sum + (s.stock || 0), 0)
       : Number(product.stock) || 0;
 
-    // Specs (after totalStock is known)
     let specsArr = [];
     if (product.specs && product.specs.length > 0) {
       specsArr = product.specs.map(s => [s.key, s.val]);
@@ -1375,7 +1288,6 @@
     specsArr.push(["Tier", "Reseller Exclusive"]);
     document.getElementById("pdSpecs").innerHTML = specsArr.map(([k,v]) => `<div class="pd-spec"><strong>${k}</strong>${v}</div>`).join("");
 
-    // Update overall stock info line with total
     const stockEl = document.getElementById("pdStock");
     if (totalStock === 0) {
       stockEl.textContent = '✖ Out of Stock';
@@ -1388,7 +1300,6 @@
       stockEl.style.color = '#27ae60';
     }
 
-    // Render size buttons with per-size stock states
     document.getElementById("pdSizes").innerHTML = sizes.map(s => {
       const outOfStock = s.stock !== null && s.stock === 0;
       const lowStock   = s.stock !== null && s.stock > 0 && s.stock <= 3;
@@ -1444,10 +1355,8 @@
     pdSelectedStock = (stockQty !== null && stockQty !== undefined) ? Number(stockQty) : null;
     document.getElementById("pdPrice").textContent = `₱${Number(price).toLocaleString()}`;
 
-    // Update stock info to reflect this specific size's stock
     const stockEl = document.getElementById("pdStock");
     if (stockQty === null || stockQty === undefined) {
-      // No per-size data — leave overall stock as-is
     } else if (stockQty === 0) {
       stockEl.textContent = `✖ Size ${size} — Out of Stock`;
       stockEl.style.color = '#ff3b30';
@@ -1464,25 +1373,20 @@
 
   function pdPickColor(dotEl, colorName) {
     pdSelectedColor = colorName;
-    pdSelectedSize = null; // reset size selection since stocks may change
-    // Update dot selection state
+    pdSelectedSize = null;
     document.querySelectorAll('#pdColors .pd-color-dot').forEach(d => d.classList.remove('selected'));
     dotEl.classList.add('selected');
-    // Update label
     const label = document.getElementById('pdSelectedColorLabel');
     if (label) label.textContent = colorName;
 
-    // Refresh size buttons to show color-specific stock
     const product = pdCurrentProduct;
     if (product) {
       const sizesEl = document.getElementById("pdSizes");
-      // Rebuild sizes with color-specific stock
       let sizes;
       if (product.sizes && product.sizes.length > 0) {
         if (typeof product.sizes[0] === 'object') {
           sizes = product.sizes.map(s => {
             let stock = s.stock != null ? Number(s.stock) : null;
-            // Use colorStock for the selected color if available
             if (s.colorStock && s.colorStock[colorName] != null) {
               stock = Number(s.colorStock[colorName]);
             }
@@ -1584,7 +1488,6 @@
     window.location.href = "https://brochure-availablestocks.up.railway.app/index.html";
   }
 
-  // ════ PRODUCT MODAL ════
   const RESELLER_DESCS = [
     " ",
   ];
@@ -1641,7 +1544,6 @@
   }
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModalDirect(); closeCart(); } });
 
-  // ════ CART SYSTEM ════
   let cart = JSON.parse(localStorage.getItem("resellerCart_" + email) || "[]");
 
   function saveCart() {
@@ -1690,12 +1592,10 @@
       setTimeout(() => { btn.textContent = "🛒 Add to Cart"; btn.style.background = ""; }, 1800);
       return;
     }
-    // Require color selection if product has colors
     if (p.colors && p.colors.length > 0 && !pdSelectedColor) {
       const btn = document.getElementById("pdAddToCartBtn");
       btn.textContent = "⚠ Please select a color first";
       btn.style.background = "#f59e0b";
-      // Highlight the colors section
       const colorsSection = document.getElementById("pdColorsSection");
       if (colorsSection) { colorsSection.style.outline = "2px solid #f59e0b"; colorsSection.style.borderRadius = "6px"; }
       setTimeout(() => {
@@ -1706,7 +1606,6 @@
     }
 
     const price = pdSelectedPrice || p.resellerPrice || p.price;
-    // maxStock: use per-size stock if known, else fall back to product-level stock, else unlimited (null)
     const maxStock = pdSelectedStock !== null ? pdSelectedStock : (Number(p.stock) || null);
 
     const existing = cart.find(i => i.productId === String(p.id) && i.size === pdSelectedSize && (i.color || null) === (pdSelectedColor || null));
@@ -2009,22 +1908,16 @@
     if (e.key === 'ArrowRight') lightboxNav(1);
   });
 
-  // Init cart badge on load
   updateCartBadge();
   renderCartItems();
 
-  // ===== SSE — LIVE PRODUCT UPDATES =====
   (function initResellerSSE() {
     let es;
     let reconnectDelay = 3000;
-    // The server sends the full product list IMMEDIATELY on connect as a "hello".
-    // window.onload already rendered all cards, so we must SKIP adding new cards
-    // on that very first message — otherwise every product is duplicated.
-    // After the first message we flip this flag and handle additions normally.
     let _firstMessageConsumed = false;
 
     function connect() {
-      _firstMessageConsumed = false; // reset on every (re)connect
+      _firstMessageConsumed = false;
       es = new EventSource('/events/products');
 
       es.onmessage = (event) => {
@@ -2039,18 +1932,15 @@
           });
           const incomingIds = new Set(incoming.map(p => String(p.id)));
 
-          // --- On the first message: just mark initialised, sync stock, don't add/remove cards ---
           if (!_firstMessageConsumed) {
             _firstMessageConsumed = true;
-            // Sync global list with fresh data from server
             incoming.forEach(p => {
               const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
               if (idx !== -1) window._resellerProducts[idx] = p;
             });
-            return; // ← CRITICAL: skip add/remove logic on the initial snapshot
+            return;
           }
 
-          // --- UPDATE: fix stock number + label on existing cards ---
           incoming.forEach(p => {
             const card = document.querySelector(`.product-card[data-id="${CSS.escape(String(p.id))}"]`);
             if (!card) return;
@@ -2061,11 +1951,9 @@
             }
             const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
 
-            // Update "Stock: X units" text
             const stockEl = card.querySelector('.product-stock');
             if (stockEl) stockEl.textContent = `Stock: ${stockNum} units`;
 
-            // Update In Stock / Out of Stock chip
             const tagEl = card.querySelector('.product-tag');
             if (tagEl) {
               tagEl.textContent = stockLabel;
@@ -2073,27 +1961,22 @@
               tagEl.style.borderColor = stockNum === 0 ? 'var(--red)' : '';
             }
 
-            // Flash card briefly to signal the change
             card.style.outline = '2px solid rgba(46,204,113,0.6)';
             setTimeout(() => { card.style.outline = ''; }, 1200);
 
-            // Keep global list in sync
             const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
             if (idx !== -1) window._resellerProducts[idx] = p;
           });
 
-          // --- DELETE: remove cards for products no longer in the list ---
           document.querySelectorAll('.product-card[data-id]').forEach(card => {
             if (!incomingIds.has(card.dataset.id)) {
               card.remove();
             }
           });
-          // Sync global list too
           window._resellerProducts = (window._resellerProducts || []).filter(p => incomingIds.has(String(p.id)));
           document.getElementById('productCount').textContent = (window._resellerProducts.length || incoming.length) + '+';
           applyView();
 
-          // --- ADD: append genuinely new products ---
           const currentIds = new Set((window._resellerProducts || []).map(p => String(p.id)));
           const newProducts = incoming.filter(p => !currentIds.has(String(p.id)));
 
@@ -2187,7 +2070,6 @@
                 toggleFav(String(productId), this);
               });
 
-              // Brief green outline so the reseller notices the new card
               card.style.outline = '2px solid rgba(46,204,113,0.7)';
               setTimeout(() => { card.style.outline = ''; }, 2500);
 
@@ -2198,7 +2080,7 @@
             showSSEToast(`${newProducts.length} new product${newProducts.length > 1 ? 's' : ''} added!`);
           }
 
-        } catch (e) { /* ignore malformed frames */ }
+        } catch (e) {  }
       };
 
       es.onopen = () => {
@@ -2215,7 +2097,6 @@
     connect();
   })();
 
-  // Non-intrusive toast for SSE-triggered new-product events
   function showSSEToast(msg) {
     let el = document.getElementById('sseToast');
     if (!el) {
