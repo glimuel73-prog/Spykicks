@@ -9,7 +9,6 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
-// ================= SSE — LIVE PRODUCT UPDATES =================
 const sseClients = new Set();
 
 function broadcastProducts() {
@@ -24,19 +23,13 @@ function broadcastProducts() {
     } catch (e) {}
 }
 
-// ================= PERSISTENT DATA DIR =================
 const DATA_DIR = "/data";
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-// ================= UPLOADS DIR =================
 const uploadsDir = path.join(DATA_DIR, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir));
 
-// ================= IMAGE UPLOAD =================
-// Saves image to disk and returns a real URL — NOT a base64 data URL.
-// This prevents the DB and localStorage from being bloated with MB-sized strings,
-// which was causing products to silently vanish in the admin panel.
 app.post("/admin/upload-image", (req, res) => {
     const { base64, mimeType } = req.body;
     if (!base64 || !mimeType) return res.json({ success: false, error: "No image data" });
@@ -54,7 +47,6 @@ app.post("/admin/upload-image", (req, res) => {
 
 app.use(express.static(path.join(__dirname)));
 
-// ================= DATABASE =================
 const db = new Database(path.join(DATA_DIR, "users.db"));
 
 db.exec(`
@@ -86,7 +78,6 @@ db.exec(`
     )
 `);
 
-// Seed default social links if not present
 const defaultSocials = {
     facebook:  "https://www.facebook.com/profile.php?id=61565876271368",
     instagram: "https://www.instagram.com/spykicksph/?utm_source=qr",
@@ -100,7 +91,6 @@ Object.entries(defaultSocials).forEach(([k, v]) => {
     if (!existing) db.prepare("INSERT INTO settings (key, value) VALUES (?, ?)").run("social_" + k, v);
 });
 
-// ================= ADMIN — GET PASSWORD HASH =================
 app.get("/admin/password-hash", (req, res) => {
     try {
         const row = db.prepare("SELECT value FROM settings WHERE key = 'admin_pw_hash'").get();
@@ -110,12 +100,10 @@ app.get("/admin/password-hash", (req, res) => {
     }
 });
 
-// ================= ADMIN — CHANGE PASSWORD =================
 app.post("/admin/change-password", (req, res) => {
     const { currentHash, newHash } = req.body;
     if (!currentHash || !newHash) return res.json({ success: false, error: "Missing fields" });
 
-    // Default hash (same as compiled default in admin.html)
     const DEFAULT_HASH = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
 
     try {
@@ -133,7 +121,6 @@ app.post("/admin/change-password", (req, res) => {
     }
 });
 
-// ================= ADMIN — GET SOCIAL LINKS =================
 app.get("/admin/social-links", (req, res) => {
     try {
         const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'social_%'").all();
@@ -145,7 +132,6 @@ app.get("/admin/social-links", (req, res) => {
     }
 });
 
-// ================= ADMIN — SAVE SOCIAL LINKS =================
 app.post("/admin/social-links", (req, res) => {
     const { links } = req.body;
     if (!links || typeof links !== "object") return res.json({ success: false });
@@ -161,7 +147,6 @@ app.post("/admin/social-links", (req, res) => {
     }
 });
 
-// ================= ADMIN — GET BRAND TAXONOMY =================
 app.get("/admin/brand-taxonomy", (req, res) => {
     try {
         const row = db.prepare("SELECT value FROM settings WHERE key = 'brand_taxonomy'").get();
@@ -171,7 +156,6 @@ app.get("/admin/brand-taxonomy", (req, res) => {
     }
 });
 
-// ================= ADMIN — SAVE BRAND TAXONOMY =================
 app.post("/admin/brand-taxonomy", (req, res) => {
     const { taxonomy } = req.body;
     if (!Array.isArray(taxonomy)) return res.json({ success: false });
@@ -183,7 +167,6 @@ app.post("/admin/brand-taxonomy", (req, res) => {
     }
 });
 
-// ================= PUBLIC — GET BRAND TAXONOMY =================
 app.get("/brand-taxonomy", (req, res) => {
     try {
         const row = db.prepare("SELECT value FROM settings WHERE key = 'brand_taxonomy'").get();
@@ -193,7 +176,6 @@ app.get("/brand-taxonomy", (req, res) => {
     }
 });
 
-// ================= PUBLIC — GET SOCIAL LINKS =================
 app.get("/social-links", (req, res) => {
     try {
         const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'social_%'").all();
@@ -206,9 +188,6 @@ app.get("/social-links", (req, res) => {
 });
 
 
-// ================= PUBLIC — BUYER PRODUCTS =================
-// Only returns active products that are published to 'buyer' or 'both'.
-// Products with publishTo === 'reseller' are excluded here.
 app.get("/products", (req, res) => {
     try {
         const rows = db.prepare("SELECT data FROM products").all();
@@ -216,7 +195,7 @@ app.get("/products", (req, res) => {
             .map(r => JSON.parse(r.data))
             .filter(p => {
                 const active = !p.status || p.status === "active";
-                const pt = p.publishTo || "both"; // treat missing as 'both' (legacy)
+                const pt = p.publishTo || "both"; 
                 return active && (pt === "buyer" || pt === "both");
             });
         res.json({ products });
@@ -228,7 +207,6 @@ app.get("/products", (req, res) => {
 app.post("/admin/delete-product", (req, res) => {
     const { id } = req.body;
     try {
-        // Also delete associated image files from disk
         const row = db.prepare("SELECT data FROM products WHERE id = ?").get(id);
         if (row) {
             try {
@@ -249,7 +227,6 @@ app.post("/admin/delete-product", (req, res) => {
     }
 });
 
-// ================= APPLY =================
 app.post("/apply-reseller", (req, res) => {
     const { email, shopName, experience, social } = req.body;
     if (!email || !shopName || !experience || !social)
@@ -264,7 +241,6 @@ app.post("/apply-reseller", (req, res) => {
     }
 });
 
-// ================= APPROVE =================
 app.post("/admin/approve-reseller", (req, res) => {
     const { email } = req.body;
     try {
@@ -275,7 +251,6 @@ app.post("/admin/approve-reseller", (req, res) => {
     }
 });
 
-// ================= REJECT / REMOVE =================
 app.post("/admin/reject-reseller", (req, res) => {
     const { email } = req.body;
     try {
@@ -286,7 +261,6 @@ app.post("/admin/reject-reseller", (req, res) => {
     }
 });
 
-// ================= CHECK USER =================
 app.post("/check-user", (req, res) => {
     const { email } = req.body;
     try {
@@ -297,7 +271,6 @@ app.post("/check-user", (req, res) => {
     }
 });
 
-// ================= RESELLER PRODUCTS =================
 app.get("/reseller-products", (req, res) => {
     const { email } = req.query;
     try {
@@ -308,7 +281,7 @@ app.get("/reseller-products", (req, res) => {
             .map(r => JSON.parse(r.data))
             .filter(p => {
                 const active = !p.status || p.status === "active";
-                const pt = p.publishTo || "both"; // treat missing as 'both' (legacy)
+                const pt = p.publishTo || "both";
                 return active && (pt === "reseller" || pt === "both");
             });
         res.json({ authorized: true, products });
@@ -317,7 +290,6 @@ app.get("/reseller-products", (req, res) => {
     }
 });
 
-// ================= ADMIN — RESELLERS LIST =================
 app.get("/admin/resellers", (req, res) => {
     try {
         const rows = db.prepare("SELECT email, shopName, experience, social, approved FROM resellers ORDER BY id DESC").all();
@@ -327,7 +299,6 @@ app.get("/admin/resellers", (req, res) => {
     }
 });
 
-// ================= ADMIN — RESELLER COUNT =================
 app.get("/admin/reseller-count", (req, res) => {
     try {
         const row = db.prepare("SELECT COUNT(*) as count FROM resellers WHERE approved = 1").get();
@@ -337,7 +308,6 @@ app.get("/admin/reseller-count", (req, res) => {
     }
 });
 
-// ================= ADMIN — SAVE PRODUCTS (bulk) =================
 app.post("/admin/save-products", (req, res) => {
     const { products } = req.body;
     if (!Array.isArray(products)) return res.json({ success: false });
@@ -354,9 +324,6 @@ app.post("/admin/save-products", (req, res) => {
     }
 });
 
-// ================= ADMIN — SAVE SINGLE PRODUCT (upsert) =================
-// Use this instead of save-products when adding/editing one product,
-// so that stock deductions on OTHER products are never overwritten.
 app.post("/admin/save-product", (req, res) => {
     const { product } = req.body;
     if (!product || !product.id) return res.json({ success: false, error: "Missing product or id" });
@@ -369,7 +336,6 @@ app.post("/admin/save-product", (req, res) => {
     }
 });
 
-// ================= ADMIN — GET SINGLE PRODUCT (fresh from DB) =================
 app.get("/admin/product/:id", (req, res) => {
     try {
         const row = db.prepare("SELECT data FROM products WHERE id = ?").get(req.params.id);
@@ -380,7 +346,6 @@ app.get("/admin/product/:id", (req, res) => {
     }
 });
 
-// ================= ADMIN — GET PRODUCTS =================
 app.get("/admin/products", (req, res) => {
     try {
         const rows = db.prepare("SELECT data FROM products").all();
@@ -391,7 +356,6 @@ app.get("/admin/products", (req, res) => {
     }
 });
 
-// ================= ADMIN — ADD RESELLER DIRECTLY =================
 app.post("/admin/add-reseller", (req, res) => {
     const { email } = req.body;
     if (!email) return res.json({ success: false, error: "Email required" });
@@ -406,7 +370,6 @@ app.post("/admin/add-reseller", (req, res) => {
     }
 });
 
-// ================= ORDERS TABLE =================
 db.exec(`
     CREATE TABLE IF NOT EXISTS orders (
         id TEXT PRIMARY KEY,
@@ -420,13 +383,11 @@ db.exec(`
     )
 `);
 
-// ================= RESELLER — PLACE ORDER =================
 app.post("/reseller/place-order", (req, res) => {
     const { email, items, totalAmount, note } = req.body;
     if (!email || !items || !Array.isArray(items) || items.length === 0)
         return res.json({ success: false, error: "Missing fields" });
 
-    // Verify reseller is still approved
     const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
     if (!row) return res.json({ success: false, error: "Not an approved reseller" });
 
@@ -442,7 +403,6 @@ app.post("/reseller/place-order", (req, res) => {
     }
 });
 
-// ================= RESELLER — GET OWN ORDERS =================
 app.get("/reseller/orders", (req, res) => {
     const { email } = req.query;
     if (!email) return res.json({ orders: [] });
@@ -455,7 +415,6 @@ app.get("/reseller/orders", (req, res) => {
     }
 });
 
-// ================= RESELLER — CANCEL OWN ORDER =================
 app.post("/reseller/cancel-order", (req, res) => {
     const { email, orderId } = req.body;
     if (!email || !orderId) return res.json({ success: false, error: "Missing fields" });
@@ -473,7 +432,6 @@ app.post("/reseller/cancel-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — GET ALL ORDERS =================
 app.get("/admin/orders", (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
@@ -484,7 +442,6 @@ app.get("/admin/orders", (req, res) => {
     }
 });
 
-// ================= ADMIN — APPROVE ORDER (deduct stock) =================
 app.post("/admin/approve-order", (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
@@ -497,7 +454,6 @@ app.post("/admin/approve-order", (req, res) => {
         const items = JSON.parse(orderRow.items);
         const now = new Date().toISOString();
 
-        // Deduct stock for each item in a transaction
         const approve = db.transaction(() => {
             for (const item of items) {
                 const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
@@ -505,23 +461,18 @@ app.post("/admin/approve-order", (req, res) => {
                 const product = JSON.parse(prodRow.data);
 
                 if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
-                    // Per-size stock deduction
                     const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
                     if (sizeObj) {
-                        // Per-color stock deduction (new model)
                         if (item.color && sizeObj.colorStock && typeof sizeObj.colorStock === 'object') {
                             const prev = Number(sizeObj.colorStock[item.color]) || 0;
                             sizeObj.colorStock[item.color] = Math.max(0, prev - (Number(item.qty) || 1));
-                            // Recompute aggregate stock for this size = sum of all color stocks
                             sizeObj.stock = Object.values(sizeObj.colorStock).reduce((a, b) => a + (Number(b) || 0), 0);
                         } else if (sizeObj.stock != null) {
                             sizeObj.stock = Math.max(0, (Number(sizeObj.stock) || 0) - (Number(item.qty) || 1));
                         }
                     }
-                    // Also update product-level stock as sum across all sizes
                     product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
                 } else {
-                    // Global stock deduction
                     product.stock = Math.max(0, (Number(product.stock) || 0) - (Number(item.qty) || 1));
                 }
 
@@ -538,7 +489,6 @@ app.post("/admin/approve-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — REJECT ORDER =================
 app.post("/admin/reject-order", (req, res) => {
     const { orderId, reason } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
@@ -552,7 +502,6 @@ app.post("/admin/reject-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — DELETE ORDER =================
 app.post("/admin/delete-order", (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
@@ -565,7 +514,6 @@ app.post("/admin/delete-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — ORDER COUNT (pending) =================
 app.get("/admin/order-count", (req, res) => {
     try {
         const row = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status = 'pending'").get();
@@ -575,7 +523,6 @@ app.get("/admin/order-count", (req, res) => {
     }
 });
 
-// ================= BUYER ORDERS TABLE =================
 db.exec(`
     CREATE TABLE IF NOT EXISTS buyer_orders (
         id TEXT PRIMARY KEY,
@@ -593,10 +540,8 @@ db.exec(`
         stockDeducted INTEGER DEFAULT 0
     )
 `);
-// Migration: add stockDeducted column for existing DBs
 try { db.exec("ALTER TABLE buyer_orders ADD COLUMN stockDeducted INTEGER DEFAULT 0"); } catch(e) {}
 
-// ================= BUYER — PLACE ORDER =================
 app.post("/buyer/place-order", (req, res) => {
     const { customer, items, totalAmount } = req.body;
     if (!customer || !items || !Array.isArray(items) || items.length === 0)
@@ -628,7 +573,6 @@ app.post("/buyer/place-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — GET ALL BUYER ORDERS =================
 app.get("/admin/buyer-orders", (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM buyer_orders ORDER BY createdAt DESC").all();
@@ -639,7 +583,6 @@ app.get("/admin/buyer-orders", (req, res) => {
     }
 });
 
-// ================= SHARED HELPER — deduct/restore stock for buyer order items =================
 function deductBuyerStock(items) {
     for (const item of items) {
         const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
@@ -690,7 +633,6 @@ function restoreBuyerStock(items) {
     }
 }
 
-// ================= ADMIN — UPDATE BUYER ORDER STATUS (with stock logic) =================
 app.post("/admin/buyer-order-status", (req, res) => {
     const { orderId, status } = req.body;
     if (!orderId || !status) return res.json({ success: false, error: "Missing fields" });
@@ -702,22 +644,17 @@ app.post("/admin/buyer-order-status", (req, res) => {
 
         const items = JSON.parse(orderRow.items);
         const wasDeducted = orderRow.stockDeducted === 1;
-        // Stock-affecting statuses: processing/shipped/delivered = stock deducted
-        // pending/cancelled = stock NOT deducted
         const shouldDeduct = ['processing', 'shipped', 'delivered'].includes(status);
         const now = new Date().toISOString();
 
         const doUpdate = db.transaction(() => {
             if (shouldDeduct && !wasDeducted) {
-                // Moving into a "confirmed" state — deduct stock
                 deductBuyerStock(items);
                 db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ?, stockDeducted = 1 WHERE id = ?").run(status, now, orderId);
             } else if (!shouldDeduct && wasDeducted) {
-                // Moving back to pending or cancelling — restore stock
                 restoreBuyerStock(items);
                 db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ?, stockDeducted = 0 WHERE id = ?").run(status, now, orderId);
             } else {
-                // No stock change needed (e.g. shipped → delivered, pending → cancelled without prior deduction)
                 db.prepare("UPDATE buyer_orders SET status = ?, updatedAt = ? WHERE id = ?").run(status, now, orderId);
             }
         });
@@ -729,7 +666,6 @@ app.post("/admin/buyer-order-status", (req, res) => {
     }
 });
 
-// ================= ADMIN — APPROVE BUYER ORDER (deduct stock, move to processing) =================
 app.post("/admin/approve-buyer-order", (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
@@ -753,7 +689,6 @@ app.post("/admin/approve-buyer-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — REJECT BUYER ORDER (restore stock if deducted, cancel) =================
 app.post("/admin/reject-buyer-order", (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
@@ -777,7 +712,6 @@ app.post("/admin/reject-buyer-order", (req, res) => {
     }
 });
 
-// ================= BUYER — CANCEL OWN ORDER (restore stock if deducted) =================
 app.post("/buyer/cancel-order", (req, res) => {
     const { orderId, contact } = req.body;
     if (!orderId || !contact) return res.json({ success: false, error: "Missing fields" });
@@ -799,7 +733,6 @@ app.post("/buyer/cancel-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — DELETE BUYER ORDER =================
 app.post("/admin/delete-buyer-order", (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
@@ -812,7 +745,6 @@ app.post("/admin/delete-buyer-order", (req, res) => {
     }
 });
 
-// ================= ADMIN — BUYER ORDER COUNT (pending) =================
 app.get("/admin/buyer-order-count", (req, res) => {
     try {
         const row = db.prepare("SELECT COUNT(*) as count FROM buyer_orders WHERE status = 'pending'").get();
@@ -822,7 +754,6 @@ app.get("/admin/buyer-order-count", (req, res) => {
     }
 });
 
-// ================= BUYER — GET OWN ORDERS (by contact) =================
 app.get("/buyer/orders", (req, res) => {
     const { contact } = req.query;
     if (!contact) return res.json({ orders: [] });
@@ -835,14 +766,12 @@ app.get("/buyer/orders", (req, res) => {
     }
 });
 
-// ================= SSE — CLIENT SUBSCRIPTION =================
 app.get("/events/products", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
-    // Send current products immediately on connect
     try {
         const rows = db.prepare("SELECT data FROM products").all();
         const products = rows.map(r => JSON.parse(r.data));
@@ -853,7 +782,6 @@ app.get("/events/products", (req, res) => {
     req.on("close", () => sseClients.delete(res));
 });
 
-// ================= START SERVER =================
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
 });
