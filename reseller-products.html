@@ -84,11 +84,11 @@
   /* Card — matches index.html style */
   .product-card { width: 210px; min-width: 210px; flex-shrink: 0; background: #fff; padding: 0 0 20px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: visible; transition: background .15s; border: none; border-radius: 0; box-shadow: none; }
   .product-card:hover { background: #fff; box-shadow: none; transform: none; }
-  /* Heart icon — centered below card, plain like index */
-  .fav-btn { position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none; z-index: 1; background: none; border: none; box-shadow: none; width: 100%; height: 36px; border-radius: 0; display: flex; align-items: center; justify-content: center; color: #ccc; flex-shrink: 0; cursor: pointer; transition: color .2s; padding: 0; }
-  .fav-btn:hover { color: #888; background: none; border-color: transparent; }
-  .fav-btn.active { color: #e11d48; background: none; border-color: transparent; }
-  .fav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.5; fill: currentColor; transition: transform .15s; }
+  /* Heart icon — absolute top-left overlay on image */
+  .fav-btn { position: absolute; top: 6px; left: 6px; z-index: 4; background: rgba(255,255,255,0.85); border: none; box-shadow: 0 1px 4px rgba(0,0,0,0.10); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; flex-shrink: 0; cursor: pointer; transition: color .2s, background .2s; padding: 0; }
+  .fav-btn:hover { color: #888; background: rgba(255,255,255,0.97); }
+  .fav-btn.active { color: #e11d48; background: rgba(255,255,255,0.97); }
+  .fav-btn svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 1.5; fill: currentColor; transition: transform .15s; }
   .fav-btn.active svg { transform: scale(1.15); }
   /* Image area — white bg, image contained like index */
   .product-img-placeholder { height: 170px; background: #fff; border-radius: 0; margin-bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
@@ -101,7 +101,7 @@
   .product-name { font-family: Arial,sans-serif; font-weight: 400; font-size: 13px; color: #111; margin: 0 8px 10px; letter-spacing: 0; line-height: 1.35; }
   .product-footer { display: flex; align-items: flex-start; flex-direction: column; margin: 0 8px 4px; flex-grow: 0; }
   .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 14px; color: #111; }
-  .product-wholesale { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; margin: 2px 8px 4px; font-family: Arial,sans-serif; }
+  .product-wholesale { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; margin: 2px 0 4px; font-family: Arial,sans-serif; }
   .product-tag { display: none; }
   .product-stock { display: none; }
   .product-colors { display: none; }
@@ -1072,20 +1072,20 @@
         </div>`;
 
     return `<div class="product-card" data-id="${productId}" data-cat="${category}" data-brand="${(p.brand||'').toLowerCase()}" data-brand-line="${(p.brandLine||'').toLowerCase()}" data-brand-model="${(p.brandModel||'').toLowerCase()}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" data-badge="${badge}">
+      <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
       ${badge ? `<div class="product-corner-badge">${badge}</div>` : ''}
       ${imgHTML}
       <div class="product-brand">${p.brand || 'Reseller Collection'}</div>
-      <div class="product-name">${p.name}</div>
+      <div class="product-name" style="flex-grow:1;">${p.name}</div>
       <div class="product-footer">
         <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+        ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '<div class="product-wholesale" style="visibility:hidden;">Wholesale</div>'}
       </div>
-      ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
       <button class="product-view-btn js-view-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         View Details
-      </button>
-      <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
     </div>`;
   }
@@ -1142,20 +1142,20 @@
       card.dataset.newArrival = p.newArrival ? '1' : '0';
       card.dataset.badge = badge;
       card.innerHTML = `
+        <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
         ${badge ? `<div class="product-corner-badge">${badge}</div>` : ''}
         ${imgHTML}
         <div class="product-brand">${p.brand || 'Reseller Collection'}</div>
-        <div class="product-name">${p.name}</div>
+        <div class="product-name" style="flex-grow:1;">${p.name}</div>
         <div class="product-footer">
           <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+          ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '<div class="product-wholesale" style="visibility:hidden;">Wholesale</div>'}
         </div>
-        ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
         <button class="product-view-btn js-view-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           View Details
-        </button>
-        <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
-          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>`;
       card.querySelector('.js-view-btn').addEventListener('click', e => { e.stopPropagation(); openPD(p, String(productId), category, badge, displayPrice); });
       card.querySelector('.fav-btn').addEventListener('click', e => { e.stopPropagation(); toggleFav(String(productId), card.querySelector('.fav-btn')); });
@@ -2167,10 +2167,13 @@
               card.dataset.sortIdx = String(i);
 
               card.innerHTML = `
+                <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+                  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
                 ${badge ? `<div class="product-corner-badge">${badge}</div>` : ''}
                 ${imgHTML}
                 <div class="product-brand">${p.brand || 'Reseller Collection'}</div>
-                <div class="product-name">${p.name}</div>
+                <div class="product-name" style="flex-grow:1;">${p.name}</div>
                 <div class="product-footer">
                   <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
                   ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '<div class="product-wholesale" style="visibility:hidden;">Wholesale</div>'}
@@ -2178,9 +2181,6 @@
                 <button class="product-view-btn js-view-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   View Details
-                </button>
-                <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
-                  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </button>`;
 
               card.querySelector('.js-view-btn').addEventListener('click', function(e) {
