@@ -1853,29 +1853,30 @@ function buildGroupSection(groupName, prods) {
 }
 
 function viewAllGroup(groupName) {
-  // Find the brand/line/model from group name by matching products
   const prods = window._allProducts || [];
   const sample = prods.find(p => {
     const key = [p.brand, p.brandLine, p.brandModel].filter(Boolean).join(' ') || (p.brand || 'Other');
     return key === groupName;
   });
   if (!sample) return;
-  // Apply the most specific filter
-  if (sample.brandModel) {
-    filterBrand((sample.brand||'').toLowerCase(), null);
-    filterLine((sample.brandLine||''), null);
-    filterModel(sample.brandModel, null);
-  } else if (sample.brandLine) {
-    filterBrand((sample.brand||'').toLowerCase(), null);
-    filterLine(sample.brandLine, null);
-  } else {
-    filterBrand((sample.brand||'').toLowerCase(), null);
-    const allBtn = document.getElementById('brandChipAll');
-    const brandChips = document.getElementById('brandChips');
-    brandChips && brandChips.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
-    const matchBtn = brandChips && [...brandChips.querySelectorAll('.sort-chip')].find(b => b.textContent.trim().toLowerCase() === (sample.brand||'').toLowerCase());
+
+  // Set all filter state at once to avoid filterBrand resetting line/model
+  activeBrand = (sample.brand || '').toLowerCase();
+  activeLine = sample.brandLine || 'all';
+  activeModel = sample.brandModel || 'all';
+
+  // Update brand chip UI
+  const brandChips = document.getElementById('brandChips');
+  if (brandChips) {
+    brandChips.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
+    const matchBtn = [...brandChips.querySelectorAll('.sort-chip')].find(b => b.textContent.trim().toLowerCase() === activeBrand);
     if (matchBtn) matchBtn.classList.add('active');
   }
+
+  // Rebuild line/model chips then apply
+  updateLineChips();
+  updateModelChips();
+  applyFiltersAndSort();
 }
 
 function filterProducts(cat, btn) {
