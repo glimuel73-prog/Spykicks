@@ -63,7 +63,7 @@
   .fav-count { background: var(--red); color: var(--white); font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
   .fav-count.visible { display: inline-flex; }
 
-  /* ── Grouped horizontal-scroll layout ── */
+  /* ── Grouped horizontal-scroll layout (kept for legacy/grouped mode) ── */
   .product-grid { width: 100%; background: #fff; }
   .product-group { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 28px 0 32px; }
   .product-group-header { display: flex; align-items: center; justify-content: space-between; padding: 0 32px 18px; }
@@ -81,35 +81,39 @@
   .scroll-arrow.hidden { opacity: 0 !important; pointer-events: none !important; }
   .product-group-scroll-wrap:hover .scroll-arrow { opacity: 1; pointer-events: all; }
 
-  /* Card — matches index.html exactly */
-  .product-card { width: 210px; min-width: 210px; flex-shrink: 0; background: #fff; padding: 0 0 20px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: visible; transition: background .15s; border: none; border-radius: 0; box-shadow: none; }
-  .product-card:hover { background: #fff; box-shadow: none; transform: none; }
-  /* Heart icon — centered below card */
-  .fav-btn { position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none; z-index: 1; background: none; border: none; box-shadow: none; width: 100%; height: 32px; border-radius: 0; display: flex; align-items: center; justify-content: center; color: #ccc; flex-shrink: 0; cursor: pointer; transition: color .2s; padding: 0; }
-  .fav-btn:hover { color: #888; background: none; border-color: transparent; }
-  .fav-btn.active { color: #e11d48; background: none; border-color: transparent; }
-  .fav-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.5; fill: currentColor; transition: transform .15s; }
+  /* ── Flat grid layout — matches index.html ── */
+  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1px; background: #e8e8e8; width: 100%; margin-top: 1px; align-items: stretch; }
+
+  /* Card — flat grid style matching index */
+  .product-card { background: #fff; padding: 24px 24px 20px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: visible; transition: background .2s, transform .2s; border: none; border-radius: 0; box-shadow: none; }
+  .product-card:hover { background: #f5f5f5; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+  /* Heart icon — top-left overlay position like index */
+  .fav-btn { position: absolute; top: 14px; left: 14px; right: auto; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; z-index: 2; padding: 0; flex-shrink: 0; }
+  .fav-btn:hover { border-color: var(--red); color: var(--red); background: rgba(255,255,255,0.9); }
+  .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
+  .fav-btn svg { width: 14px; height: 14px; fill: currentColor; transition: transform .15s; stroke: none; }
   .fav-btn.active svg { transform: scale(1.15); }
   /* Image area */
-  .product-img-placeholder { height: 170px; background: #fff; border-radius: 0; margin-bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
-  .product-img-placeholder img { width: 100%; height: 100%; object-fit: contain; padding: 0 12px; }
-  .product-img-placeholder svg { opacity: .12; width: 60px; height: 60px; }
-  .product-corner-badge { position: absolute; top: 6px; right: 6px; background: var(--red); color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 1px; padding: 2px 7px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
-  .product-new-arrival-badge { position: absolute; bottom: 6px; left: 6px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; padding: 2px 8px; text-transform: uppercase; z-index: 3; border-radius: 3px; display: block; }
+  .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
+  .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+  .product-img-placeholder svg { opacity: .15; width: 80px; height: 80px; }
+  .product-corner-badge { position: absolute; top: 16px; right: 16px; background: var(--red); color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
+  .product-new-arrival-badge { position: absolute; bottom: 10px; left: 10px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 10px; text-transform: uppercase; z-index: 3; border-radius: 3px; display: block; }
   /* Text area below image */
-  .product-brand { font-size: 13px; font-weight: 700; font-family: Arial,sans-serif; color: #111; letter-spacing: 0; text-transform: none; margin: 16px 8px 2px; line-height: 1.2; }
-  .product-name { font-family: Arial,sans-serif; font-weight: 400; font-size: 13px; color: #111; margin: 0 8px 10px; letter-spacing: 0; line-height: 1.35; }
-  .product-footer { display: flex; align-items: flex-start; flex-direction: column; margin: 0 8px 4px; flex-grow: 1; }
-  .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 14px; color: #111; }
+  .product-brand { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
+  .product-name { font-family: Arial,sans-serif; font-weight: 700; font-size: 15px; color: #111; margin-bottom: 10px; letter-spacing: 0; line-height: 1.35; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-grow: 1; }
+  .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 16px; color: #111; }
   .product-wholesale { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; margin-top: 1px; font-family: Arial,sans-serif; min-height: 18px; }
-  .product-tag { display: none; }
-  .product-stock { display: none; }
+  .product-tag { display: inline-flex; align-items: center; background: #f0faf5; color: #27ae60; font-family: Arial,sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; border: 1px solid #c3e8d4; }
+  .product-tag.out { background: #fff0f0; color: #e11d48; border-color: #f5c0c8; }
+  .product-stock { display: block; font-family: Arial,sans-serif; font-size: 11px; color: #999; letter-spacing: 1px; margin-bottom: 8px; }
   .product-colors { display: none; }
   .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: default; }
 
   /* View btn — outlined style */
-  .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px 8px 0; width: calc(100% - 16px); background: none; color: #444; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 10px; border: 1px solid #bbb; cursor: pointer; transition: all .2s; border-radius: 20px; }
-  .product-view-btn:hover { border-color: #000; color: #000; background: #f5f5f5; }
+  .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 8px 0 0; width: 100%; background: none; color: #444; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px; border: 1px solid #ccc; cursor: pointer; transition: all .2s; border-radius: 20px; }
+  .product-view-btn:hover { border-color: #000; color: #fff; background: #000; }
   .product-view-btn svg { width: 12px; height: 12px; }
   .pd-colors { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .pd-color-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: transform .15s, box-shadow .15s, outline .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); outline: 2px solid transparent; outline-offset: 3px; }
@@ -214,7 +218,22 @@
   .order-cancel-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
   .order-status-pill.cancelled { color: #555; border-color: #bbb; background: #f5f5f5; }
 
-  .fav-empty { display: none; padding: 60px 24px; text-align: center; width: 100%; }
+  /* ── Flat grid (used when filters are active) ── */
+  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 24px 32px; background: #fff; width: 100%; }
+  #productGrid.grouped-mode { background: #fff; display: block; }
+  #productGrid:not(.grouped-mode) { display: block; background: #fff; }
+
+  /* In flat grid, cards expand to fill column */
+  .product-grid-flat .product-card { width: 100%; min-width: unset; }
+
+  /* Flat grid card — show stock info like index */
+  .product-grid-flat .product-tag { display: inline-block; font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #666; border: 1px solid #ddd; padding: 3px 10px; border-radius: 3px; }
+  .product-grid-flat .product-stock { display: block; font-family: Arial,sans-serif; font-size: 11px; color: #aaa; letter-spacing: .5px; margin-bottom: 8px; }
+  .product-grid-flat .product-footer { flex-direction: row; align-items: center; justify-content: space-between; }
+  .product-grid-flat .product-brand { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; font-weight: 400; margin: 16px 8px 4px; }
+  .product-grid-flat .product-name { font-size: 16px; font-weight: 700; letter-spacing: .5px; line-height: 1.3; flex-grow: 1; }
+  .product-grid-flat .product-price { font-size: 22px; font-weight: 700; }
+  .product-grid-flat .product-wholesale { display: none; }
   .fav-empty p { font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-top: 12px; }
   .fav-empty-icon { font-size: 36px; opacity: .2; }
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
@@ -419,8 +438,8 @@
   }
 
   @media (max-width: 400px) {
-    .product-card { width: 130px; min-width: 130px; }
-    .product-img-placeholder { height: 110px; }
+    .product-grid-flat { grid-template-columns: repeat(2, 1fr); }
+    .product-img-placeholder { height: 140px; }
     .pd-specs { grid-template-columns: 1fr; }
   }
 </style>
@@ -892,43 +911,283 @@
   }
 
   function applyView() {
-    const cards = Array.from(document.querySelectorAll(".product-card[data-id]"));
+    const grid = document.getElementById("productGrid");
     const favEmpty = document.getElementById("favEmpty");
     const noResults = document.getElementById("noResults");
     const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+    const allProds = window._resellerProducts || [];
 
-    cards.forEach(card => {
-      const id = card.dataset.id;
-      const cat = card.dataset.cat;
-      const gender = card.dataset.gender || '';
-      const brand = (card.dataset.brand || '').toLowerCase();
-      const brandLine = (card.dataset.brandLine || '').toLowerCase();
-      const brandModel = (card.dataset.brandModel || '').toLowerCase();
-      const name = (card.querySelector(".product-name")?.textContent || "").toLowerCase();
+    // Filter from data
+    const filtered = allProds.filter(p => {
+      const cat = (p.category || 'sneakers').toLowerCase();
+      const gender = (p.gender || '').toLowerCase();
+      const brand = (p.brand || '').toLowerCase();
+      const brandLine = (p.brandLine || '').toLowerCase();
+      const brandModel = (p.brandModel || '').toLowerCase();
+      const name = (p.name || '').toLowerCase();
+      const productId = String(p.id || '');
+
       let show = true;
-      if (showingFavs) { show = favorites.includes(id); }
-      else if (currentCat === 'new-arrivals') { show = card.dataset.newArrival === '1'; }
-      else { show = currentCat === "all" || cat === currentCat; }
-      if (show && activeGender !== "all") show = !gender || gender === activeGender;
-      if (show && activeBrand !== "all") show = brand === activeBrand.toLowerCase();
-      if (show && activeLine !== "all") show = brandLine === activeLine.toLowerCase();
-      if (show && activeModel !== "all") show = brandModel === activeModel.toLowerCase();
-      if (show && query) show = name.includes(query);
-      card.style.display = show ? "" : "none";
+      if (showingFavs) { show = favorites.includes(productId); }
+      else if (currentCat === 'new-arrivals') { show = !!p.newArrival; }
+      else { show = currentCat === 'all' || cat === currentCat; }
+      if (show && activeGender !== 'all') show = !gender || gender === activeGender;
+      if (show && activeBrand !== 'all') show = brand === activeBrand.toLowerCase();
+      if (show && activeLine !== 'all') show = brandLine === activeLine.toLowerCase();
+      if (show && activeModel !== 'all') show = brandModel === activeModel.toLowerCase();
+      if (show && query) show = name.includes(query) || brand.includes(query);
+      return show;
     });
 
-    // Show/hide groups based on whether they have visible cards
-    document.querySelectorAll('.product-group').forEach(group => {
-      const anyVisible = Array.from(group.querySelectorAll('.product-card[data-id]')).some(c => c.style.display !== 'none');
-      group.style.display = anyVisible ? '' : 'none';
+    // Sort
+    filtered.sort((a, b) => {
+      const pa = getDisplayPrice(a);
+      const pb = getDisplayPrice(b);
+      if (activeSort === 'price-asc') return pa - pb;
+      if (activeSort === 'price-desc') return pb - pa;
+      if (activeSort === 'name') return (a.name || '').localeCompare(b.name || '');
+      return 0;
     });
 
-    const visibleCount = cards.filter(c => c.style.display !== "none").length;
-    favEmpty.style.display = (showingFavs && visibleCount === 0) ? "block" : "none";
-    noResults.style.display = (!showingFavs && visibleCount === 0) ? "block" : "none";
+    const count = filtered.length;
+    document.getElementById("visibleCount").textContent = count + " item" + (count !== 1 ? "s" : "");
+    noResults.style.display = (!showingFavs && count === 0) ? "block" : "none";
+    favEmpty.style.display = (showingFavs && count === 0) ? "block" : "none";
 
-    document.getElementById("visibleCount").textContent = visibleCount + " item" + (visibleCount !== 1 ? "s" : "");
-    const sc = document.getElementById("sortBarCount"); if (sc) sc.textContent = '';
+    // Always use flat grid layout
+    const useGrouped = false;
+
+    // Clear rendered content (keep no-results/fav-empty nodes)
+    Array.from(grid.children).forEach(child => {
+      if (!child.id || (child.id !== 'noResults' && child.id !== 'favEmpty')) child.remove();
+    });
+
+    if (count === 0) return;
+
+    if (useGrouped) {
+      grid.classList.add('grouped-mode');
+      // Group by brand + brandLine
+      const groups = new Map();
+      filtered.forEach(p => {
+        const key = [p.brand, p.brandLine].filter(Boolean).join(' ') || (p.brand || 'Other');
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(p);
+      });
+      const multipleGroups = groups.size > 1 || (groups.size === 1 && [...groups.values()][0].length > 1);
+      if (!multipleGroups) {
+        renderFlatGrid(grid, filtered);
+        grid.classList.remove('grouped-mode');
+        return;
+      }
+      groups.forEach((prods, groupName) => {
+        const section = buildGroupSection(groupName, prods);
+        grid.insertBefore(section, noResults);
+      });
+    } else {
+      grid.classList.remove('grouped-mode');
+      renderFlatGrid(grid, filtered);
+    }
+  }
+
+  function getDisplayPrice(p) {
+    if (p.sizes && p.sizes.length > 0 && typeof p.sizes[0] === 'object') {
+      return p.sizes[0].resellerPrice || p.resellerPrice || p.price || 0;
+    }
+    return p.resellerPrice || p.price || 0;
+  }
+
+  function renderFlatGrid(grid, products) {
+    const noResults = document.getElementById("noResults");
+    const wrap = document.createElement('div');
+    wrap.className = 'product-grid-flat';
+    products.forEach((p, i) => {
+      const productId = p.id || `product_${i}`;
+      wrap.insertAdjacentHTML('beforeend', buildResellerCard(p, productId));
+    });
+    grid.insertBefore(wrap, noResults);
+    // Attach events after insertion
+    wrap.querySelectorAll('.js-view-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const card = this.closest('.product-card');
+        const pid = card.dataset.id;
+        const prod = (window._resellerProducts || []).find(p => String(p.id) === pid);
+        if (prod) openPD(prod, pid, card.dataset.cat, card.dataset.badge || '', getDisplayPrice(prod));
+      });
+    });
+    wrap.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const card = this.closest('.product-card');
+        toggleFav(String(card.dataset.id), this);
+      });
+    });
+    wrap.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', function() {
+        const pid = this.dataset.id;
+        const prod = (window._resellerProducts || []).find(p => String(p.id) === pid);
+        if (prod) openPD(prod, pid, this.dataset.cat, this.dataset.badge || '', getDisplayPrice(prod));
+      });
+    });
+    wrap.querySelectorAll('.img-zoom-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        try { openLightbox(JSON.parse(this.dataset.imgs), 0); } catch(err) {}
+      });
+    });
+    wrap.querySelectorAll('.img-dl-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        downloadImage(this.dataset.src, this.dataset.name + '.jpg');
+      });
+    });
+  }
+
+  function buildResellerCard(p, productId) {
+    const isFav = favorites.includes(String(productId));
+    const badge = p.badge || '';
+    const category = (p.category || 'sneakers').toLowerCase();
+    const hasImg = p.images && p.images.length > 0;
+    const displayPrice = getDisplayPrice(p);
+    let stockNum = Number(p.stock) || 0;
+    if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
+      stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+    }
+    const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
+
+    const imgHTML = hasImg
+      ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;">
+          <img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;" alt="${p.name}">
+          ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
+          <button class="img-zoom-btn" title="View full image" data-imgs='${JSON.stringify(p.images).replace(/'/g,"&#39;")}' data-idx="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
+          <button class="img-dl-btn" title="Download image" data-src="${p.images[0]}" data-name="${(p.name||'product').replace(/"/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+        </div>`
+      : `<div class="product-img-placeholder" style="position:relative;">
+          ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
+          <svg viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#fff"/><rect x="4" y="28" width="52" height="5" rx="2" fill="#fff"/></svg>
+        </div>`;
+
+    return `<div class="product-card" data-id="${productId}" data-cat="${category}" data-brand="${(p.brand||'').toLowerCase()}" data-brand-line="${(p.brandLine||'').toLowerCase()}" data-brand-model="${(p.brandModel||'').toLowerCase()}" data-gender="${(p.gender||'').toLowerCase()}" data-new-arrival="${p.newArrival ? '1' : '0'}" data-badge="${badge}">
+      <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      ${badge ? `<div class="product-corner-badge">${badge}</div>` : ''}
+      ${imgHTML}
+      <div class="product-brand">${p.brand || 'Reseller Collection'}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-footer">
+        <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+        <div class="product-tag${stockNum === 0 ? ' out' : ''}">${stockLabel}</div>
+      </div>
+      ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
+      <div class="product-stock">Stock: ${stockNum} units</div>
+      <button class="product-view-btn js-view-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        View Details
+      </button>
+    </div>`;
+  }
+
+  function buildGroupSection(groupName, prods) {
+    const section = document.createElement('div');
+    section.className = 'product-group';
+    section.dataset.groupKey = groupName.toLowerCase();
+    const scrollId = 'scroll_' + groupName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+    section.innerHTML = `
+      <div class="product-group-header">
+        <div class="product-group-title">${groupName}</div>
+        <button class="product-group-viewall" onclick="viewAllGroup('${groupName.replace(/'/g,"\\'")}')">VIEW ALL →</button>
+      </div>
+      <div class="product-group-scroll-wrap">
+        <button class="scroll-arrow left hidden" onclick="document.getElementById('${scrollId}').scrollBy({left:-520,behavior:'smooth'})"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="product-group-scroll" id="${scrollId}"></div>
+        <button class="scroll-arrow right" onclick="document.getElementById('${scrollId}').scrollBy({left:520,behavior:'smooth'})"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>`;
+    const scrollEl = section.querySelector('.product-group-scroll');
+    const leftArrow = section.querySelector('.scroll-arrow.left');
+    const rightArrow = section.querySelector('.scroll-arrow.right');
+    prods.forEach((p, i) => {
+      const productId = p.id || `product_${i}`;
+      const isFav = favorites.includes(String(productId));
+      const badge = p.badge || '';
+      const category = (p.category || 'sneakers').toLowerCase();
+      const hasImg = p.images && p.images.length > 0;
+      const displayPrice = getDisplayPrice(p);
+      const imgHTML = hasImg
+        ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;">
+            <img src="${p.images[0]}" style="width:100%;height:100%;object-fit:contain;padding:0 12px;" alt="${p.name}">
+            ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
+            <button class="img-zoom-btn" title="View full image" data-imgs='${JSON.stringify(p.images).replace(/'/g,"&#39;")}' data-idx="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
+            <button class="img-dl-btn" title="Download image" data-src="${p.images[0]}" data-name="${(p.name||'product').replace(/"/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+          </div>`
+        : `<div class="product-img-placeholder" style="position:relative;">
+            ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
+            <svg viewBox="0 0 80 40" fill="none"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#fff"/><rect x="4" y="28" width="52" height="5" rx="2" fill="#fff"/></svg>
+          </div>`;
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.dataset.id = String(productId);
+      card.dataset.cat = category;
+      card.dataset.brand = (p.brand||'').toLowerCase();
+      card.dataset.brandLine = (p.brandLine||'').toLowerCase();
+      card.dataset.brandModel = (p.brandModel||'').toLowerCase();
+      card.dataset.gender = (p.gender||'').toLowerCase();
+      card.dataset.newArrival = p.newArrival ? '1' : '0';
+      card.dataset.badge = badge;
+      card.innerHTML = `
+        ${badge ? `<div class="product-corner-badge">${badge}</div>` : ''}
+        ${imgHTML}
+        <div class="product-brand">${p.brand || 'Reseller Collection'}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-footer">
+          <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+          ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '<div class="product-wholesale" style="visibility:hidden;">Wholesale</div>'}
+        </div>
+        <button class="product-view-btn js-view-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          View Details
+        </button>
+        <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>`;
+      card.querySelector('.js-view-btn').addEventListener('click', e => { e.stopPropagation(); openPD(p, String(productId), category, badge, displayPrice); });
+      card.querySelector('.fav-btn').addEventListener('click', e => { e.stopPropagation(); toggleFav(String(productId), card.querySelector('.fav-btn')); });
+      card.addEventListener('click', () => openPD(p, String(productId), category, badge, displayPrice));
+      card.querySelector('.img-zoom-btn')?.addEventListener('click', e => { e.stopPropagation(); try { openLightbox(JSON.parse(e.currentTarget.dataset.imgs), 0); } catch(err) {} });
+      card.querySelector('.img-dl-btn')?.addEventListener('click', e => { e.stopPropagation(); downloadImage(e.currentTarget.dataset.src, e.currentTarget.dataset.name + '.jpg'); });
+      scrollEl.appendChild(card);
+    });
+    scrollEl.addEventListener('scroll', () => {
+      leftArrow.classList.toggle('hidden', scrollEl.scrollLeft <= 0);
+      rightArrow.classList.toggle('hidden', scrollEl.scrollLeft + scrollEl.clientWidth >= scrollEl.scrollWidth - 4);
+    });
+    requestAnimationFrame(() => {
+      if (scrollEl.scrollWidth <= scrollEl.clientWidth + 4) rightArrow.classList.add('hidden');
+    });
+    return section;
+  }
+
+  function viewAllGroup(groupName) {
+    const prods = window._resellerProducts || [];
+    const sample = prods.find(p => {
+      const key = [p.brand, p.brandLine].filter(Boolean).join(' ') || (p.brand || 'Other');
+      return key === groupName;
+    });
+    if (!sample) return;
+    activeBrand = (sample.brand || '').toLowerCase();
+    activeLine = sample.brandLine || 'all';
+    activeModel = 'all';
+    const bc = document.querySelector(`#brandChips .sort-chip:not(#brandChipAll)`);
+    document.querySelectorAll('#brandChips .sort-chip').forEach(c => c.classList.remove('active'));
+    const allBrandBtns = document.querySelectorAll('#brandChips .sort-chip');
+    allBrandBtns.forEach(c => { if (c.textContent.trim().toLowerCase() === activeBrand) c.classList.add('active'); });
+    updateLineChips();
+    if (activeLine !== 'all') {
+      document.querySelectorAll('#lineChips .sort-chip').forEach(c => {
+        if (c.textContent.trim().toLowerCase() === activeLine.toLowerCase()) c.classList.add('active');
+      });
+    }
+    applyView();
   }
 
   window.onload = async () => {
@@ -950,190 +1209,21 @@
 
       window._resellerProducts = data.products;
 
-      const grid = document.getElementById("productGrid");
-
-      data.products.forEach((p, i) => {
-        const badge    = p.badge || "";
-        const category = (p.category || "sneakers").toLowerCase();
-        const catLabel = category.charAt(0).toUpperCase() + category.slice(1);
-        const productId = p.id || `product_${i}`;
-        const isFav = favorites.includes(productId);
-        const hasImg = p.images && p.images.length > 0;
-        let stockNum = Number(p.stock) || 0;
-        if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
-          stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
-        }
-        const stockLabel = stockNum === 0 ? "Out of Stock" : "In Stock";
-        let displayPrice = p.resellerPrice || p.price;
-        if (p.sizes && p.sizes.length > 0 && typeof p.sizes[0] === 'object') {
-          displayPrice = p.sizes[0].resellerPrice || p.resellerPrice || p.price;
-        }
-
-        const imgHTML = hasImg
-          ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;">
-              <img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;" alt="${p.name}">
-              ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
-              <button class="img-zoom-btn" title="View full image" data-imgs='${JSON.stringify(p.images).replace(/'/g,"&#39;")}' data-idx="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
-              <button class="img-dl-btn" title="Download image" data-src="${p.images[0]}" data-name="${(p.name||'product').replace(/"/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
-            </div>`
-          : `<div class="product-img-placeholder" style="position:relative;">
-              ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
-              <svg viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#fff"/><rect x="4" y="28" width="52" height="5" rx="2" fill="#fff"/></svg>
-            </div>`;
-
-        const card = document.createElement("div");
-        card.className = "product-card";
-        card.dataset.id = String(productId);
-        card.dataset.cat = category;
-        card.dataset.gender = (p.gender || '').toLowerCase();
-        card.dataset.newArrival = p.newArrival ? '1' : '0';
-        card.dataset.brand = (p.brand || '').toLowerCase();
-        card.dataset.brandLine = (p.brandLine || '').toLowerCase();
-        card.dataset.brandModel = (p.brandModel || '').toLowerCase();
-        card.dataset.name = (p.name || '').toLowerCase();
-        card.dataset.priceRaw = String(Number(displayPrice) || 0);
-        card.dataset.sortIdx = String(i);
-
-        card.innerHTML = `
-          ${badge ? `<div class="product-corner-badge">${badge}</div>` : ""}
-          ${imgHTML}
-          <div class="product-brand">${p.brand || "Reseller Collection"}</div>
-          <div class="product-name">${p.name}</div>
-          <div class="product-footer">
-            <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-            ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '<div class="product-wholesale" style="visibility:hidden;">Wholesale</div>'}
-          </div>
-          <button class="product-view-btn js-view-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            View Details
-          </button>
-          <button class="fav-btn ${isFav ? "active" : ""}" title="${isFav ? "Remove from favorites" : "Add to favorites"}">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          </button>
-        `;
-
-        card.querySelector(".js-view-btn").addEventListener("click", function(e) {
-          e.stopPropagation();
-          openPD(p, String(productId), category, badge, displayPrice);
-        });
-
-        const zoomBtn = card.querySelector(".img-zoom-btn");
-        if (zoomBtn) {
-          zoomBtn.addEventListener("click", function(e) {
-            e.stopPropagation();
-            try { openLightbox(JSON.parse(this.dataset.imgs), 0); } catch(err) {}
-          });
-        }
-        const dlBtn = card.querySelector(".img-dl-btn");
-        if (dlBtn) {
-          dlBtn.addEventListener("click", function(e) {
-            e.stopPropagation();
-            downloadImage(this.dataset.src, this.dataset.name + '.jpg');
-          });
-        }
-
-        card.addEventListener("click", function() {
-          openPD(p, String(productId), category, badge, displayPrice);
-        });
-
-        card.querySelector(".fav-btn").addEventListener("click", function(e) {
-          e.stopPropagation();
-          toggleFav(String(productId), this);
-        });
-
-        // Cards are stored; groups are built after all cards are created
-        card._productData = p;
-        window._pendingCards = window._pendingCards || [];
-        window._pendingCards.push(card);
-      });
-
-      // Build grouped horizontal scroll layout — grouped by brand line
-      const allCards = window._pendingCards || [];
-      window._pendingCards = [];
-      const grouped = {};
-      const groupOrder = [];
-      allCards.forEach(card => {
-        const p = card._productData;
-        const brand = (p.brand || '').trim();
-        const line = (p.brandLine || '').trim();
-        // Group title: "Brand Line" if line exists, else just "Brand"
-        const groupKey = line ? `${brand} ${line}` : (brand || 'Other');
-        if (!grouped[groupKey]) { grouped[groupKey] = []; groupOrder.push(groupKey); }
-        grouped[groupKey].push(card);
-      });
-      groupOrder.forEach(groupKey => {
-        const cards = grouped[groupKey];
-        const group = document.createElement('div');
-        group.className = 'product-group';
-        group.dataset.groupKey = groupKey.toLowerCase();
-        const scrollId = 'scroll_' + groupKey.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-        group.innerHTML = `
-          <div class="product-group-header">
-            <div class="product-group-title">${groupKey}</div>
-            <button class="product-group-viewall" onclick="viewAllGroup('${groupKey}')">VIEW ALL →</button>
-          </div>
-          <div class="product-group-scroll-wrap">
-            <button class="scroll-arrow left" onclick="scrollGroup('${scrollId}',-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-            <div class="product-group-scroll" id="${scrollId}"></div>
-            <button class="scroll-arrow right" onclick="scrollGroup('${scrollId}',1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-          </div>`;
-        const scrollEl = group.querySelector('.product-group-scroll');
-        cards.forEach(card => scrollEl.appendChild(card));
-        grid.appendChild(group);
-      });
-
-      // VIEW ALL → filters by line if available, else by brand
-      window.viewAllGroup = function(groupKey) {
-        const prod = (window._resellerProducts || []).find(p => {
-          const brand = (p.brand || '').trim();
-          const line = (p.brandLine || '').trim();
-          return (line ? `${brand} ${line}` : brand) === groupKey;
-        });
-        if (!prod) return;
-        const brand = (prod.brand || '').toLowerCase();
-        const line = (prod.brandLine || '').toLowerCase();
-        // Activate brand chip
-        document.querySelectorAll('#brandChips .sort-chip').forEach(c => c.classList.remove('active'));
-        const bc = document.querySelector(`#brandChips .sort-chip[data-brand="${brand}"]`);
-        if (bc) { bc.classList.add('active'); activeBrand = brand; }
-        // Activate line chip if applicable
-        if (line) {
-          updateLineChips();
-          setTimeout(() => {
-            document.querySelectorAll('#lineChips .sort-chip').forEach(c => c.classList.remove('active'));
-            const lc = [...document.querySelectorAll('#lineChips .sort-chip')].find(b => b.textContent.trim().toLowerCase() === line);
-            if (lc) { lc.classList.add('active'); activeLine = line; }
-            applyView();
-          }, 50);
-        } else {
-          activeLine = 'all'; activeBrand = brand;
-          applyView();
-        }
-      };
-
-      // Add scroll helper
-      window.scrollGroup = function(id, dir) {
-        const el = document.getElementById(id);
-        if (el) el.scrollBy({ left: dir * 600, behavior: 'smooth' });
-      };
-
+      // Build category chips for custom categories
       const STATIC_CATS = ['all', 'new-arrivals', 'sneakers', 'apparel', 'accessories', 'bags', 'caps', 'other'];
-      const customCats = [...new Set(
-        data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c))
-      )];
+      const customCats = [...new Set(data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
       const chipsContainer = document.getElementById('catChips');
       chipsContainer.querySelectorAll('.sort-chip[data-custom]').forEach(el => el.remove());
       const otherChip = [...chipsContainer.querySelectorAll('.sort-chip')].find(b => b.textContent.trim() === 'Other');
       customCats.forEach(cat => {
         const btn = document.createElement('button');
-        btn.className = 'sort-chip';
-        btn.dataset.custom = '1';
+        btn.className = 'sort-chip'; btn.dataset.custom = '1';
         btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
         btn.onclick = function() { filterCat(cat, this); };
-        if (otherChip) chipsContainer.insertBefore(btn, otherChip);
-        else chipsContainer.appendChild(btn);
+        if (otherChip) chipsContainer.insertBefore(btn, otherChip); else chipsContainer.appendChild(btn);
       });
 
+      // Build brand chips
       const brands = [...new Set(data.products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
       const brandBar = document.getElementById('brandBar');
       const brandChips = document.getElementById('brandChips');
@@ -1141,16 +1231,13 @@
       if (brands.length > 0) {
         brands.forEach(brand => {
           const btn = document.createElement('button');
-          btn.className = 'sort-chip';
-          btn.textContent = brand;
+          btn.className = 'sort-chip'; btn.textContent = brand;
           btn.dataset.brand = brand.toLowerCase();
           btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
           brandChips.appendChild(btn);
         });
         brandBar.style.display = 'block';
-      } else {
-        brandBar.style.display = 'none';
-      }
+      } else { brandBar.style.display = 'none'; }
 
       updateFavCount();
       applyView();
