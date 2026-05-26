@@ -916,8 +916,7 @@
 
     // Show/hide groups based on whether they have visible cards
     document.querySelectorAll('.product-group').forEach(group => {
-      const visibleInGroup = group.querySelectorAll('.product-card[data-id]');
-      const anyVisible = Array.from(visibleInGroup).some(c => c.style.display !== 'none');
+      const anyVisible = Array.from(group.querySelectorAll('.product-card[data-id]')).some(c => c.style.display !== 'none');
       group.style.display = anyVisible ? '' : 'none';
     });
 
@@ -1045,24 +1044,30 @@
         window._pendingCards.push(card);
       });
 
-      // Build grouped horizontal scroll layout
+      // Build grouped horizontal scroll layout — grouped by brand line
       const allCards = window._pendingCards || [];
       window._pendingCards = [];
       const grouped = {};
+      const groupOrder = [];
       allCards.forEach(card => {
-        const brand = card._productData.brand || 'Other';
-        if (!grouped[brand]) grouped[brand] = [];
-        grouped[brand].push(card);
+        const p = card._productData;
+        const brand = (p.brand || '').trim();
+        const line = (p.brandLine || '').trim();
+        // Group title: "Brand Line" if line exists, else just "Brand"
+        const groupKey = line ? `${brand} ${line}` : (brand || 'Other');
+        if (!grouped[groupKey]) { grouped[groupKey] = []; groupOrder.push(groupKey); }
+        grouped[groupKey].push(card);
       });
-      Object.entries(grouped).forEach(([brand, cards]) => {
+      groupOrder.forEach(groupKey => {
+        const cards = grouped[groupKey];
         const group = document.createElement('div');
         group.className = 'product-group';
-        group.dataset.groupBrand = brand.toLowerCase();
-        const scrollId = 'scroll_' + brand.replace(/\s+/g,'_');
+        group.dataset.groupKey = groupKey.toLowerCase();
+        const scrollId = 'scroll_' + groupKey.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
         group.innerHTML = `
           <div class="product-group-header">
-            <div class="product-group-title">${brand}</div>
-            <button class="product-group-viewall" onclick="filterBrand('${brand.toLowerCase()}', document.querySelector('#brandChips .sort-chip[data-brand=\\'${brand.toLowerCase()}\\']'))">VIEW ALL →</button>
+            <div class="product-group-title">${groupKey}</div>
+            <button class="product-group-viewall" onclick="viewAllGroup('${groupKey}')">VIEW ALL →</button>
           </div>
           <div class="product-group-scroll-wrap">
             <button class="scroll-arrow left" onclick="scrollGroup('${scrollId}',-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -1073,6 +1078,35 @@
         cards.forEach(card => scrollEl.appendChild(card));
         grid.appendChild(group);
       });
+
+      // VIEW ALL → filters by line if available, else by brand
+      window.viewAllGroup = function(groupKey) {
+        const prod = (window._resellerProducts || []).find(p => {
+          const brand = (p.brand || '').trim();
+          const line = (p.brandLine || '').trim();
+          return (line ? `${brand} ${line}` : brand) === groupKey;
+        });
+        if (!prod) return;
+        const brand = (prod.brand || '').toLowerCase();
+        const line = (prod.brandLine || '').toLowerCase();
+        // Activate brand chip
+        document.querySelectorAll('#brandChips .sort-chip').forEach(c => c.classList.remove('active'));
+        const bc = document.querySelector(`#brandChips .sort-chip[data-brand="${brand}"]`);
+        if (bc) { bc.classList.add('active'); activeBrand = brand; }
+        // Activate line chip if applicable
+        if (line) {
+          updateLineChips();
+          setTimeout(() => {
+            document.querySelectorAll('#lineChips .sort-chip').forEach(c => c.classList.remove('active'));
+            const lc = [...document.querySelectorAll('#lineChips .sort-chip')].find(b => b.textContent.trim().toLowerCase() === line);
+            if (lc) { lc.classList.add('active'); activeLine = line; }
+            applyView();
+          }, 50);
+        } else {
+          activeLine = 'all'; activeBrand = brand;
+          applyView();
+        }
+      };
 
       // Add scroll helper
       window.scrollGroup = function(id, dir) {
@@ -2075,19 +2109,21 @@
               card.style.outline = '2px solid rgba(46,204,113,0.7)';
               setTimeout(() => { card.style.outline = ''; }, 2500);
 
-              // Append to brand group, creating one if needed
-              const brand = p.brand || 'Other';
-              const scrollId = 'scroll_' + brand.replace(/\s+/g,'_');
+              // Append to brand+line group, creating one if needed
+              const brand = (p.brand || 'Other').trim();
+              const line = (p.brandLine || '').trim();
+              const groupKey = line ? `${brand} ${line}` : brand;
+              const scrollId = 'scroll_' + groupKey.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
               let scrollEl = document.getElementById(scrollId);
               if (!scrollEl) {
                 const grid = document.getElementById('productGrid');
                 const group = document.createElement('div');
                 group.className = 'product-group';
-                group.dataset.groupBrand = brand.toLowerCase();
+                group.dataset.groupKey = groupKey.toLowerCase();
                 group.innerHTML = `
                   <div class="product-group-header">
-                    <div class="product-group-title">${brand}</div>
-                    <button class="product-group-viewall" onclick="filterBrand('${brand.toLowerCase()}',null)">VIEW ALL →</button>
+                    <div class="product-group-title">${groupKey}</div>
+                    <button class="product-group-viewall" onclick="viewAllGroup('${groupKey}')">VIEW ALL →</button>
                   </div>
                   <div class="product-group-scroll-wrap">
                     <button class="scroll-arrow left" onclick="scrollGroup('${scrollId}',-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
