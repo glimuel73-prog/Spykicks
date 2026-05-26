@@ -99,9 +99,9 @@
   /* Text area below image */
   .product-brand { font-size: 13px; font-weight: 700; font-family: Arial,sans-serif; color: #111; letter-spacing: 0; text-transform: none; margin: 16px 8px 2px; line-height: 1.2; }
   .product-name { font-family: Arial,sans-serif; font-weight: 400; font-size: 13px; color: #111; margin: 0 8px 10px; letter-spacing: 0; line-height: 1.35; }
-  .product-footer { display: flex; align-items: flex-start; flex-direction: column; margin: 0 8px 4px; }
+  .product-footer { display: flex; align-items: flex-start; flex-direction: column; margin: 0 8px 4px; flex-grow: 1; }
   .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 14px; color: #111; }
-  .product-wholesale { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; margin-top: 1px; font-family: Arial,sans-serif; }
+  .product-wholesale { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; margin-top: 1px; font-family: Arial,sans-serif; min-height: 18px; }
   .product-tag { display: none; }
   .product-stock { display: none; }
   .product-colors { display: none; }
@@ -1000,7 +1000,7 @@
           <div class="product-name">${p.name}</div>
           <div class="product-footer">
             <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-            ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
+            ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '<div class="product-wholesale" style="visibility:hidden;">Wholesale</div>'}
           </div>
           <button class="product-view-btn js-view-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -2078,7 +2078,7 @@
                 <div class="product-name">${p.name}</div>
                 <div class="product-footer">
                   <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-                  ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
+                  ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '<div class="product-wholesale" style="visibility:hidden;">Wholesale</div>'}
                 </div>
                 <button class="product-view-btn js-view-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
