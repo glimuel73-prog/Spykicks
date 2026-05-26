@@ -63,30 +63,57 @@
   .fav-count { background: var(--red); color: var(--white); font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
   .fav-count.visible { display: inline-flex; }
 
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: #e8e8e8; width: 100%; margin: 1px 0 0; align-items: stretch; }
-  .product-card { background: #fff; padding: 24px 24px 24px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
-  .product-card:hover { background: #f5f5f5; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
-  .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
-  .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
-  .product-img-placeholder svg { opacity: .15; width: 80px; height: 80px; }
-  .product-corner-badge { position: absolute; top: 16px; right: 16px; background: var(--red); color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
-  .product-new-arrival-badge { position: absolute; bottom: 10px; left: 10px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 10px; text-transform: uppercase; z-index: 3; border-radius: 3px; }
-  .product-brand { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
-  .product-name { font-family: Arial,sans-serif; font-weight: 700; font-size: 16px; color: #111; margin-bottom: 12px; letter-spacing: .5px; line-height: 1.3; flex-grow: 1; }
-  .product-footer { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; margin-top: auto; }
-  .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 22px; color: #111; }
-  .product-tag { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #666; border: 1px solid #ddd; padding: 3px 10px; border-radius: 3px; }
-  .product-stock { font-family: Arial,sans-serif; font-size: 11px; color: #aaa; letter-spacing: .5px; margin-bottom: 8px; }
-  .product-colors { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+  /* ── Grouped horizontal-scroll layout ── */
+  .product-grid { width: 100%; background: #fff; }
+  .product-group { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 20px 0 24px; }
+  .product-group-header { display: flex; align-items: center; justify-content: space-between; padding: 0 24px 14px; }
+  .product-group-title { font-family: Arial,sans-serif; font-weight: 900; font-size: 18px; color: #111; letter-spacing: -.2px; }
+  .product-group-viewall { background: none; border: 1px solid #bbb; color: #444; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 18px; cursor: pointer; border-radius: 3px; transition: all .18s; }
+  .product-group-viewall:hover { border-color: #000; color: #000; background: #f5f5f5; }
+  .product-group-scroll-wrap { position: relative; }
+  .product-group-scroll { display: flex; gap: 0; overflow-x: auto; padding: 0 16px 12px; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
+  .product-group-scroll::-webkit-scrollbar { display: none; }
+  .scroll-arrow { position: absolute; top: 45%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; box-shadow: 0 2px 10px rgba(0,0,0,0.12); transition: all .18s; opacity: 0; pointer-events: none; }
+  .scroll-arrow:hover { border-color: #000; }
+  .scroll-arrow svg { width: 13px; height: 13px; stroke: #333; stroke-width: 2.5; fill: none; }
+  .scroll-arrow.left { left: 6px; }
+  .scroll-arrow.right { right: 6px; }
+  .product-group-scroll-wrap:hover .scroll-arrow { opacity: 1; pointer-events: all; }
+
+  /* Card */
+  .product-card { width: 190px; min-width: 190px; flex-shrink: 0; background: #fff; padding: 0 0 16px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: visible; transition: background .15s; border: none; }
+  .product-card:hover { background: #fff; box-shadow: none; transform: none; }
+  .product-img-placeholder { height: 160px; background: #fff; border-radius: 0; margin-bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
+  .product-img-placeholder img { width: 100%; height: 100%; object-fit: contain; padding: 0 10px; }
+  .product-img-placeholder svg { opacity: .12; width: 60px; height: 60px; }
+  .product-corner-badge { position: absolute; top: 6px; right: 6px; background: var(--red); color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 9px; letter-spacing: 1px; padding: 2px 7px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
+  .product-new-arrival-badge { position: absolute; bottom: 6px; left: 6px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; padding: 2px 8px; text-transform: uppercase; z-index: 3; border-radius: 3px; }
+  .product-brand { font-size: 13px; font-weight: 700; font-family: Arial,sans-serif; color: #111; letter-spacing: 0; text-transform: none; margin: 12px 8px 1px; line-height: 1.2; }
+  .product-name { font-family: Arial,sans-serif; font-weight: 400; font-size: 13px; color: #111; margin: 0 8px 8px; letter-spacing: 0; line-height: 1.35; }
+  .product-footer { display: flex; align-items: flex-start; flex-direction: column; margin: 0 8px 4px; }
+  .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 14px; color: #111; }
+  .product-wholesale { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; margin-top: 1px; font-family: Arial,sans-serif; }
+  .product-tag { display: none; }
+  .product-stock { display: none; }
+  .product-colors { display: none; }
   .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: default; }
+
+  /* Fav button — centered below card, no overlap */
+  .fav-btn { position: relative; top: auto; left: auto; right: auto; background: none; border: none; box-shadow: none; width: 100%; height: 32px; border-radius: 0; display: flex; align-items: center; justify-content: center; color: #ccc; flex-shrink: 0; cursor: pointer; transition: color .2s; padding: 0; z-index: 2; }
+  .fav-btn:hover { color: #888; background: none; border-color: transparent; }
+  .fav-btn.active { color: #e11d48; background: none; border-color: transparent; }
+  .fav-btn svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.5; fill: currentColor; transition: transform .15s; }
+  .fav-btn.active svg { transform: scale(1.15); }
+
+  /* View btn */
+  .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 4px 8px 0; width: calc(100% - 16px); background: #111; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 10px; border: none; cursor: pointer; transition: background .2s; border-radius: 20px; }
+  .product-view-btn:hover { background: #333; }
+  .product-view-btn svg { width: 12px; height: 12px; }
   .pd-colors { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .pd-color-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; cursor: pointer; transition: transform .15s, box-shadow .15s, outline .15s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); outline: 2px solid transparent; outline-offset: 3px; }
   .pd-color-dot:hover { transform: scale(1.15); box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
   .pd-color-dot.selected { outline: 2px solid #111; outline-offset: 3px; transform: scale(1.15); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
   .pd-selected-color-label { font-size: 12px; color: #555; font-family: Arial, sans-serif; letter-spacing: 1px; margin-top: 6px; min-height: 18px; }
-  .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: #111; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 12px; border: none; cursor: pointer; transition: background .2s; margin-top: auto; border-radius: 20px; }
-  .product-view-btn:hover { background: #333; }
-  .product-view-btn svg { width: 14px; height: 14px; }
 
   .img-card-wrap { position: relative; }
   .img-card-wrap:hover .img-dl-btn { opacity: 1; }
@@ -185,13 +212,7 @@
   .order-cancel-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
   .order-status-pill.cancelled { color: #555; border-color: #bbb; background: #f5f5f5; }
 
-  .fav-btn { position: absolute; top: 14px; left: 14px; right: auto; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; z-index: 2; padding: 0; border-radius: 50%; }
-  .fav-btn:hover { border-color: var(--red); color: var(--red); }
-  .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
-  .fav-btn svg { width: 14px; height: 14px; fill: currentColor; transition: transform .15s; }
-  .fav-btn.active svg { transform: scale(1.15); }
-
-  .fav-empty { display: none; grid-column: 1 / -1; padding: 60px 24px; text-align: center; }
+  .fav-empty { display: none; padding: 60px 24px; text-align: center; width: 100%; }
   .fav-empty p { font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-top: 12px; }
   .fav-empty-icon { font-size: 36px; opacity: .2; }
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
@@ -351,21 +372,14 @@
     #lineChips::-webkit-scrollbar,
     #modelChips::-webkit-scrollbar { display: none; }
 
-    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; }
-    .product-card { padding: 12px; }
-    .product-img-placeholder { height: 210px; border-radius: 3px; }
-    .product-brand { font-size: 9px; letter-spacing: 2px; }
-    .product-name { font-size: 13px; margin-bottom: 8px; }
-    .product-price { font-size: 17px; }
-    .product-tag { font-size: 9px; padding: 2px 5px; }
-    .product-stock { font-size: 10px; }
-    .product-colors { gap: 4px; margin-bottom: 7px; }
-    .color-dot { width: 11px; height: 11px; }
-    .product-corner-badge { font-size: 9px; padding: 2px 6px; top: 10px; right: 10px; }
-    .product-new-arrival-badge { font-size: 9px; padding: 2px 7px; bottom: 6px; left: 6px; }
-    .fav-btn { top: 8px; left: 8px; width: 28px; height: 28px; }
-    .fav-btn svg { width: 12px; height: 12px; }
-    .product-view-btn { font-size: 10px; letter-spacing: 1px; padding: 9px 8px; border-radius: 3px; }
+    .product-group-header { padding: 0 14px 12px; }
+    .product-group-scroll { padding: 0 10px 10px; }
+    .product-card { width: 150px; min-width: 150px; }
+    .product-img-placeholder { height: 130px; }
+    .product-brand { font-size: 12px; }
+    .product-name { font-size: 12px; }
+    .product-price { font-size: 13px; }
+    .product-wholesale { font-size: 10px; }
 
     .pd-drawer { max-width: 100%; top: auto; bottom: 0; height: 92dvh; border-radius: 24px 24px 0 0; transform: translateY(100%); }
     .pd-drawer.open { transform: translateY(0); }
@@ -403,8 +417,8 @@
   }
 
   @media (max-width: 400px) {
-    .product-grid { grid-template-columns: 1fr; }
-    .product-img-placeholder { height: 260px; }
+    .product-card { width: 130px; min-width: 130px; }
+    .product-img-placeholder { height: 110px; }
     .pd-specs { grid-template-columns: 1fr; }
   }
 </style>
@@ -513,13 +527,12 @@
     </div>
   </div>
 
-  <div class="product-grid" id="productGrid">
-    <div class="fav-empty" id="favEmpty">
-      <div class="fav-empty-icon">♥</div>
-      <p>No favorites yet — heart a product</p>
-    </div>
-    <div class="no-results" id="noResults">No products in this category.</div>
+  <div class="product-grid" id="productGrid"></div>
+  <div class="fav-empty" id="favEmpty">
+    <div class="fav-empty-icon">♥</div>
+    <p>No favorites yet — heart a product</p>
   </div>
+  <div class="no-results" id="noResults">No products in this category.</div>
 
 </div>
 
@@ -901,17 +914,14 @@
       card.style.display = show ? "" : "none";
     });
 
-    const grid = document.getElementById("productGrid");
-    const visible = cards.filter(c => c.style.display !== "none");
-    visible.sort((a, b) => {
-      if (activeSort === "price-asc")  return +a.dataset.priceRaw - +b.dataset.priceRaw;
-      if (activeSort === "price-desc") return +b.dataset.priceRaw - +a.dataset.priceRaw;
-      if (activeSort === "name")       return (a.dataset.name||"").localeCompare(b.dataset.name||"");
-      return +a.dataset.sortIdx - +b.dataset.sortIdx;
+    // Show/hide groups based on whether they have visible cards
+    document.querySelectorAll('.product-group').forEach(group => {
+      const visibleInGroup = group.querySelectorAll('.product-card[data-id]');
+      const anyVisible = Array.from(visibleInGroup).some(c => c.style.display !== 'none');
+      group.style.display = anyVisible ? '' : 'none';
     });
-    visible.forEach(c => grid.appendChild(c));
 
-    const visibleCount = visible.length;
+    const visibleCount = cards.filter(c => c.style.display !== "none").length;
     favEmpty.style.display = (showingFavs && visibleCount === 0) ? "block" : "none";
     noResults.style.display = (!showingFavs && visibleCount === 0) ? "block" : "none";
 
@@ -984,26 +994,19 @@
 
         card.innerHTML = `
           ${badge ? `<div class="product-corner-badge">${badge}</div>` : ""}
+          <button class="fav-btn ${isFav ? "active" : ""}" title="${isFav ? "Remove from favorites" : "Add to favorites'}">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
           ${imgHTML}
-          <div class="product-brand" style="margin-top:14px;">${p.brand || "Reseller Collection"}</div>
+          <div class="product-brand">${p.brand || "Reseller Collection"}</div>
           <div class="product-name">${p.name}</div>
-          ${buildColorDots_r(p.colors, 14, 'color-dot')}
           <div class="product-footer">
-            <div>
-              <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-              ${p.wholesalePrice ? `<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#3b82f6;margin-top:2px;">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
-            </div>
-            <div class="product-tag">${stockLabel}</div>
+            <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+            ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
           </div>
-          <div class="product-stock">Stock: ${stockNum} units</div>
           <button class="product-view-btn js-view-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             View Details
-          </button>
-          <button class="fav-btn ${isFav ? "active" : ""}" title="${isFav ? "Remove from favorites" : "Add to favorites"}">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
           </button>
         `;
 
@@ -1036,8 +1039,46 @@
           toggleFav(String(productId), this);
         });
 
-        grid.appendChild(card);
+        // Cards are stored; groups are built after all cards are created
+        card._productData = p;
+        window._pendingCards = window._pendingCards || [];
+        window._pendingCards.push(card);
       });
+
+      // Build grouped horizontal scroll layout
+      const allCards = window._pendingCards || [];
+      window._pendingCards = [];
+      const grouped = {};
+      allCards.forEach(card => {
+        const brand = card._productData.brand || 'Other';
+        if (!grouped[brand]) grouped[brand] = [];
+        grouped[brand].push(card);
+      });
+      Object.entries(grouped).forEach(([brand, cards]) => {
+        const group = document.createElement('div');
+        group.className = 'product-group';
+        group.dataset.groupBrand = brand.toLowerCase();
+        const scrollId = 'scroll_' + brand.replace(/\s+/g,'_');
+        group.innerHTML = `
+          <div class="product-group-header">
+            <div class="product-group-title">${brand}</div>
+            <button class="product-group-viewall" onclick="filterBrand('${brand.toLowerCase()}', document.querySelector('#brandChips .sort-chip[data-brand=\\'${brand.toLowerCase()}\\']'))">VIEW ALL →</button>
+          </div>
+          <div class="product-group-scroll-wrap">
+            <button class="scroll-arrow left" onclick="scrollGroup('${scrollId}',-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <div class="product-group-scroll" id="${scrollId}"></div>
+            <button class="scroll-arrow right" onclick="scrollGroup('${scrollId}',1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>`;
+        const scrollEl = group.querySelector('.product-group-scroll');
+        cards.forEach(card => scrollEl.appendChild(card));
+        grid.appendChild(group);
+      });
+
+      // Add scroll helper
+      window.scrollGroup = function(id, dir) {
+        const el = document.getElementById(id);
+        if (el) el.scrollBy({ left: dir * 600, behavior: 'smooth' });
+      };
 
       const STATIC_CATS = ['all', 'new-arrivals', 'sneakers', 'apparel', 'accessories', 'bags', 'caps', 'other'];
       const customCats = [...new Set(
@@ -1065,6 +1106,7 @@
           const btn = document.createElement('button');
           btn.className = 'sort-chip';
           btn.textContent = brand;
+          btn.dataset.brand = brand.toLowerCase();
           btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
           brandChips.appendChild(btn);
         });
