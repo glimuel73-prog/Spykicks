@@ -994,7 +994,7 @@
 
         card.innerHTML = `
           ${badge ? `<div class="product-corner-badge">${badge}</div>` : ""}
-          <button class="fav-btn ${isFav ? "active" : ""}" title="${isFav ? "Remove from favorites" : "Add to favorites'}">
+          <button class="fav-btn ${isFav ? "active" : ""}" title="${isFav ? "Remove from favorites" : "Add to favorites"}">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
           ${imgHTML}
@@ -2037,24 +2037,19 @@
 
               card.innerHTML = `
                 ${badge ? `<div class="product-corner-badge">${badge}</div>` : ''}
+                <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
+                  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>
                 ${imgHTML}
-                <div class="product-brand" style="margin-top:14px;">${p.brand || 'Reseller Collection'}</div>
+                <div class="product-brand">${p.brand || 'Reseller Collection'}</div>
                 <div class="product-name">${p.name}</div>
-                ${buildColorDots_r(p.colors, 14, 'color-dot')}
                 <div class="product-footer">
-                  <div>
-                    <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-                    ${p.wholesalePrice ? `<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#3b82f6;margin-top:2px;">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
-                  </div>
-                  <div class="product-tag">${stockLabel}</div>
+                  <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
+                  ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
                 </div>
-                <div class="product-stock">Stock: ${stockNum} units</div>
                 <button class="product-view-btn js-view-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   View Details
-                </button>
-                <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
-                  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </button>`;
 
               card.querySelector('.js-view-btn').addEventListener('click', function(e) {
@@ -2080,7 +2075,29 @@
               card.style.outline = '2px solid rgba(46,204,113,0.7)';
               setTimeout(() => { card.style.outline = ''; }, 2500);
 
-              document.getElementById('productGrid').appendChild(card);
+              // Append to brand group, creating one if needed
+              const brand = p.brand || 'Other';
+              const scrollId = 'scroll_' + brand.replace(/\s+/g,'_');
+              let scrollEl = document.getElementById(scrollId);
+              if (!scrollEl) {
+                const grid = document.getElementById('productGrid');
+                const group = document.createElement('div');
+                group.className = 'product-group';
+                group.dataset.groupBrand = brand.toLowerCase();
+                group.innerHTML = `
+                  <div class="product-group-header">
+                    <div class="product-group-title">${brand}</div>
+                    <button class="product-group-viewall" onclick="filterBrand('${brand.toLowerCase()}',null)">VIEW ALL →</button>
+                  </div>
+                  <div class="product-group-scroll-wrap">
+                    <button class="scroll-arrow left" onclick="scrollGroup('${scrollId}',-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <div class="product-group-scroll" id="${scrollId}"></div>
+                    <button class="scroll-arrow right" onclick="scrollGroup('${scrollId}',1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                  </div>`;
+                grid.appendChild(group);
+                scrollEl = group.querySelector('.product-group-scroll');
+              }
+              scrollEl.appendChild(card);
             });
 
             applyView();
