@@ -1765,10 +1765,10 @@ function applyFiltersAndSort() {
 
   if (useGrouped) {
     grid.classList.add('grouped-mode');
-    // Group by brandModel, then brandLine, then brand
+    // Group by brandLine, then brand
     const groups = new Map();
     filtered.forEach(p => {
-      const key = [p.brand, p.brandLine, p.brandModel].filter(Boolean).join(' ') || (p.brand || 'Other');
+      const key = [p.brand, p.brandLine].filter(Boolean).join(' ') || (p.brand || 'Other');
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(p);
     });
@@ -1854,7 +1854,7 @@ function buildGroupSection(groupName, prods) {
 function viewAllGroup(groupName) {
   const prods = window._allProducts || [];
   const sample = prods.find(p => {
-    const key = [p.brand, p.brandLine, p.brandModel].filter(Boolean).join(' ') || (p.brand || 'Other');
+    const key = [p.brand, p.brandLine].filter(Boolean).join(' ') || (p.brand || 'Other');
     return key === groupName;
   });
   if (!sample) return;
