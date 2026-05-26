@@ -475,15 +475,19 @@
 
   <div class="section-header">
     <span class="section-title">Reseller Catalog</span>
-    <div class="cat-chips" id="catChips">
-      <button class="cat-chip active" onclick="filterCat('all',this)">All</button>
-      <button class="cat-chip" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
-      <button class="cat-chip" onclick="filterCat('sneakers',this)">Sneakers</button>
-      <button class="cat-chip" onclick="filterCat('apparel',this)">Apparel</button>
-      <button class="cat-chip" onclick="filterCat('accessories',this)">Accessories</button>
-      <button class="cat-chip" onclick="filterCat('bags',this)">Bags</button>
-      <button class="cat-chip" onclick="filterCat('caps',this)">Caps</button>
-      <button class="cat-chip" onclick="filterCat('other',this)">Other</button>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;padding:12px 40px;border-bottom:1px solid #e8e8e8;background:#f9f9f9;flex-wrap:wrap;">
+    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Category</span>
+    <div id="catChips" style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="sort-chip active" onclick="filterCat('all',this)">All</button>
+      <button class="sort-chip" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
+      <button class="sort-chip" onclick="filterCat('sneakers',this)">Sneakers</button>
+      <button class="sort-chip" onclick="filterCat('apparel',this)">Apparel</button>
+      <button class="sort-chip" onclick="filterCat('accessories',this)">Accessories</button>
+      <button class="sort-chip" onclick="filterCat('bags',this)">Bags</button>
+      <button class="sort-chip" onclick="filterCat('caps',this)">Caps</button>
+      <button class="sort-chip" onclick="filterCat('other',this)">Other</button>
     </div>
   </div>
 
@@ -502,13 +506,13 @@
     </div>
   </div>
 
-  <div style="display:flex;align-items:center;gap:8px;padding:10px 40px;width:100%;border-bottom:1px solid var(--border);background:var(--white);flex-wrap:wrap;" class="gender-bar-reseller">
+  <div style="display:flex;align-items:center;gap:8px;padding:10px 40px;width:100%;border-bottom:1px solid #e8e8e8;background:#fff;flex-wrap:wrap;" class="gender-bar-reseller">
     <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Gender</span>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;-webkit-overflow-scrolling:touch;"  class="gender-chips-inner">
-      <button class="cat-chip active" id="rGenderAll"    onclick="filterGender('all',this)">All</button>
-      <button class="cat-chip"        id="rGenderMale"   onclick="filterGender('male',this)">♂ Men's</button>
-      <button class="cat-chip"        id="rGenderFemale" onclick="filterGender('female',this)">♀ Women's</button>
-      <button class="cat-chip"        id="rGenderUnisex" onclick="filterGender('unisex',this)">⚥ Unisex</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;overflow-x:auto;-webkit-overflow-scrolling:touch;" class="gender-chips-inner">
+      <button class="sort-chip active" id="rGenderAll"    onclick="filterGender('all',this)">All</button>
+      <button class="sort-chip"        id="rGenderMale"   onclick="filterGender('male',this)">♂ Men's</button>
+      <button class="sort-chip"        id="rGenderFemale" onclick="filterGender('female',this)">♀ Women's</button>
+      <button class="sort-chip"        id="rGenderUnisex" onclick="filterGender('unisex',this)">⚥ Unisex</button>
     </div>
   </div>
 
@@ -870,7 +874,7 @@
     currentCat = cat;
     showingFavs = false;
     document.getElementById("favToggleBtn").classList.remove("active");
-    document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
+    document.querySelectorAll("#catChips .sort-chip").forEach(c => c.classList.remove("active"));
     if (chipEl) chipEl.classList.add("active");
     applyView();
   }
@@ -880,12 +884,9 @@
     const btn = document.getElementById("favToggleBtn");
     btn.classList.toggle("active", showingFavs);
     if (showingFavs) {
-      document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
+      document.querySelectorAll("#catChips .sort-chip").forEach(c => c.classList.remove("active"));
     } else {
-      document.querySelectorAll("#catChips .cat-chip").forEach(c => {
-        if (c.textContent.trim().toLowerCase().startsWith(currentCat === "all" ? "all" : currentCat)) c.classList.add("active");
-      });
-      document.querySelector("#catChips .cat-chip[onclick*=\"'all'\"]").classList.add("active");
+      document.querySelector("#catChips .sort-chip[onclick*=\"'all'\"]").classList.add("active");
     }
     applyView();
   }
@@ -1121,11 +1122,11 @@
         data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c))
       )];
       const chipsContainer = document.getElementById('catChips');
-      chipsContainer.querySelectorAll('.cat-chip[data-custom]').forEach(el => el.remove());
-      const otherChip = [...chipsContainer.querySelectorAll('.cat-chip')].find(b => b.textContent.trim() === 'Other');
+      chipsContainer.querySelectorAll('.sort-chip[data-custom]').forEach(el => el.remove());
+      const otherChip = [...chipsContainer.querySelectorAll('.sort-chip')].find(b => b.textContent.trim() === 'Other');
       customCats.forEach(cat => {
         const btn = document.createElement('button');
-        btn.className = 'cat-chip';
+        btn.className = 'sort-chip';
         btn.dataset.custom = '1';
         btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
         btn.onclick = function() { filterCat(cat, this); };
