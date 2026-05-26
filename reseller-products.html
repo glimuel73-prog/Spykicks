@@ -55,36 +55,37 @@
 
   /* ── Main flat product grid (matches index) ── */
   .product-grid { display: block; width: 100%; background: #fff; }
-  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: #e8e8e8; max-width: 100%; align-items: stretch; }
+  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: #e8e8e8; max-width: 100%; align-items: start; }
 
-  /* Card — matches index style */
-  .product-card { background: #fff; padding: 24px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
-  .product-card:hover { background: #f5f5f5; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+  /* Card — aligned columns, index style */
+  .product-card { background: #fff; padding: 0 0 20px; transition: background .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
+  .product-card:hover { background: #f7f7f7; }
 
-  /* Fav btn — top-left absolute overlay */
-  .fav-btn { position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; padding: 0; }
+  /* Fav btn — top-left absolute overlay on image */
+  .fav-btn { position: absolute; top: 10px; left: 10px; z-index: 2; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; padding: 0; }
   .fav-btn:hover { border-color: var(--red); color: var(--red); }
   .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
   .fav-btn svg { width: 14px; height: 14px; fill: currentColor; transition: transform .15s; }
   .fav-btn.active svg { transform: scale(1.15); }
 
   /* Image area */
-  .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
+  .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 0; margin-bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
   .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
   .product-img-placeholder svg { opacity: .15; width: 80px; height: 80px; }
 
-  .product-corner-badge { position: absolute; top: 16px; right: 16px; background: var(--red); color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
-  .product-new-arrival-badge { position: absolute; bottom: 10px; left: 10px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 10px; text-transform: uppercase; z-index: 3; border-radius: 3px; }
+  .product-corner-badge { position: absolute; top: 10px; right: 10px; background: var(--red); color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
+  .product-new-arrival-badge { position: absolute; bottom: 8px; left: 8px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 9px; text-transform: uppercase; z-index: 3; border-radius: 3px; }
 
-  /* Text */
-  .product-brand { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 3px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
-  .product-name { font-family: Arial,sans-serif; font-weight: 700; font-size: 16px; color: #111; margin-bottom: 12px; letter-spacing: .5px; line-height: 1.3; flex-grow: 1; }
-  .product-footer { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; margin-top: auto; }
-  .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 22px; color: #111; }
-  .product-wholesale { font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; font-family: Arial,sans-serif; }
-  .product-tag { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #666; border: 1px solid #ddd; padding: 3px 10px; border-radius: 3px; }
-  .product-stock { font-family: Arial,sans-serif; font-size: 11px; color: #aaa; letter-spacing: .5px; margin-bottom: 8px; }
-  .product-colors { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+  /* Text — fixed heights for alignment */
+  .product-brand { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 3px; text-transform: uppercase; color: #999; margin: 14px 16px 4px; line-height: 1.2; }
+  .product-name { font-family: Arial,sans-serif; font-weight: 700; font-size: 15px; color: #111; margin: 0 16px 0; letter-spacing: .3px; line-height: 1.3; min-height: 40px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  /* Footer row: price left, tag right — always same vertical position */
+  .product-footer { display: flex; align-items: center; justify-content: space-between; margin: 10px 16px 4px; flex-shrink: 0; }
+  .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 20px; color: #111; line-height: 1; }
+  .product-tag { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: #666; border: 1px solid #ddd; padding: 3px 9px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+  .product-wholesale { display: block; font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; font-family: Arial,sans-serif; margin: 0 16px 4px; }
+  .product-stock { font-family: Arial,sans-serif; font-size: 11px; color: #aaa; letter-spacing: .3px; margin: 0 16px 8px; }
+  .product-colors { display: flex; gap: 5px; flex-wrap: wrap; margin: 0 16px 8px; align-items: center; }
   .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: default; }
 
   .no-results { display: none; padding: 80px 24px; text-align: center; font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
@@ -124,14 +125,14 @@
   .product-group-scroll .product-tag, .product-group-scroll .product-stock, .product-group-scroll .product-colors, .product-group-scroll .product-corner-badge, .product-group-scroll .img-zoom-btn, .product-group-scroll .img-dl-btn, .product-group-scroll .product-new-arrival-badge { display: none; }
 
   /* Flat grid card overrides */
-  .product-grid-flat .product-card { padding: 24px; }
-  .product-grid-flat .fav-btn { position: absolute; top: 14px; left: 14px; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; display: flex; align-items: center; justify-content: center; }
+  .product-grid-flat .product-card { padding: 0 0 20px; }
+  .product-grid-flat .fav-btn { position: absolute; top: 10px; left: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; display: flex; align-items: center; justify-content: center; }
   .product-grid-flat .fav-btn:hover { border-color: var(--red); color: var(--red); background: rgba(255,255,255,0.9); }
   .product-grid-flat .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
   .product-grid-flat .fav-btn svg { width: 14px; height: 14px; stroke: none; }
 
   /* View btn — matches index */
-  .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: none; color: #666; font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 9px 18px; border: 1px solid #ccc; cursor: pointer; transition: border-color .2s, color .2s, background .2s; margin-top: 10px; border-radius: 20px; }
+  .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: none; color: #666; font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 16px; border: 1px solid #ccc; cursor: pointer; transition: border-color .2s, color .2s, background .2s; margin: 8px 16px 0; border-radius: 20px; width: calc(100% - 32px); }
   .product-view-btn:hover { border-color: #000; color: #000; background: #f5f5f5; }
   .product-view-btn svg { width: 13px; height: 13px; }
   .pd-colors { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -428,10 +429,15 @@
     .product-group-scroll .product-card { width: 150px; min-width: 150px; }
     .product-group-scroll .product-img-placeholder { height: 130px; }
     .product-grid-flat { grid-template-columns: repeat(2, 1fr); gap: 1px; }
-    .product-card { padding: 14px; }
-    .product-img-placeholder { height: 180px; }
-    .product-name { font-size: 14px; }
-    .product-price { font-size: 18px; }
+    .product-img-placeholder { height: 160px; }
+    .product-name { font-size: 13px; min-height: 34px; }
+    .product-price { font-size: 16px; }
+    .product-brand { margin: 10px 12px 3px; }
+    .product-name { margin: 0 12px 0; }
+    .product-footer { margin: 8px 12px 3px; }
+    .product-wholesale { margin: 0 12px 3px; }
+    .product-stock { margin: 0 12px 6px; }
+    .product-view-btn { margin: 6px 12px 0; width: calc(100% - 24px); font-size: 10px; padding: 7px 10px; }
 
     .pd-drawer { max-width: 100%; top: auto; bottom: 0; height: 92dvh; border-radius: 24px 24px 0 0; transform: translateY(100%); }
     .pd-drawer.open { transform: translateY(0); }
@@ -1079,7 +1085,6 @@
       stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
     }
     const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
-    const stockColor = stockNum === 0 ? '#e11d48' : '#27ae60';
 
     const imgHTML = hasImg
       ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;">
@@ -1103,9 +1108,10 @@
       <div class="product-name">${p.name}</div>
       <div class="product-footer">
         <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-        ${p.wholesalePrice ? `<div class="product-tag" style="border-color:#bfdbfe;color:#3b82f6;background:#eff6ff;">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : `<div class="product-tag" style="color:${stockColor};border-color:${stockColor}22;">${stockLabel}</div>`}
+        <div class="product-tag" style="${stockNum === 0 ? 'color:#e11d48;border-color:#fca5a5;' : ''}">${stockLabel}</div>
       </div>
-      ${p.wholesalePrice ? `<div class="product-stock" style="display:block;color:${stockColor};">Stock: ${stockNum} units</div>` : `<div class="product-stock" style="display:block;">Stock: ${stockNum} units</div>`}
+      ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
+      <div class="product-stock">Stock: ${stockNum} units</div>
       <button class="product-view-btn js-view-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         View Details
@@ -2199,8 +2205,9 @@
                 <div class="product-name">${p.name}</div>
                 <div class="product-footer">
                   <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-                  ${p.wholesalePrice ? `<div class="product-tag" style="border-color:#bfdbfe;color:#3b82f6;background:#eff6ff;">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
+                  <div class="product-tag">In Stock</div>
                 </div>
+                ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
                 <button class="product-view-btn js-view-btn">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   View Details
