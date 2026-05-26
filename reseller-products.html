@@ -964,10 +964,8 @@
     // Always use flat grid layout
     const useGrouped = false;
 
-    // Clear rendered content (keep no-results/fav-empty nodes)
-    Array.from(grid.children).forEach(child => {
-      if (!child.id || (child.id !== 'noResults' && child.id !== 'favEmpty')) child.remove();
-    });
+    // Clear all rendered content from grid
+    grid.innerHTML = '';
 
     if (count === 0) return;
 
@@ -988,7 +986,7 @@
       }
       groups.forEach((prods, groupName) => {
         const section = buildGroupSection(groupName, prods);
-        grid.insertBefore(section, noResults);
+        grid.appendChild(section);
       });
     } else {
       grid.classList.remove('grouped-mode');
@@ -1004,14 +1002,13 @@
   }
 
   function renderFlatGrid(grid, products) {
-    const noResults = document.getElementById("noResults");
     const wrap = document.createElement('div');
     wrap.className = 'product-grid-flat';
     products.forEach((p, i) => {
       const productId = p.id || `product_${i}`;
       wrap.insertAdjacentHTML('beforeend', buildResellerCard(p, productId));
     });
-    grid.insertBefore(wrap, noResults);
+    grid.appendChild(wrap);
     // Attach events after insertion
     wrap.querySelectorAll('.js-view-btn').forEach(btn => {
       btn.addEventListener('click', function(e) {
