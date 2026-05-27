@@ -1091,6 +1091,8 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 .order-approve-btn:hover { opacity:.8; }
 .order-reject-btn { background:none; border:1px solid rgba(255,59,48,.4); color:var(--red); font-family:var(--font); font-weight:700; font-size:11px; letter-spacing:.5px; text-transform:uppercase; padding:6px 14px; border-radius:5px; cursor:pointer; transition:all .15s; }
 .order-reject-btn:hover { background:var(--red); color:#fff; border-color:var(--red); }
+.order-cancel-reseller-btn { background:none; border:1px solid rgba(245,158,11,.5); color:var(--orange); font-family:var(--font); font-weight:700; font-size:11px; letter-spacing:.5px; text-transform:uppercase; padding:6px 14px; border-radius:5px; cursor:pointer; transition:all .15s; }
+.order-cancel-reseller-btn:hover { background:var(--orange); color:#fff; border-color:var(--orange); }
 .order-delete-btn { background:none; border:1px solid var(--border2); color:var(--text-dim); font-family:var(--font); font-weight:700; font-size:11px; letter-spacing:.5px; text-transform:uppercase; padding:6px 10px; border-radius:5px; cursor:pointer; transition:all .15s; }
 .order-delete-btn:hover { border-color:var(--red); color:var(--red); }
 
@@ -1807,9 +1809,10 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <div class="filter-bar" style="padding:14px 32px;border-bottom:1px solid var(--border);">
         <select class="select-filter" id="orderStatusFilter" onchange="renderOrdersTable()">
           <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
+          <option value="pending">⏳ Pending</option>
+          <option value="approved">✓ Approved</option>
+          <option value="rejected">✗ Rejected</option>
+          <option value="cancelled">✕ Cancelled</option>
         </select>
         <input type="text" class="search-input" placeholder="Search reseller…" id="orderSearch" oninput="renderOrdersTable()">
         <button class="btn-add" onclick="loadOrders()" style="background:var(--surface);color:var(--text-muted);border:1px solid var(--border);">
@@ -4154,6 +4157,11 @@ function renderOrdersTable() {
            <button class="order-reject-btn" onclick="promptRejectOrder('${o.id}')">✗ Reject</button>
            <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete order">🗑</button>
          </div>`
+      : o.status === 'approved'
+      ? `<div class="action-btns">
+           <button class="order-cancel-reseller-btn" onclick="cancelResellerOrder('${o.id}')">✕ Cancel</button>
+           <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete order">🗑 Delete</button>
+         </div>`
       : `<div class="action-btns">
            <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete order">🗑 Delete</button>
          </div>`;
@@ -4207,6 +4215,9 @@ function renderOrdersTable() {
         ${o.status === 'pending' ? `<div class="card-actions">
           <button class="order-approve-btn" style="flex:1;" onclick="approveOrder('${o.id}')">✓ Approve</button>
           <button class="order-reject-btn" style="flex:1;" onclick="promptRejectOrder('${o.id}')">✗ Reject</button>
+          <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button>
+        </div>` : o.status === 'approved' ? `<div class="card-actions">
+          <button class="order-cancel-reseller-btn" style="flex:1;" onclick="cancelResellerOrder('${o.id}')">✕ Cancel Order</button>
           <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button>
         </div>` : `<div class="card-actions"><button class="order-delete-btn" style="width:100%;" onclick="deleteOrder('${o.id}')">🗑 Delete Order</button></div>`}
       </div>`;
@@ -4262,6 +4273,28 @@ async function rejectOrder(orderId, reason) {
       renderDashboard();
     } else {
       showToast('Failed to reject order.', true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+async function cancelResellerOrder(orderId) {
+  if (!confirm('Cancel this approved reseller order? Stock will be restored.')) return;
+  try {
+    const res = await fetch('/admin/cancel-reseller-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Order cancelled. Stock has been restored.');
+      await loadOrders();
+      await loadProductsFromBackend();
+      renderDashboard();
+    } else {
+      showToast('Failed to cancel order: ' + (data.error || 'Unknown error'), true);
     }
   } catch(e) {
     showToast('Connection error.', true);
