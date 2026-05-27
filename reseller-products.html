@@ -2025,9 +2025,6 @@
 
         const noteHTML = order.note ? `<div style="padding:8px 16px;font-size:12px;color:#888;font-family:Arial,sans-serif;border-top:1px solid #f0f0f0;">Note: ${order.note}</div>` : "";
 
-        const stockRestoreNote = (order.status === 'approved' || order.status === 'processing')
-          ? `<span style="font-family:Arial,sans-serif;font-size:10px;color:#f59e0b;letter-spacing:.5px;margin-left:10px;">⚠ Stock will be restored</span>`
-          : '';
         const cancelRow = meta.canCancel
           ? `<div class="order-cancel-row">
                <button class="order-cancel-btn" id="cancelBtn_${order.id}" onclick="cancelOrder('${order.id}', this)">
