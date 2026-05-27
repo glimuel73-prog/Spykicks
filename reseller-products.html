@@ -235,7 +235,10 @@
   .order-cancel-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(255,59,48,0.35); color: var(--red); font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 16px; border-radius: 4px; cursor: pointer; transition: all .2s; }
   .order-cancel-btn:hover { background: var(--red); color: #fff; border-color: var(--red); }
   .order-cancel-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
-  .order-status-pill.cancelled { color: #555; border-color: #bbb; background: #f5f5f5; }
+  .order-status-pill.cancelled   { color: #555;    border-color: #bbb;    background: #f5f5f5; }
+  .order-status-pill.processing  { color: #1d4ed8; border-color: #93c5fd; background: #eff6ff; }
+  .order-status-pill.shipped     { color: #6d28d9; border-color: #c4b5fd; background: #f5f3ff; }
+  .order-status-pill.delivered   { color: #166534; border-color: #4ade80; background: #f0fdf4; }
 
   /* ── Flat grid — matches index.html ── */
   .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 24px 32px; background: #fff; width: 100%; }
@@ -1998,18 +2001,50 @@
         return;
       }
 
+      const statusMeta = {
+        pending:    { cls: 'pending',    label: '⏳ Pending',      canCancel: true  },
+        approved:   { cls: 'approved',   label: '✓ Approved',      canCancel: true  },
+        processing: { cls: 'processing', label: '🔄 Processing',   canCancel: true  },
+        shipped:    { cls: 'shipped',    label: '🚚 Shipped',       canCancel: false },
+        delivered:  { cls: 'delivered',  label: '✓ Delivered',     canCancel: false },
+        rejected:   { cls: 'rejected',   label: '✗ Rejected',      canCancel: false },
+        cancelled:  { cls: 'cancelled',  label: '✕ Cancelled',     canCancel: false },
+      };
+
       listEl.innerHTML = data.orders.map(order => {
         const d = new Date(order.createdAt);
         const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-        const statusClass = order.status === 'approved' ? 'approved' : order.status === 'rejected' ? 'rejected' : order.status === 'cancelled' ? 'cancelled' : 'pending';
-        const statusLabel = order.status === 'approved' ? '✓ Approved' : order.status === 'rejected' ? '✗ Rejected' : order.status === 'cancelled' ? '✕ Cancelled' : '⏳ Pending';
+        const meta = statusMeta[order.status] || statusMeta.pending;
+
         const itemsHTML = order.items.map(i =>
           `<div class="order-item-row">
             <span>${i.name} <span style="color:#999;font-size:11px;">× ${i.qty} (Size ${i.size}${i.color ? ", " + i.color : ""})</span></span>
             <span>₱${(i.price * i.qty).toLocaleString()}</span>
           </div>`
         ).join("");
+
         const noteHTML = order.note ? `<div style="padding:8px 16px;font-size:12px;color:#888;font-family:Arial,sans-serif;border-top:1px solid #f0f0f0;">Note: ${order.note}</div>` : "";
+
+        const stockRestoreNote = (order.status === 'approved' || order.status === 'processing')
+          ? `<span style="font-family:Arial,sans-serif;font-size:10px;color:#f59e0b;letter-spacing:.5px;margin-left:10px;">⚠ Stock will be restored</span>`
+          : '';
+        const cancelRow = meta.canCancel
+          ? `<div class="order-cancel-row">
+               <button class="order-cancel-btn" id="cancelBtn_${order.id}" onclick="cancelOrder('${order.id}', this)">
+                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                 Cancel Order
+               </button>
+               ${stockRestoreNote}
+             </div>`
+          : `<div class="order-cancel-row">
+               <span style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;letter-spacing:.5px;">
+                 ${order.status === 'cancelled' ? '✕ This order has been cancelled.'
+                   : order.status === 'shipped' ? '🚚 Already shipped — contact support to cancel.'
+                   : order.status === 'delivered' ? '✓ Delivered — cannot be cancelled.'
+                   : '✗ This order cannot be cancelled.'}
+               </span>
+             </div>`;
+
         return `
           <div class="order-card">
             <div class="order-card-header">
@@ -2017,7 +2052,7 @@
                 <div class="order-id">#${order.id.replace("ORD_","")}</div>
                 <div class="order-date">${dateStr}</div>
               </div>
-              <span class="order-status-pill ${statusClass}">${statusLabel}</span>
+              <span class="order-status-pill ${meta.cls}">${meta.label}</span>
             </div>
             <div class="order-items-list">${itemsHTML}</div>
             ${noteHTML}
@@ -2025,14 +2060,7 @@
               <span>Total</span>
               <span>₱${Number(order.totalAmount).toLocaleString()}</span>
             </div>
-            ${(order.status === 'pending' || order.status === 'approved') ? `
-            <div class="order-cancel-row">
-              <button class="order-cancel-btn" id="cancelBtn_${order.id}" onclick="cancelOrder('${order.id}', this)">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Cancel Order
-              </button>
-              ${order.status === 'approved' ? `<span style="font-family:Arial,sans-serif;font-size:10px;color:#f59e0b;letter-spacing:.5px;margin-left:10px;">⚠ Stock will be restored</span>` : ''}
-            </div>` : ''}
+            ${cancelRow}
           </div>`;
       }).join("");
     } catch (err) {
