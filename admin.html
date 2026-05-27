@@ -4256,8 +4256,10 @@ async function rejectOrder(orderId, reason) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('Order rejected.');
+      showToast('Order rejected. Stock has been restored.');
       await loadOrders();
+      await loadProductsFromBackend();
+      renderDashboard();
     } else {
       showToast('Failed to reject order.', true);
     }
@@ -4498,6 +4500,10 @@ async function updateBuyerOrderStatus(orderId, status) {
       if (o) o.status = status;
       showToast('Order status updated to: ' + status);
       renderBuyerOrdersTable();
+      if (status === 'cancelled') {
+        await loadProductsFromBackend();
+        renderDashboard();
+      }
     } else {
       showToast('Failed: ' + (data.error || 'Unknown'), true);
     }
@@ -4540,8 +4546,10 @@ async function rejectBuyerOrder(orderId) {
     if (data.success) {
       const o = allBuyerOrders.find(x => x.id === orderId);
       if (o) o.status = 'cancelled';
-      showToast('Order rejected and cancelled.');
+      showToast('Order rejected and cancelled. Stock has been restored.');
       renderBuyerOrdersTable();
+      await loadProductsFromBackend();
+      renderDashboard();
     } else {
       showToast('Failed: ' + (data.error || 'Unknown'), true);
     }
