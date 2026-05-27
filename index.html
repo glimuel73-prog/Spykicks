@@ -2496,6 +2496,7 @@ async function lookupOrders() {
               ${canCancel ? `<button class="order-cancel-btn" onclick="cancelBuyerOrder('${o.id}','${contact.replace(/'/g,"\\'")}')">Cancel</button>` : ''}
             </div>
           </div>
+          ${o.status === 'shipped' || o.status === 'delivered' ? `<div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:9px 20px;font-family:Arial,sans-serif;font-size:11px;color:#92400e;letter-spacing:.3px;">📦 To cancel or return this order, please contact the page/admin directly.</div>` : ''}
           <div class="order-history-body">
             <div style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;margin-bottom:10px;letter-spacing:1px;">📍 ${addr}${o.fullAddress ? ' — ' + o.fullAddress : ''}</div>
             ${itemsHTML}
