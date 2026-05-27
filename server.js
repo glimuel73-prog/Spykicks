@@ -535,6 +535,122 @@ app.post("/admin/reject-order", (req, res) => {
     }
 });
 
+app.post("/admin/reseller-order-status", (req, res) => {
+    const { orderId, status } = req.body;
+    if (!orderId || !status) return res.json({ success: false, error: "Missing fields" });
+    const allowed = ['pending', 'approved', 'processing', 'shipped', 'delivered', 'rejected', 'cancelled'];
+    if (!allowed.includes(status)) return res.json({ success: false, error: "Invalid status" });
+    try {
+        const orderRow = db.prepare("SELECT * FROM orders WHERE id = ?").get(orderId);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+
+        const items = JSON.parse(orderRow.items);
+        const wasApproved = ['approved', 'processing', 'shipped', 'delivered'].includes(orderRow.status);
+        const willApprove = ['approved', 'processing', 'shipped', 'delivered'].includes(status);
+        const now = new Date().toISOString();
+
+        const doUpdate = db.transaction(() => {
+            // Deduct stock when moving into an "active" state from pending/rejected/cancelled
+            if (willApprove && !wasApproved) {
+                for (const item of items) {
+                    const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
+                    if (!prodRow) continue;
+                    const product = JSON.parse(prodRow.data);
+                    if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
+                        const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
+                        if (sizeObj) {
+                            if (item.color && sizeObj.colorStock && typeof sizeObj.colorStock === 'object') {
+                                const prev = Number(sizeObj.colorStock[item.color]) || 0;
+                                sizeObj.colorStock[item.color] = Math.max(0, prev - (Number(item.qty) || 1));
+                                sizeObj.stock = Object.values(sizeObj.colorStock).reduce((a, b) => a + (Number(b) || 0), 0);
+                            } else if (sizeObj.stock != null) {
+                                sizeObj.stock = Math.max(0, (Number(sizeObj.stock) || 0) - (Number(item.qty) || 1));
+                            }
+                        }
+                        product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+                    } else {
+                        product.stock = Math.max(0, (Number(product.stock) || 0) - (Number(item.qty) || 1));
+                    }
+                    db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), item.productId);
+                }
+            }
+            // Restore stock when moving out of an "active" state to cancelled/rejected
+            if (!willApprove && wasApproved) {
+                for (const item of items) {
+                    const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
+                    if (!prodRow) continue;
+                    const product = JSON.parse(prodRow.data);
+                    if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
+                        const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
+                        if (sizeObj) {
+                            if (item.color && sizeObj.colorStock && typeof sizeObj.colorStock === 'object') {
+                                sizeObj.colorStock[item.color] = (Number(sizeObj.colorStock[item.color]) || 0) + (Number(item.qty) || 1);
+                                sizeObj.stock = Object.values(sizeObj.colorStock).reduce((a, b) => a + (Number(b) || 0), 0);
+                            } else if (sizeObj.stock != null) {
+                                sizeObj.stock = (Number(sizeObj.stock) || 0) + (Number(item.qty) || 1);
+                            }
+                        }
+                        product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+                    } else {
+                        product.stock = (Number(product.stock) || 0) + (Number(item.qty) || 1);
+                    }
+                    db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), item.productId);
+                }
+            }
+            db.prepare("UPDATE orders SET status = ?, updatedAt = ? WHERE id = ?").run(status, now, orderId);
+        });
+        doUpdate();
+        broadcastProducts();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+app.post("/admin/cancel-reseller-order", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) return res.json({ success: false, error: "orderId required" });
+    try {
+        const orderRow = db.prepare("SELECT * FROM orders WHERE id = ?").get(orderId);
+        if (!orderRow) return res.json({ success: false, error: "Order not found" });
+
+        const items = JSON.parse(orderRow.items);
+        const wasApproved = ['approved', 'processing', 'shipped', 'delivered'].includes(orderRow.status);
+        const now = new Date().toISOString();
+
+        const doCancel = db.transaction(() => {
+            if (wasApproved) {
+                for (const item of items) {
+                    const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
+                    if (!prodRow) continue;
+                    const product = JSON.parse(prodRow.data);
+                    if (item.size && product.sizes && product.sizes.length > 0 && typeof product.sizes[0] === 'object') {
+                        const sizeObj = product.sizes.find(s => String(s.size) === String(item.size));
+                        if (sizeObj) {
+                            if (item.color && sizeObj.colorStock && typeof sizeObj.colorStock === 'object') {
+                                sizeObj.colorStock[item.color] = (Number(sizeObj.colorStock[item.color]) || 0) + (Number(item.qty) || 1);
+                                sizeObj.stock = Object.values(sizeObj.colorStock).reduce((a, b) => a + (Number(b) || 0), 0);
+                            } else if (sizeObj.stock != null) {
+                                sizeObj.stock = (Number(sizeObj.stock) || 0) + (Number(item.qty) || 1);
+                            }
+                        }
+                        product.stock = product.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+                    } else {
+                        product.stock = (Number(product.stock) || 0) + (Number(item.qty) || 1);
+                    }
+                    db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), item.productId);
+                }
+            }
+            db.prepare("UPDATE orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
+        });
+        doCancel();
+        broadcastProducts();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
 app.post("/admin/delete-order", (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
