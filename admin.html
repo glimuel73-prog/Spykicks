@@ -4206,11 +4206,15 @@ function renderOrdersTable() {
 
 
   if (cardTable) {
+    const rOpts = ['pending','approved','processing','shipped','delivered','rejected','cancelled'];
+    const rLabels = { pending:'⏳ Pending', approved:'✓ Approved', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', rejected:'✗ Rejected', cancelled:'✕ Cancelled' };
     cardTable.innerHTML = filtered.map(o => {
       const d = new Date(o.createdAt);
       const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-      const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : 'pending';
-      const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : o.status === 'cancelled' ? '✕ Cancelled' : '⏳ Pending';
+      const statusClass = ['approved','delivered','shipped'].includes(o.status) ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : 'pending';
+      const statusLabel = rLabels[o.status] || o.status;
+      const rSelect = `<select onchange="updateResellerOrderStatus('${o.id}', this.value)" style="flex:1;font-family:var(--font);font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--surface);color:var(--text);">${rOpts.map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${rLabels[s]}</option>`).join('')}</select>`;
+      const mobileApproveReject = o.status === 'pending' ? `<button onclick="approveOrder('${o.id}')" style="background:#16a34a;color:#fff;border:none;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">✓ Approve</button><button onclick="promptRejectOrder('${o.id}')" style="background:#e11d48;color:#fff;border:none;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:6px;cursor:pointer;flex:1;">✗ Reject</button>` : '';
       return `<div class="card-row">
         <div class="card-top">
           <div style="flex:1;min-width:0;">
@@ -4221,17 +4225,14 @@ function renderOrdersTable() {
         </div>
         <div class="card-field"><strong>Items</strong>${o.items.map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ')}</div>
         ${o.note ? `<div class="card-field"><strong>Note</strong>${o.note}</div>` : ''}
-        <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0;">
           <span style="font-family:var(--font);font-weight:700;font-size:16px;">₱${Number(o.totalAmount).toLocaleString()}</span>
         </div>
-        ${(() => {
-          const rOpts = ['pending','approved','processing','shipped','delivered','rejected','cancelled'];
-          const rLabels = { pending:'⏳ Pending', approved:'✓ Approved', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', rejected:'✗ Rejected', cancelled:'✕ Cancelled' };
-          const rSelect = `<select onchange="updateResellerOrderStatus('${o.id}', this.value)" style="flex:1;font-family:var(--font);font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--surface);color:var(--text);">${rOpts.map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${rLabels[s]}</option>`).join('')}</select>`;
-          if (o.status === 'pending') return `<div class="card-actions" style="flex-wrap:wrap;gap:6px;"><button class="order-approve-btn" style="flex:1;" onclick="approveOrder('${o.id}')">✓ Approve</button><button class="order-reject-btn" style="flex:1;" onclick="promptRejectOrder('${o.id}')">✗ Reject</button></div><div class="card-actions" style="margin-top:6px;">${rSelect}<button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button></div>`;
-          if (o.status === 'approved') return `<div class="card-actions" style="flex-wrap:wrap;gap:6px;"><button class="order-cancel-reseller-btn" style="flex:1;" onclick="cancelResellerOrder('${o.id}')">✕ Cancel Order</button><button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button></div><div class="card-actions" style="margin-top:6px;">${rSelect}</div>`;
-          return `<div class="card-actions" style="margin-top:6px;">${rSelect}<button class="order-delete-btn" onclick="deleteOrder('${o.id}')">🗑</button></div>`;
-        })()}
+        ${mobileApproveReject ? `<div style="display:flex;gap:8px;margin-bottom:8px;">${mobileApproveReject}</div>` : ''}
+        <div class="card-actions">
+          ${rSelect}
+          <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button>
+        </div>
       </div>`;
     }).join('');
   }
