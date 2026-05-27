@@ -984,12 +984,32 @@
       if (brandBar) brandBar.style.display = "none";
       document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     } else {
+      // Reset all filters back to default so grouped view is restored
+      currentCat = 'all';
+      activeGender = 'all';
+      activeBrand = 'all';
+      activeLine = 'all';
+      activeModel = 'all';
+      activeSort = 'default';
+
       favPageHeader.classList.remove("visible");
       if (mainSectionHeader) mainSectionHeader.style.display = "";
       if (sortBar) sortBar.style.display = "";
       if (genderBar) genderBar.style.display = "";
       if (brandBar) brandBar.style.display = document.getElementById('brandChips')?.querySelectorAll('.sort-chip:not(#brandChipAll)').length > 0 ? 'block' : 'none';
-      document.querySelector("#catChips .cat-chip").classList.add("active");
+
+      // Reset chip UI states
+      document.querySelectorAll("#catChips .cat-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
+      document.querySelectorAll(".sort-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
+      document.getElementById("rGenderAll")?.classList.add("active");
+      document.getElementById("rGenderMale")?.classList.remove("active");
+      document.getElementById("rGenderFemale")?.classList.remove("active");
+      document.getElementById("rGenderUnisex")?.classList.remove("active");
+      document.getElementById("brandChipAll")?.classList.add("active");
+      document.querySelectorAll("#brandChips .sort-chip:not(#brandChipAll)").forEach(c => c.classList.remove("active"));
+      document.getElementById("brandLevel2").style.display = "none";
+      document.getElementById("brandLevel3").style.display = "none";
+      if (document.getElementById("searchInput")) document.getElementById("searchInput").value = "";
     }
     applyView();
   }
