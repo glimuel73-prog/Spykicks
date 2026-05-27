@@ -61,8 +61,8 @@
   /* ── Main flat product grid (matches index) ── */
   .product-grid { display: block; width: 100%; background: #fff; }
 
-  /* Card — aligned columns, index style */
-  .product-card { background: #fff; padding: 0 0 20px; transition: background .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
+  /* Card — base (used by scroll/grouped mode) */
+  .product-card { background: #fff; padding: 0 0 20px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
   .product-card:hover { background: #f7f7f7; }
 
   /* Fav btn — top-left absolute overlay on image */
@@ -237,35 +237,36 @@
   .order-cancel-btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
   .order-status-pill.cancelled { color: #555; border-color: #bbb; background: #f5f5f5; }
 
-  /* ── Flat grid (used when filters are active) ── */
-  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: #e8e8e8; width: 100%; margin-top: 1px; align-items: stretch; }
+  /* ── Flat grid — exact index.html match ── */
+  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: #e8e8e8; width: 100%; margin-top: 1px; align-items: stretch; }
   #productGrid.grouped-mode { background: #fff; display: block; }
   #productGrid:not(.grouped-mode) { display: block; background: #fff; }
 
-  /* Cards: full height stretch so all cards in a row are equal height */
-  .product-grid-flat .product-card { width: 100%; min-width: unset; padding: 0 0 20px; align-self: stretch; }
-  .product-grid-flat .product-card:hover { background: #f7f7f7; transform: none; box-shadow: none; }
+  /* Card: padded like index, hover lift + shadow */
+  .product-grid-flat .product-card { width: 100%; min-width: unset; padding: 24px 24px 24px; align-self: stretch; transition: background .2s, transform .2s; }
+  .product-grid-flat .product-card:hover { background: #f5f5f5; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
 
-  /* Image: flush to top, fixed height, cover fit */
-  .product-grid-flat .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 0; margin-bottom: 0; }
+  /* Image: rounded corners, gap below, like index */
+  .product-grid-flat .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 16px; }
   .product-grid-flat .product-img-placeholder img { object-fit: cover; padding: 0; }
 
-  /* Tag: plain bordered box — no green pill */
-  .product-grid-flat .product-tag { display: inline-flex; align-items: center; background: none; color: #666; font-size: 10px; font-family: Arial,sans-serif; font-weight: 400; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 9px; border-radius: 3px; border: 1px solid #ddd; }
-  .product-grid-flat .product-stock { display: block; font-family: Arial,sans-serif; font-size: 11px; color: #aaa; letter-spacing: .3px; margin: 0 16px 8px; }
-  .product-grid-flat .product-footer { flex-direction: row; align-items: center; justify-content: space-between; margin: 10px 16px 4px; }
-  .product-grid-flat .product-brand { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; font-weight: 400; margin: 14px 16px 4px; }
-  .product-grid-flat .product-name { font-size: 15px; font-weight: 700; letter-spacing: .3px; line-height: 1.3; margin: 0 16px 0; min-height: 40px; }
-  .product-grid-flat .product-price { font-size: 20px; font-weight: 700; }
-  .product-grid-flat .product-wholesale { display: block; margin: 0 16px 4px; }
-  /* Push view button to bottom of card */
-  .product-grid-flat .product-view-btn { margin-top: auto; }
-
-  /* Fav btn: top-left overlay circle on image */
-  .product-grid-flat .fav-btn { position: absolute; top: 10px; left: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; display: flex; align-items: center; justify-content: center; }
+  /* Fav btn: positioned relative to padded card */
+  .product-grid-flat .fav-btn { position: absolute; top: 14px; left: 14px; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; display: flex; align-items: center; justify-content: center; }
   .product-grid-flat .fav-btn:hover { border-color: var(--red); color: var(--red); background: rgba(255,255,255,0.9); }
   .product-grid-flat .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
   .product-grid-flat .fav-btn svg { width: 14px; height: 14px; stroke: none; }
+
+  /* Text — exact index spacing (no side margins, padding comes from card) */
+  .product-grid-flat .product-brand { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; font-weight: 400; margin: 0 0 4px; }
+  .product-grid-flat .product-name { font-size: 16px; font-weight: 700; letter-spacing: .5px; line-height: 1.3; margin: 0 0 12px; flex-grow: 1; min-height: unset; }
+  /* Footer pushed to bottom via margin-top: auto on product-name flex-grow */
+  .product-grid-flat .product-footer { flex-direction: row; align-items: center; justify-content: space-between; margin: 0 0 12px; margin-top: auto; }
+  .product-grid-flat .product-price { font-size: 22px; font-weight: 700; }
+  .product-grid-flat .product-tag { display: inline-flex; align-items: center; background: none; color: #666; font-size: 10px; font-family: Arial,sans-serif; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; border-radius: 3px; border: 1px solid #ddd; }
+  .product-grid-flat .product-stock { display: block; font-family: Arial,sans-serif; font-size: 11px; color: #aaa; letter-spacing: .5px; margin: 0 0 8px; }
+  .product-grid-flat .product-wholesale { display: block; margin: 0 0 4px; }
+  /* View button full width within padded card */
+  .product-grid-flat .product-view-btn { margin: 8px 0 0; width: 100%; }
   .fav-empty { display: none; max-width: 100%; margin: 0 auto; padding: 80px 40px; text-align: center; color: #aaa; font-family: Arial,sans-serif; letter-spacing: 3px; text-transform: uppercase; font-size: 14px; flex-direction: column; align-items: center; background: #f9f9f9; }
   .fav-empty.visible { display: flex; }
   .fav-empty svg { opacity: .2; width: 48px; height: 48px; margin-bottom: 20px; stroke: #000; fill: none; }
@@ -436,15 +437,13 @@
     .product-group-scroll .product-card { width: 150px; min-width: 150px; }
     .product-group-scroll .product-img-placeholder { height: 130px; }
     .product-grid-flat { grid-template-columns: repeat(2, 1fr); gap: 1px; }
-    .product-img-placeholder { height: 160px; }
-    .product-name { font-size: 13px; min-height: 34px; }
-    .product-price { font-size: 16px; }
-    .product-brand { margin: 10px 12px 3px; }
-    .product-name { margin: 0 12px 0; }
-    .product-footer { margin: 8px 12px 3px; }
-    .product-wholesale { margin: 0 12px 3px; }
-    .product-stock { margin: 0 12px 6px; }
-    .product-view-btn { margin: auto 12px 0; width: calc(100% - 24px); font-size: 10px; padding: 7px 10px; }
+    .product-grid-flat .product-card { padding: 14px 14px 14px; }
+    .product-grid-flat .product-img-placeholder { height: 160px; margin-bottom: 10px; }
+    .product-grid-flat .product-name { font-size: 13px; }
+    .product-grid-flat .product-price { font-size: 16px; }
+    .product-grid-flat .product-footer { margin: 0 0 8px; }
+    .product-grid-flat .product-stock { margin: 0 0 6px; }
+    .product-grid-flat .product-view-btn { margin: 6px 0 0; width: 100%; font-size: 10px; padding: 7px 10px; }
 
     .pd-drawer { max-width: 100%; top: auto; bottom: 0; height: 92dvh; border-radius: 24px 24px 0 0; transform: translateY(100%); }
     .pd-drawer.open { transform: translateY(0); }
