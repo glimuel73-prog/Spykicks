@@ -2003,8 +2003,8 @@
 
       const statusMeta = {
         pending:    { cls: 'pending',    label: '⏳ Pending',      canCancel: true  },
-        approved:   { cls: 'approved',   label: '✓ Approved',      canCancel: true  },
-        processing: { cls: 'processing', label: '🔄 Processing',   canCancel: true  },
+        approved:   { cls: 'approved',   label: '✓ Approved',      canCancel: false },
+        processing: { cls: 'processing', label: '🔄 Processing',   canCancel: false },
         shipped:    { cls: 'shipped',    label: '🚚 Shipped',       canCancel: false },
         delivered:  { cls: 'delivered',  label: '✓ Delivered',     canCancel: false },
         rejected:   { cls: 'rejected',   label: '✗ Rejected',      canCancel: false },
@@ -2041,6 +2041,8 @@
                  ${order.status === 'cancelled' ? '✕ This order has been cancelled.'
                    : order.status === 'shipped' ? '🚚 Already shipped — contact support to cancel.'
                    : order.status === 'delivered' ? '✓ Delivered — cannot be cancelled.'
+                   : order.status === 'approved' ? '✓ Approved — contact admin to cancel.'
+                   : order.status === 'processing' ? '🔄 Processing — contact admin to cancel.'
                    : '✗ This order cannot be cancelled.'}
                </span>
              </div>`;
@@ -2077,13 +2079,15 @@
       const res = await fetch('/reseller/cancel-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ orderId, email })
       });
-      const data = await res.json();
-      if (data.success) {
+      let data = {};
+      try { data = await res.json(); } catch(_) {}
+      if (res.ok && data.success) {
         await loadOrderHistory();
       } else {
-        alert('Could not cancel: ' + (data.error || 'Unknown error'));
+        alert('Could not cancel: ' + (data.error || (res.ok ? 'Unknown error' : 'Server error ' + res.status)));
         btn.disabled = false;
         btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel Order';
       }
