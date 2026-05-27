@@ -2483,7 +2483,7 @@ async function lookupOrders() {
           <span><strong>${i.name}</strong>${i.size ? ` &nbsp;·&nbsp; Size: ${i.size}` : ''}${i.color ? ` &nbsp;·&nbsp; ${i.color}` : ''} &nbsp;·&nbsp; Qty: ${i.qty}</span>
           <span style="flex-shrink:0;font-weight:700;">₱${(i.price*i.qty).toLocaleString()}</span>
         </div>`).join('');
-      const canCancel = o.status === 'pending';
+      const canCancel = o.status === 'pending' || o.status === 'processing';
       return `
         <div class="order-history-card">
           <div class="order-history-head">
