@@ -1811,6 +1811,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <option value="">All Statuses</option>
           <option value="pending">⏳ Pending</option>
           <option value="approved">✓ Approved</option>
+          <option value="processing">🔄 Processing</option>
+          <option value="shipped">🚚 Shipped</option>
+          <option value="delivered">✓ Delivered</option>
           <option value="rejected">✗ Rejected</option>
           <option value="cancelled">✕ Cancelled</option>
         </select>
@@ -4148,21 +4151,30 @@ function renderOrdersTable() {
   tbody.innerHTML = filtered.map(o => {
     const d = new Date(o.createdAt);
     const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    const statusClass = o.status === 'approved' ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : 'pending';
-    const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : o.status === 'cancelled' ? '✕ Cancelled' : '⏳ Pending';((s, i) => s + (i.qty || 1), 0);
+    const statusClass = o.status === 'approved' || o.status === 'delivered' ? 'approved' : o.status === 'rejected' ? 'rejected' : o.status === 'cancelled' ? 'cancelled' : o.status === 'shipped' ? 'approved' : o.status === 'processing' ? 'pending' : 'pending';
+    const statusLabel = o.status === 'approved' ? '✓ Approved' : o.status === 'rejected' ? '✗ Rejected' : o.status === 'cancelled' ? '✕ Cancelled' : o.status === 'processing' ? '🔄 Processing' : o.status === 'shipped' ? '🚚 Shipped' : o.status === 'delivered' ? '✓ Delivered' : '⏳ Pending';((s, i) => s + (i.qty || 1), 0);
     const itemSummary = o.items.slice(0,2).map(i => `${i.name} ×${i.qty} (${i.size}${i.color ? ', ' + i.color : ''})`).join(', ') + (o.items.length > 2 ? ` +${o.items.length-2} more` : '');
+    const resellerStatusOpts = ['pending','approved','processing','shipped','delivered','rejected','cancelled'];
+    const resellerStatusLabels = { pending:'⏳ Pending', approved:'✓ Approved', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', rejected:'✗ Rejected', cancelled:'✕ Cancelled' };
+    const resellerStatusSelect = `<select onchange="updateResellerOrderStatus('${o.id}', this.value)" onclick="event.stopPropagation()"
+      style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:1px;border:1px solid var(--border);border-radius:6px;padding:5px 8px;background:var(--surface);color:var(--text);cursor:pointer;">
+      ${resellerStatusOpts.map(s => `<option value="${s}" ${o.status===s?'selected':''}>${resellerStatusLabels[s]}</option>`).join('')}
+    </select>`;
     const actionBtns = o.status === 'pending'
-      ? `<div class="action-btns">
+      ? `<div class="action-btns" style="flex-wrap:wrap;gap:4px;">
            <button class="order-approve-btn" onclick="approveOrder('${o.id}')">✓ Approve</button>
            <button class="order-reject-btn" onclick="promptRejectOrder('${o.id}')">✗ Reject</button>
+           ${resellerStatusSelect}
            <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete order">🗑</button>
          </div>`
       : o.status === 'approved'
-      ? `<div class="action-btns">
+      ? `<div class="action-btns" style="flex-wrap:wrap;gap:4px;">
            <button class="order-cancel-reseller-btn" onclick="cancelResellerOrder('${o.id}')">✕ Cancel</button>
+           ${resellerStatusSelect}
            <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete order">🗑 Delete</button>
          </div>`
-      : `<div class="action-btns">
+      : `<div class="action-btns" style="flex-wrap:wrap;gap:4px;">
+           ${resellerStatusSelect}
            <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete order">🗑 Delete</button>
          </div>`;
 
@@ -4212,14 +4224,14 @@ function renderOrdersTable() {
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span style="font-family:var(--font);font-weight:700;font-size:16px;">₱${Number(o.totalAmount).toLocaleString()}</span>
         </div>
-        ${o.status === 'pending' ? `<div class="card-actions">
-          <button class="order-approve-btn" style="flex:1;" onclick="approveOrder('${o.id}')">✓ Approve</button>
-          <button class="order-reject-btn" style="flex:1;" onclick="promptRejectOrder('${o.id}')">✗ Reject</button>
-          <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button>
-        </div>` : o.status === 'approved' ? `<div class="card-actions">
-          <button class="order-cancel-reseller-btn" style="flex:1;" onclick="cancelResellerOrder('${o.id}')">✕ Cancel Order</button>
-          <button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button>
-        </div>` : `<div class="card-actions"><button class="order-delete-btn" style="width:100%;" onclick="deleteOrder('${o.id}')">🗑 Delete Order</button></div>`}
+        ${(() => {
+          const rOpts = ['pending','approved','processing','shipped','delivered','rejected','cancelled'];
+          const rLabels = { pending:'⏳ Pending', approved:'✓ Approved', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', rejected:'✗ Rejected', cancelled:'✕ Cancelled' };
+          const rSelect = `<select onchange="updateResellerOrderStatus('${o.id}', this.value)" style="flex:1;font-family:var(--font);font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:6px;padding:8px;background:var(--surface);color:var(--text);">${rOpts.map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${rLabels[s]}</option>`).join('')}</select>`;
+          if (o.status === 'pending') return `<div class="card-actions" style="flex-wrap:wrap;gap:6px;"><button class="order-approve-btn" style="flex:1;" onclick="approveOrder('${o.id}')">✓ Approve</button><button class="order-reject-btn" style="flex:1;" onclick="promptRejectOrder('${o.id}')">✗ Reject</button></div><div class="card-actions" style="margin-top:6px;">${rSelect}<button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button></div>`;
+          if (o.status === 'approved') return `<div class="card-actions" style="flex-wrap:wrap;gap:6px;"><button class="order-cancel-reseller-btn" style="flex:1;" onclick="cancelResellerOrder('${o.id}')">✕ Cancel Order</button><button class="order-delete-btn" onclick="deleteOrder('${o.id}')" title="Delete">🗑</button></div><div class="card-actions" style="margin-top:6px;">${rSelect}</div>`;
+          return `<div class="card-actions" style="margin-top:6px;">${rSelect}<button class="order-delete-btn" onclick="deleteOrder('${o.id}')">🗑</button></div>`;
+        })()}
       </div>`;
     }).join('');
   }
@@ -4295,6 +4307,31 @@ async function cancelResellerOrder(orderId) {
       renderDashboard();
     } else {
       showToast('Failed to cancel order: ' + (data.error || 'Unknown error'), true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+async function updateResellerOrderStatus(orderId, status) {
+  try {
+    const res = await fetch('/admin/reseller-order-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, status })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const o = allOrders.find(x => x.id === orderId);
+      if (o) o.status = status;
+      showToast('Reseller order status updated to: ' + status);
+      renderOrdersTable();
+      if (status === 'cancelled' || status === 'rejected') {
+        await loadProductsFromBackend();
+        renderDashboard();
+      }
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown'), true);
     }
   } catch(e) {
     showToast('Connection error.', true);
