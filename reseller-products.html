@@ -2024,14 +2024,13 @@
         ).join("");
 
         const noteHTML = order.note ? `<div style="padding:8px 16px;font-size:12px;color:#888;font-family:Arial,sans-serif;border-top:1px solid #f0f0f0;">Note: ${order.note}</div>` : "";
-
+       
         const cancelRow = meta.canCancel
           ? `<div class="order-cancel-row">
                <button class="order-cancel-btn" id="cancelBtn_${order.id}" onclick="cancelOrder('${order.id}', this)">
                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                  Cancel Order
                </button>
-               ${stockRestoreNote}
              </div>`
           : `<div class="order-cancel-row">
                <span style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;letter-spacing:.5px;">
