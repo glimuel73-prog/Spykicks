@@ -2518,7 +2518,7 @@ async function cancelBuyerOrder(orderId, contact) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('Order cancelled.');
+      showToast('Order cancelled. Stock has been restored.');
       lookupOrders();
     } else {
       showToast(data.error || 'Failed to cancel order.');
