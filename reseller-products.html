@@ -46,7 +46,8 @@
   .fav-chip { display: flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--border-dark); color: var(--text-muted); font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 16px; cursor: pointer; transition: all .2s; border-radius: 20px; }
   .fav-chip:hover { border-color: #000; color: #000; }
   .fav-chip svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
-  .fav-count { background: #000; color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px; }
+  .fav-count { background: #000; color: #fff; font-size: 10px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 10px; display: none; align-items: center; justify-content: center; padding: 0 4px; }
+  .fav-count.visible { display: inline-flex; }
 
 
 
@@ -524,7 +525,7 @@
       <button class="fav-chip" id="favToggleBtn" onclick="toggleFavView()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         Favorites
-        <span class="fav-count" id="favCount">0</span>
+        <span class="fav-count" id="favCount"></span>
       </button>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
