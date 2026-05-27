@@ -4248,19 +4248,21 @@ async function approveOrder(orderId) {
     const res = await fetch('/admin/approve-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       showToast('Order approved! Stock updated.');
       await loadOrders();
       await loadProductsFromBackend();
       renderDashboard();
     } else {
-      showToast('Failed: ' + (data.error || 'Unknown error'), true);
+      showToast('Failed: ' + (data.error || (res.ok ? 'Unknown error' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4275,19 +4277,21 @@ async function rejectOrder(orderId, reason) {
     const res = await fetch('/admin/reject-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId, reason })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       showToast('Order rejected. Stock has been restored.');
       await loadOrders();
       await loadProductsFromBackend();
       renderDashboard();
     } else {
-      showToast('Failed to reject order.', true);
+      showToast('Failed to reject order: ' + (data.error || (res.ok ? 'Unknown error' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4297,19 +4301,21 @@ async function cancelResellerOrder(orderId) {
     const res = await fetch('/admin/cancel-reseller-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       showToast('Order cancelled. Stock has been restored.');
       await loadOrders();
       await loadProductsFromBackend();
       renderDashboard();
     } else {
-      showToast('Failed to cancel order: ' + (data.error || 'Unknown error'), true);
+      showToast('Failed to cancel order: ' + (data.error || (res.ok ? 'Unknown error' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4318,10 +4324,12 @@ async function updateResellerOrderStatus(orderId, status) {
     const res = await fetch('/admin/reseller-order-status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId, status })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       const o = allOrders.find(x => x.id === orderId);
       if (o) o.status = status;
       showToast('Reseller order status updated to: ' + status);
@@ -4331,10 +4339,10 @@ async function updateResellerOrderStatus(orderId, status) {
         renderDashboard();
       }
     } else {
-      showToast('Failed: ' + (data.error || 'Unknown'), true);
+      showToast('Failed: ' + (data.error || (res.ok ? 'Unknown' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4344,19 +4352,21 @@ async function deleteOrder(orderId) {
     const res = await fetch('/admin/delete-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       allOrders = allOrders.filter(o => o.id !== orderId);
       renderOrdersTable();
       renderDashboard();
       showToast('Order deleted.');
     } else {
-      showToast('Failed to delete order: ' + (data.error || 'Unknown error'), true);
+      showToast('Failed to delete order: ' + (data.error || (res.ok ? 'Unknown error' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4562,10 +4572,12 @@ async function updateBuyerOrderStatus(orderId, status) {
     const res = await fetch('/admin/buyer-order-status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId, status })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       const o = allBuyerOrders.find(x => x.id === orderId);
       if (o) o.status = status;
       showToast('Order status updated to: ' + status);
@@ -4575,10 +4587,10 @@ async function updateBuyerOrderStatus(orderId, status) {
         renderDashboard();
       }
     } else {
-      showToast('Failed: ' + (data.error || 'Unknown'), true);
+      showToast('Failed: ' + (data.error || (res.ok ? 'Unknown' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4588,19 +4600,21 @@ async function approveBuyerOrder(orderId) {
     const res = await fetch('/admin/approve-buyer-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       const o = allBuyerOrders.find(x => x.id === orderId);
       if (o) o.status = 'processing';
       showToast('Order approved — moved to Processing.');
       renderBuyerOrdersTable();
     } else {
-      showToast('Failed: ' + (data.error || 'Unknown'), true);
+      showToast('Failed: ' + (data.error || (res.ok ? 'Unknown' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4610,10 +4624,12 @@ async function rejectBuyerOrder(orderId) {
     const res = await fetch('/admin/reject-buyer-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       const o = allBuyerOrders.find(x => x.id === orderId);
       if (o) o.status = 'cancelled';
       showToast('Order rejected and cancelled. Stock has been restored.');
@@ -4621,10 +4637,10 @@ async function rejectBuyerOrder(orderId) {
       await loadProductsFromBackend();
       renderDashboard();
     } else {
-      showToast('Failed: ' + (data.error || 'Unknown'), true);
+      showToast('Failed: ' + (data.error || (res.ok ? 'Unknown' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
@@ -4634,18 +4650,20 @@ async function deleteBuyerOrder(orderId) {
     const res = await fetch('/admin/delete-buyer-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ orderId })
     });
-    const data = await res.json();
-    if (data.success) {
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+    if (res.ok && data.success) {
       allBuyerOrders = allBuyerOrders.filter(o => o.id !== orderId);
       renderBuyerOrdersTable();
       showToast('Buyer order deleted.');
     } else {
-      showToast('Failed: ' + (data.error || 'Unknown'), true);
+      showToast('Failed: ' + (data.error || (res.ok ? 'Unknown' : 'Server error ' + res.status)), true);
     }
   } catch(e) {
-    showToast('Connection error.', true);
+    showToast('Connection error. Please try again.', true);
   }
 }
 
