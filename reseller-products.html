@@ -109,20 +109,20 @@
   .product-group-scroll-wrap:hover .scroll-arrow { opacity: 1; pointer-events: all; }
 
   /* Scroll-mode card overrides (compact) */
-  .product-group-scroll .product-card { width: 210px; min-width: 210px; flex-shrink: 0; padding: 0 0 20px; box-shadow: none; transform: none !important; }
+  .product-group-scroll .product-card { width: 210px; min-width: 210px; flex-shrink: 0; border-radius: 0; border: none; padding: 0 0 20px; box-shadow: none; background: #fff; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: visible; transition: background .15s; transform: none !important; }
   .product-group-scroll .product-card:hover { background: #fff; box-shadow: none; transform: none !important; }
-  .product-group-scroll .fav-btn { position: relative; top: auto; left: auto; background: none; border: none; box-shadow: none; width: 100%; height: 36px; border-radius: 0; color: #ccc; }
-  .product-group-scroll .fav-btn:hover { background: none; border-color: transparent; color: #888; }
-  .product-group-scroll .fav-btn.active { background: none; border-color: transparent; color: #e11d48; }
+  .product-group-scroll .fav-btn { position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: none !important; z-index: 1; background: none !important; border: none !important; box-shadow: none !important; width: 100%; height: 36px; border-radius: 0; display: flex; align-items: center; justify-content: center; color: #ccc; flex-shrink: 0; }
+  .product-group-scroll .fav-btn:hover { background: none !important; border-color: transparent !important; color: #888; }
+  .product-group-scroll .fav-btn.active { background: none !important; border-color: transparent !important; color: #e11d48; }
   .product-group-scroll .fav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.5; fill: currentColor; }
-  .product-group-scroll .product-img-placeholder, .product-group-scroll .img-card-wrap.product-img-placeholder { height: 170px; border-radius: 0; margin-bottom: 0; background: #fff; }
-  .product-group-scroll .product-img-placeholder img, .product-group-scroll .img-card-wrap.product-img-placeholder img { object-fit: contain; padding: 0 12px; }
-  .product-group-scroll .product-brand { font-size: 13px; font-weight: 700; color: #111; letter-spacing: 0; text-transform: none; margin: 16px 8px 2px; }
-  .product-group-scroll .product-name { font-size: 13px; font-weight: 400; color: #111; margin: 0 8px 10px; letter-spacing: 0; flex-grow: 0; }
-  .product-group-scroll .product-footer { margin: 0 8px; flex-direction: column; align-items: flex-start; }
-  .product-group-scroll .product-price { font-size: 14px; }
+  .product-group-scroll .product-img-placeholder, .product-group-scroll .img-card-wrap.product-img-placeholder { height: 170px; border-radius: 0; margin-bottom: 0; background: #fff; position: relative; flex-shrink: 0; }
+  .product-group-scroll .product-img-placeholder img, .product-group-scroll .img-card-wrap.product-img-placeholder img { object-fit: contain; padding: 0 12px; width: 100%; height: 100%; }
+  .product-group-scroll .product-card > .product-brand { font-size: 13px; font-weight: 700; color: #111; letter-spacing: 0; text-transform: none; margin: 16px 8px 2px; font-family: Arial, sans-serif; }
+  .product-group-scroll .product-card > .product-name { font-size: 13px; font-weight: 400; color: #111; margin: 0 8px 10px; letter-spacing: 0; line-height: 1.35; flex-grow: 0; }
+  .product-group-scroll .product-card > .product-footer { margin: 0 8px; }
+  .product-group-scroll .product-price { font-size: 14px; font-weight: 700; color: #111; }
   .product-group-scroll .product-view-btn { display: flex; margin: 6px 8px 0; width: calc(100% - 16px); font-size: 10px; padding: 7px 10px; }
-  .product-group-scroll .product-tag, .product-group-scroll .product-stock, .product-group-scroll .product-colors, .product-group-scroll .product-corner-badge, .product-group-scroll .img-zoom-btn, .product-group-scroll .img-dl-btn, .product-group-scroll .product-new-arrival-badge { display: none; }
+  .product-group-scroll .product-tag, .product-group-scroll .product-stock, .product-group-scroll .product-colors, .product-group-scroll .product-corner-badge, .product-group-scroll .img-zoom-btn, .product-group-scroll .img-dl-btn, .product-group-scroll .product-new-arrival-badge, .product-group-scroll .product-wholesale { display: none; }
 
   /* Flat grid card overrides */
   .product-grid-flat .product-card { padding: 0 0 20px; }
