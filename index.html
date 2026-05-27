@@ -70,13 +70,13 @@
   .hero-dot { display: none; }
   .hero-dot.active { display: none; }
 
-  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px 18px; max-width: 100%; margin: 0 auto; border-bottom: 1px solid #e0e0e0; flex-wrap: wrap; gap: 12px; background: #f9f9f9; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px 18px; max-width: 100%; margin: 0 auto; flex-wrap: wrap; gap: 12px; background: #f9f9f9; }
   .section-title { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #111; }
   .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .chip { padding: 7px 18px; border: 1px solid #ccc; background: none; color: #666; font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
   .chip.active, .chip:hover { border-color: #000; color: #fff; background: #000; }
 
-  .sort-bar { display: flex; align-items: center; gap: 12px; padding: 12px 40px; max-width: 100%; margin: 0 auto; border-bottom: 1px solid #e8e8e8; background: #fff; flex-wrap: wrap; }
+  .sort-bar { display: flex; align-items: center; gap: 12px; padding: 12px 40px; max-width: 100%; margin: 0 auto; background: #fff; flex-wrap: wrap; }
   .sort-label { font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #999; flex-shrink: 0; }
   .sort-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
   .sort-chip { padding: 6px 16px; border: 1px solid #ddd; background: none; color: #666; font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
@@ -86,7 +86,7 @@
   .content { display: none; }
   .content.active { display: block; }
 
-  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1px; background: #e8e8e8; max-width: 100%; margin: 1px auto 0; align-items: stretch; }
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0; background: #fff; max-width: 100%; margin: 0 auto; align-items: stretch; }
   .product-card { background: #fff; padding: 24px 24px 24px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
   .product-card:hover { background: #f5f5f5; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
   .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
@@ -133,7 +133,7 @@
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial, sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #aaa; background: #fff; }
 
   /* ── Grouped horizontal-scroll layout ── */
-  .product-group { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 28px 0 32px; }
+  .product-group { background: #fff; padding: 28px 0 32px; }
   .product-group-header { display: flex; align-items: center; justify-content: space-between; padding: 0 32px 18px; }
   .product-group-title { font-family: Arial, sans-serif; font-weight: 900; font-size: 22px; color: #111; letter-spacing: -.3px; }
   .product-group-viewall { background: none; border: 1px solid #bbb; color: #444; font-family: Arial, sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 20px; cursor: pointer; border-radius: 3px; transition: all .18s; }
@@ -424,7 +424,7 @@
     .product-price { font-size: 18px; }
     .product-category-tag { display: none; }
 
-    .product-grid-flat { grid-template-columns: repeat(2, 1fr); gap: 1px; background: #e8e8e8; padding: 0; }
+    .product-grid-flat { grid-template-columns: repeat(2, 1fr); gap: 16px; background: #fff; padding: 12px; }
     .product-grid-flat .product-card { padding: 0 0 12px; }
     .product-grid-flat .product-img-placeholder { height: auto; aspect-ratio: 1/1; border-radius: 0; margin-bottom: 10px; }
     .product-grid-flat .product-brand { margin: 0 10px 3px; font-size: 9px; }
@@ -697,7 +697,7 @@
     </div>
   </div>
 
-  <div style="display:flex;align-items:center;gap:8px;padding:10px 40px;max-width:100%;margin:0 auto;border-bottom:1px solid #e8e8e8;background:#fff;flex-wrap:wrap;" class="gender-bar">
+  <div style="display:flex;align-items:center;gap:8px;padding:10px 40px;max-width:100%;margin:0 auto;background:#fff;flex-wrap:wrap;" class="gender-bar">
     <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Gender</span>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
       <button class="sort-chip active" id="genderChipAll" onclick="filterGender('all',this)">All</button>
@@ -707,7 +707,7 @@
     </div>
   </div>
 
-  <div id="brandBar" style="display:none;background:#fff;border-bottom:1px solid #e8e8e8;">
+  <div id="brandBar" style="display:none;background:#fff;">
 
     <div id="brandLevel1" style="display:flex;align-items:center;gap:8px;padding:10px 40px;flex-wrap:wrap;">
       <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
@@ -781,7 +781,7 @@
     </div>
   </div>
 
-  <div style="background:#fff;border-bottom:1px solid #e8e8e8;padding:20px 40px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
+  <div style="background:#fff;padding:20px 40px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;">
     <div style="display:flex;flex-direction:column;gap:5px;flex:1;max-width:360px;">
       <label style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#888;">Your Contact Number</label>
       <input type="tel" id="orderLookupContact" placeholder="09XXXXXXXXX" style="background:#f8f8f8;border:1px solid #e5e5e5;color:#111;font-family:Arial,sans-serif;font-size:14px;padding:11px 14px;border-radius:8px;outline:none;transition:border-color .2s;width:100%;" oninput="this.style.borderColor='#e5e5e5'" onkeydown="if(event.key==='Enter')lookupOrders()">
