@@ -271,8 +271,15 @@
   .product-grid-flat .fav-btn:hover { border-color: var(--red); color: var(--red); background: rgba(255,255,255,0.9); }
   .product-grid-flat .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
   .product-grid-flat .fav-btn svg { width: 14px; height: 14px; stroke: none; }
-  .fav-empty p { font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-top: 12px; }
-  .fav-empty-icon { font-size: 36px; opacity: .2; }
+  .fav-empty { display: none; max-width: 100%; margin: 0 auto; padding: 80px 40px; text-align: center; color: #aaa; font-family: Arial,sans-serif; letter-spacing: 3px; text-transform: uppercase; font-size: 14px; flex-direction: column; align-items: center; background: #f9f9f9; }
+  .fav-empty.visible { display: flex; }
+  .fav-empty svg { opacity: .2; width: 48px; height: 48px; margin-bottom: 20px; stroke: #000; fill: none; }
+  .fav-empty p { font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #aaa; margin-top: 0; }
+  .fav-page-header { display: none; align-items: center; justify-content: space-between; padding: 18px 40px; background: #fff; border-bottom: 1px solid #e0e0e0; }
+  .fav-page-header.visible { display: flex; }
+  .fav-page-title { font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #111; }
+  .fav-back-btn { background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 9px 20px; border: none; cursor: pointer; border-radius: 20px; transition: background .2s; display: flex; align-items: center; gap: 8px; }
+  .fav-back-btn:hover { background: #333; }
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
 
   .search-wrap { position: relative; }
@@ -475,6 +482,8 @@
 
     .footer-trust { flex-direction: column; gap: 20px; padding: 20px 16px; }
     .footer { flex-direction: column; gap: 10px; padding: 20px 16px; text-align: center; }
+    .fav-page-header { padding: 14px 16px; }
+    .fav-back-btn { font-size: 10px; padding: 7px 14px; }
 
     .state-box { padding: 0 16px; margin-top: 60px; }
     .state-box h2 { font-size: 32px; }
@@ -535,7 +544,12 @@
 
 <div id="mainContent">
 
-  <div class="section-header">
+  <div class="fav-page-header" id="favPageHeader">
+    <span class="fav-page-title">My Favorites</span>
+    <button class="fav-back-btn" onclick="toggleFavView()">← Back to Shop</button>
+  </div>
+
+  <div class="section-header" id="mainSectionHeader">
     <span class="section-title">All Products</span>
     <div class="filter-chips" id="catChips">
       <button class="cat-chip active" onclick="filterCat('all',this)">All</button>
@@ -594,8 +608,8 @@
 
   <div class="product-grid" id="productGrid"></div>
   <div class="fav-empty" id="favEmpty">
-    <div class="fav-empty-icon">♥</div>
-    <p>No favorites yet — heart a product</p>
+    <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <p>No favorites yet — heart a product to save it here.</p>
   </div>
   <div class="no-results" id="noResults">No products in this category.</div>
 
@@ -935,6 +949,15 @@
     document.getElementById("favToggleBtn").classList.remove("active");
     document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     if (chipEl) chipEl.classList.add("active");
+    // Restore normal layout
+    const favPageHeader = document.getElementById("favPageHeader");
+    const mainSectionHeader = document.getElementById("mainSectionHeader");
+    const sortBar = document.querySelector(".sort-bar");
+    const genderBar = document.querySelector(".gender-bar-reseller");
+    if (favPageHeader) favPageHeader.classList.remove("visible");
+    if (mainSectionHeader) mainSectionHeader.style.display = "";
+    if (sortBar) sortBar.style.display = "";
+    if (genderBar) genderBar.style.display = "";
     applyView();
   }
 
@@ -942,9 +965,26 @@
     showingFavs = !showingFavs;
     const btn = document.getElementById("favToggleBtn");
     btn.classList.toggle("active", showingFavs);
+
+    // Show/hide the favorites page header vs normal controls
+    const favPageHeader = document.getElementById("favPageHeader");
+    const mainSectionHeader = document.getElementById("mainSectionHeader");
+    const sortBar = document.querySelector(".sort-bar");
+    const genderBar = document.querySelector(".gender-bar-reseller");
+    const brandBar = document.getElementById("brandBar");
+
     if (showingFavs) {
+      favPageHeader.classList.add("visible");
+      if (mainSectionHeader) mainSectionHeader.style.display = "none";
+      if (sortBar) sortBar.style.display = "none";
+      if (genderBar) genderBar.style.display = "none";
+      if (brandBar) brandBar.style.display = "none";
       document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     } else {
+      favPageHeader.classList.remove("visible");
+      if (mainSectionHeader) mainSectionHeader.style.display = "";
+      if (sortBar) sortBar.style.display = "";
+      if (genderBar) genderBar.style.display = "";
       document.querySelector("#catChips .cat-chip").classList.add("active");
     }
     applyView();
@@ -992,7 +1032,7 @@
     const count = filtered.length;
     document.getElementById("visibleCount").textContent = count + " item" + (count !== 1 ? "s" : "");
     noResults.style.display = (!showingFavs && count === 0) ? "block" : "none";
-    favEmpty.style.display = (showingFavs && count === 0) ? "block" : "none";
+    if (showingFavs && count === 0) { favEmpty.classList.add("visible"); } else { favEmpty.classList.remove("visible"); }
 
     // Decide: grouped when no filters active, flat when filtered
     const useGrouped = !showingFavs && currentCat === 'all' && activeGender === 'all' && activeBrand === 'all' && activeLine === 'all' && activeModel === 'all' && !query && activeSort === 'default';
