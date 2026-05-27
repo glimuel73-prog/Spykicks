@@ -2003,8 +2003,8 @@
 
       const statusMeta = {
         pending:    { cls: 'pending',    label: '⏳ Pending',      canCancel: true  },
-        approved:   { cls: 'approved',   label: '✓ Approved',      canCancel: false },
-        processing: { cls: 'processing', label: '🔄 Processing',   canCancel: false },
+        approved:   { cls: 'approved',   label: '✓ Approved',      canCancel: true  },
+        processing: { cls: 'processing', label: '🔄 Processing',   canCancel: true  },
         shipped:    { cls: 'shipped',    label: '🚚 Shipped',       canCancel: false },
         delivered:  { cls: 'delivered',  label: '✓ Delivered',     canCancel: false },
         rejected:   { cls: 'rejected',   label: '✗ Rejected',      canCancel: false },
@@ -2039,10 +2039,8 @@
           : `<div class="order-cancel-row">
                <span style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;letter-spacing:.5px;">
                  ${order.status === 'cancelled' ? '✕ This order has been cancelled.'
-                   : order.status === 'shipped' ? '🚚 Already shipped — contact support to cancel.'
+                   : order.status === 'shipped' ? '🚚 Already shipped — contact admin to cancel.'
                    : order.status === 'delivered' ? '✓ Delivered — cannot be cancelled.'
-                   : order.status === 'approved' ? '✓ Approved — contact admin to cancel.'
-                   : order.status === 'processing' ? '🔄 Processing — contact admin to cancel.'
                    : '✗ This order cannot be cancelled.'}
                </span>
              </div>`;
