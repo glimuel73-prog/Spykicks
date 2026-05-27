@@ -959,6 +959,8 @@
     if (mainSectionHeader) mainSectionHeader.style.display = "";
     if (sortBar) sortBar.style.display = "";
     if (genderBar) genderBar.style.display = "";
+    const brandBarEl = document.getElementById("brandBar");
+    if (brandBarEl) brandBarEl.style.display = document.getElementById('brandChips')?.querySelectorAll('.sort-chip:not(#brandChipAll)').length > 0 ? 'block' : 'none';
     applyView();
   }
 
@@ -986,6 +988,7 @@
       if (mainSectionHeader) mainSectionHeader.style.display = "";
       if (sortBar) sortBar.style.display = "";
       if (genderBar) genderBar.style.display = "";
+      if (brandBar) brandBar.style.display = document.getElementById('brandChips')?.querySelectorAll('.sort-chip:not(#brandChipAll)').length > 0 ? 'block' : 'none';
       document.querySelector("#catChips .cat-chip").classList.add("active");
     }
     applyView();
