@@ -341,8 +341,10 @@
     }
     .pd-drawer.open { transform: translateY(0); }
     .pd-inner { flex-direction: column; overflow-y: auto; }
-    .pd-left { min-height: 340px; padding: 24px; flex-shrink: 0; border-radius: 0; }
-    .pd-main-img { max-width: 300px; }
+    .pd-left { min-height: unset; padding: 0; flex-shrink: 0; border-radius: 0; }
+    .pd-main-img { max-width: 100%; width: 100%; aspect-ratio: 1/1; border-radius: 0; }
+    .pd-main-img img { border-radius: 0; }
+    .pd-thumbs { gap: 8px; padding: 10px 12px; }
     .pd-right { width: 100%; padding: 20px 20px 32px; flex-shrink: 0; overflow-y: visible; }
     .pd-top-bar { padding: 12px 20px; border-radius: 24px 24px 0 0; }
     .pd-close { top: 12px; right: 12px; }
