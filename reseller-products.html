@@ -60,7 +60,6 @@
 
   /* ── Main flat product grid (matches index) ── */
   .product-grid { display: block; width: 100%; background: #fff; }
-  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: #e8e8e8; max-width: 100%; align-items: start; }
 
   /* Card — aligned columns, index style */
   .product-card { background: #fff; padding: 0 0 20px; transition: background .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
@@ -130,15 +129,6 @@
   .product-group-scroll .product-view-btn { display: flex; margin: auto 8px 0; width: calc(100% - 16px); font-size: 10px; padding: 7px 10px; }
   .product-group-scroll .product-tag, .product-group-scroll .product-stock, .product-group-scroll .product-colors, .product-group-scroll .product-corner-badge, .product-group-scroll .img-zoom-btn, .product-group-scroll .img-dl-btn, .product-group-scroll .product-new-arrival-badge { display: none; }
   .product-group-scroll .product-wholesale { display: block; font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; font-family: Arial,sans-serif; margin: 2px 8px 4px; }
-
-  /* Flat grid card overrides — matches index.html exactly */
-  .product-grid-flat .product-card { padding: 0 0 20px; }
-  .product-grid-flat .fav-btn { position: absolute; top: 10px; left: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; display: flex; align-items: center; justify-content: center; }
-  .product-grid-flat .fav-btn:hover { border-color: var(--red); color: var(--red); background: rgba(255,255,255,0.9); }
-  .product-grid-flat .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
-  .product-grid-flat .fav-btn svg { width: 14px; height: 14px; stroke: none; }
-  /* Tag: plain bordered box like index (no green pill) */
-  .product-grid-flat .product-tag { background: none !important; color: #666 !important; border: 1px solid #ddd !important; border-radius: 3px !important; font-size: 10px; letter-spacing: 1.5px; padding: 3px 9px; }
 
   /* View btn — matches index */
   .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: none; color: #666; font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 16px; border: 1px solid #ccc; cursor: pointer; transition: border-color .2s, color .2s, background .2s; margin: auto 16px 0; border-radius: 20px; width: calc(100% - 32px); }
@@ -248,15 +238,15 @@
   .order-status-pill.cancelled { color: #555; border-color: #bbb; background: #f5f5f5; }
 
   /* ── Flat grid (used when filters are active) ── */
-  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: #e8e8e8; width: 100%; margin-top: 1px; }
+  .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: #e8e8e8; width: 100%; margin-top: 1px; align-items: stretch; }
   #productGrid.grouped-mode { background: #fff; display: block; }
   #productGrid:not(.grouped-mode) { display: block; background: #fff; }
 
-  /* Cards: no padding on top (image is flush), no hover lift */
-  .product-grid-flat .product-card { width: 100%; min-width: unset; padding: 0 0 20px; }
+  /* Cards: full height stretch so all cards in a row are equal height */
+  .product-grid-flat .product-card { width: 100%; min-width: unset; padding: 0 0 20px; align-self: stretch; }
   .product-grid-flat .product-card:hover { background: #f7f7f7; transform: none; box-shadow: none; }
 
-  /* Image: flush, no border-radius, no bottom margin */
+  /* Image: flush to top, fixed height, cover fit */
   .product-grid-flat .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 0; margin-bottom: 0; }
   .product-grid-flat .product-img-placeholder img { object-fit: cover; padding: 0; }
 
@@ -268,6 +258,8 @@
   .product-grid-flat .product-name { font-size: 15px; font-weight: 700; letter-spacing: .3px; line-height: 1.3; margin: 0 16px 0; min-height: 40px; }
   .product-grid-flat .product-price { font-size: 20px; font-weight: 700; }
   .product-grid-flat .product-wholesale { display: block; margin: 0 16px 4px; }
+  /* Push view button to bottom of card */
+  .product-grid-flat .product-view-btn { margin-top: auto; }
 
   /* Fav btn: top-left overlay circle on image */
   .product-grid-flat .fav-btn { position: absolute; top: 10px; left: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; display: flex; align-items: center; justify-content: center; }
