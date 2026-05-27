@@ -2025,12 +2025,13 @@
               <span>Total</span>
               <span>₱${Number(order.totalAmount).toLocaleString()}</span>
             </div>
-            ${order.status === 'pending' ? `
+            ${(order.status === 'pending' || order.status === 'approved') ? `
             <div class="order-cancel-row">
               <button class="order-cancel-btn" id="cancelBtn_${order.id}" onclick="cancelOrder('${order.id}', this)">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 Cancel Order
               </button>
+              ${order.status === 'approved' ? `<span style="font-family:Arial,sans-serif;font-size:10px;color:#f59e0b;letter-spacing:.5px;margin-left:10px;">⚠ Stock will be restored</span>` : ''}
             </div>` : ''}
           </div>`;
       }).join("");
