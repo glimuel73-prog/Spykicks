@@ -359,21 +359,12 @@ app.post("/admin/update-stock", (req, res) => {
         const row = db.prepare("SELECT data FROM products WHERE id = ?").get(productId);
         if (!row) return res.json({ success: false, error: "Product not found" });
         const product = JSON.parse(row.data);
-        // Only update the stock values; leave every other field untouched
-        if (product.sizes && product.sizes.length) {
-            product.sizes = product.sizes.map(s => {
-                const sizeLabel = typeof s === "object" ? s.size : s;
-                const incoming = sizes.find(x => x.size === sizeLabel);
-                if (incoming) {
-                    return typeof s === "object"
-                        ? { ...s, stock: Math.max(0, Number(incoming.stock) || 0) }
-                        : { size: sizeLabel, stock: Math.max(0, Number(incoming.stock) || 0) };
-                }
-                return s;
-            });
-            product.stock = product.sizes.reduce((sum, s) =>
-                sum + (typeof s === "object" ? (Number(s.stock) || 0) : 0), 0);
-        }
+        // Store inventory stock overrides in a separate invStock map
+        // so the original sizes[].stock and product.stock (Products page) are never touched
+        if (!product.invStock) product.invStock = {};
+        sizes.forEach(({ size, stock }) => {
+            product.invStock[size] = Math.max(0, Number(stock) || 0);
+        });
         db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), productId);
         broadcastProducts();
         res.json({ success: true });
