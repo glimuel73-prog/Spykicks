@@ -352,7 +352,7 @@ app.post("/admin/save-product", (req, res) => {
 
 // Inventory-only stock update — only modifies sizes[].stock, nothing else
 app.post("/admin/update-stock", (req, res) => {
-    const { productId, sizes } = req.body;
+    const { productId, sizes, supplier, wholesalePrice } = req.body;
     if (!productId || !Array.isArray(sizes))
         return res.json({ success: false, error: "Missing productId or sizes" });
     try {
@@ -365,6 +365,11 @@ app.post("/admin/update-stock", (req, res) => {
         sizes.forEach(({ size, stock }) => {
             product.invStock[size] = Math.max(0, Number(stock) || 0);
         });
+        // Save supplier and wholesale price if provided
+        if (typeof supplier === 'string') product.supplier = supplier.trim();
+        if (wholesalePrice !== undefined && wholesalePrice !== null) {
+            product.wholesalePrice = Math.max(0, Number(wholesalePrice) || 0);
+        }
         db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), productId);
         broadcastProducts();
         res.json({ success: true });
