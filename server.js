@@ -12,6 +12,20 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 const sseClients = new Set();
 const sseOrderClients = new Map(); // contact -> Set of res
 const sseAdminClients = new Set(); // admin order live-feed clients
+const sseResellerOrderClients = new Map(); // email -> Set of res
+
+function broadcastResellerOrders(email) {
+    const clients = sseResellerOrderClients.get(email);
+    if (!clients || clients.size === 0) return;
+    try {
+        const rows = db.prepare("SELECT * FROM orders WHERE resellerEmail = ? ORDER BY createdAt DESC").all(email);
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        const payload = JSON.stringify({ type: "reseller_orders", orders });
+        for (const res of clients) {
+            try { res.write(`data: ${payload}\n\n`); } catch (e) { clients.delete(res); }
+        }
+    } catch (e) {}
+}
 
 function broadcastAdminOrders() {
     if (sseAdminClients.size === 0) return;
@@ -576,6 +590,7 @@ app.post("/admin/approve-order", (req, res) => {
 
         approve();
         broadcastProducts(); broadcastAdminOrders();
+        broadcastResellerOrders(orderRow.resellerEmail);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -586,9 +601,12 @@ app.post("/admin/reject-order", (req, res) => {
     const { orderId, reason } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
+        const orderRow = db.prepare("SELECT * FROM orders WHERE id = ?").get(orderId);
         const now = new Date().toISOString();
         db.prepare("UPDATE orders SET status = 'rejected', note = ?, updatedAt = ? WHERE id = ?")
             .run(reason || "", now, orderId);
+        broadcastAdminOrders();
+        if (orderRow) broadcastResellerOrders(orderRow.resellerEmail);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -661,6 +679,7 @@ app.post("/admin/reseller-order-status", (req, res) => {
         });
         doUpdate();
         broadcastProducts(); broadcastAdminOrders();
+        broadcastResellerOrders(orderRow.resellerEmail);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -705,6 +724,7 @@ app.post("/admin/cancel-reseller-order", (req, res) => {
         });
         doCancel();
         broadcastProducts(); broadcastAdminOrders();
+        broadcastResellerOrders(orderRow.resellerEmail);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -715,8 +735,11 @@ app.post("/admin/delete-order", (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
+        const orderRow = db.prepare("SELECT * FROM orders WHERE id = ?").get(orderId);
         const result = db.prepare("DELETE FROM orders WHERE id = ?").run(orderId);
         if (result.changes === 0) return res.json({ success: false, error: "Order not found" });
+        if (orderRow) broadcastResellerOrders(orderRow.resellerEmail);
+        broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -1018,6 +1041,31 @@ app.get("/events/orders", (req, res) => {
     req.on("close", () => {
         const clients = sseOrderClients.get(contact);
         if (clients) { clients.delete(res); if (clients.size === 0) sseOrderClients.delete(contact); }
+    });
+});
+
+app.get("/events/reseller-orders", (req, res) => {
+    const email = (req.query.email || "").trim();
+    if (!email) return res.status(400).end();
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+
+    // Send current orders immediately on connect
+    try {
+        const rows = db.prepare("SELECT * FROM orders WHERE resellerEmail = ? ORDER BY createdAt DESC").all(email);
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        res.write(`data: ${JSON.stringify({ type: "reseller_orders", orders })}\n\n`);
+    } catch (e) {}
+
+    if (!sseResellerOrderClients.has(email)) sseResellerOrderClients.set(email, new Set());
+    sseResellerOrderClients.get(email).add(res);
+
+    req.on("close", () => {
+        const clients = sseResellerOrderClients.get(email);
+        if (clients) { clients.delete(res); if (clients.size === 0) sseResellerOrderClients.delete(email); }
     });
 });
 
