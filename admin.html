@@ -2934,7 +2934,7 @@ function showPage(page, el) {
   if (page === 'resellers') loadResellers();
   if (page === 'settings') { loadSocialLinks(); }
   if (page === 'orders') loadOrders();
-  if (page === 'inventory') renderInventoryTable();
+  if (page === 'inventory') loadInventory();
 }
 
 
@@ -4951,26 +4951,17 @@ loadProductsFromBackend();
 let invSortKey = 'name';
 let invSortDir = 1;
 let invEditingId = null;
+let stockItems = []; // loaded from server DB — not localStorage
 
-// Standalone stock items (not tied to products)
-let stockItems = JSON.parse(localStorage.getItem('stockItems') || '[]');
-if (!stockItems.length) {
-  // Seed with example non-product items
-  stockItems = [
-    { id: 'si1', name: 'Packing Boxes (Medium)', sku: 'PKG-BOX-M', location: 'Warehouse A', supplier: 'PackCo', qty: 120, reorderPoint: 30, lastReceived: '2026-05-10', notes: 'For standard shoe sizes' },
-    { id: 'si2', name: 'Tissue Paper (White)', sku: 'PKG-TISS-W', location: 'Warehouse A', supplier: 'PackCo', qty: 4, reorderPoint: 50, lastReceived: '2026-04-22', notes: 'Running low — reorder soon' },
-    { id: 'si3', name: 'Thank You Cards', sku: 'MKT-CARD-01', location: 'Store Front', supplier: 'PrintHouse', qty: 0, reorderPoint: 100, lastReceived: '2026-03-15', notes: 'Out of stock' },
-    { id: 'si4', name: 'Bubble Wrap Roll (10m)', sku: 'PKG-BWRAP', location: 'Warehouse B', supplier: 'ShipSafe', qty: 18, reorderPoint: 5, lastReceived: '2026-05-01', notes: '' },
-    { id: 'si5', name: 'Shipping Labels (A6)', sku: 'PKG-LABEL-A6', location: 'Warehouse A', supplier: 'PrintHouse', qty: 350, reorderPoint: 100, lastReceived: '2026-05-18', notes: '' },
-    { id: 'si6', name: 'Scotch Tape Rolls', sku: 'PKG-TAPE', location: 'Store Front', supplier: 'OfficeMax', qty: 3, reorderPoint: 10, lastReceived: '2026-04-05', notes: '' },
-    { id: 'si7', name: 'Hangers (Plastic)', sku: 'DISP-HANG', location: 'Store Front', supplier: 'DisplayCo', qty: 45, reorderPoint: 20, lastReceived: '2026-05-20', notes: 'For apparel display' },
-    { id: 'si8', name: 'Price Tags (Blank)', sku: 'DISP-PTAG', location: 'Warehouse B', supplier: 'PrintHouse', qty: 200, reorderPoint: 50, lastReceived: '2026-04-30', notes: '' },
-  ];
-  saveStockItems();
-}
-
-function saveStockItems() {
-  try { localStorage.setItem('stockItems', JSON.stringify(stockItems)); } catch(_) {}
+async function loadInventory() {
+  try {
+    const res = await fetch('/admin/inventory');
+    const data = await res.json();
+    stockItems = data.items || [];
+  } catch (e) {
+    stockItems = [];
+  }
+  renderInventoryTable();
 }
 
 function invSort(key) {
@@ -4980,9 +4971,9 @@ function invSort(key) {
 }
 
 function renderInventoryTable() {
-  const q       = (document.getElementById('invSearch')?.value || '').toLowerCase().trim();
-  const fLevel  = document.getElementById('invFilterStatus')?.value || '';
-  const fLoc    = document.getElementById('invFilterLocation')?.value || '';
+  const q      = (document.getElementById('invSearch')?.value || '').toLowerCase().trim();
+  const fLevel = document.getElementById('invFilterStatus')?.value || '';
+  const fLoc   = document.getElementById('invFilterLocation')?.value || '';
 
   let rows = stockItems.map(s => ({ ...s }));
 
@@ -5013,12 +5004,11 @@ function renderInventoryTable() {
 
   document.getElementById('invRowCount').textContent = rows.length + ' item' + (rows.length !== 1 ? 's' : '');
 
-  // Update summary cards
   const all = stockItems;
-  document.getElementById('invSumTotal').textContent  = all.length;
+  document.getElementById('invSumTotal').textContent   = all.length;
   document.getElementById('invSumInStock').textContent = all.filter(r => Number(r.qty) > Math.max(Number(r.reorderPoint)||5, 5)).length;
-  document.getElementById('invSumLow').textContent    = all.filter(r => Number(r.qty) > 0 && Number(r.qty) <= Math.max(Number(r.reorderPoint)||5, 5)).length;
-  document.getElementById('invSumOut').textContent    = all.filter(r => Number(r.qty) === 0).length;
+  document.getElementById('invSumLow').textContent     = all.filter(r => Number(r.qty) > 0 && Number(r.qty) <= Math.max(Number(r.reorderPoint)||5, 5)).length;
+  document.getElementById('invSumOut').textContent     = all.filter(r => Number(r.qty) === 0).length;
 
   const tbody = document.getElementById('invBody');
   const empty = document.getElementById('invEmpty');
@@ -5096,10 +5086,10 @@ function closeStockItemModal() {
   invEditingId = null;
 }
 
-function saveStockItem() {
+async function saveStockItem() {
   const name = document.getElementById('invF_name').value.trim();
   if (!name) { alert('Item name is required.'); return; }
-  const data = {
+  const payload = {
     name,
     sku: document.getElementById('invF_sku').value.trim(),
     location: document.getElementById('invF_location').value,
@@ -5109,23 +5099,52 @@ function saveStockItem() {
     lastReceived: document.getElementById('invF_lastReceived').value,
     notes: document.getElementById('invF_notes').value.trim(),
   };
-  if (invEditingId) {
-    const idx = stockItems.findIndex(s => s.id === invEditingId);
-    if (idx !== -1) stockItems[idx] = { ...stockItems[idx], ...data };
-  } else {
-    data.id = 'si' + Date.now();
-    stockItems.push(data);
+
+  try {
+    let res, data;
+    if (invEditingId) {
+      res = await fetch('/admin/inventory/' + invEditingId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      data = await res.json();
+      if (data.success) {
+        const idx = stockItems.findIndex(s => s.id === invEditingId);
+        if (idx !== -1) stockItems[idx] = data.item;
+      } else { alert(data.error || 'Failed to update item.'); return; }
+    } else {
+      res = await fetch('/admin/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      data = await res.json();
+      if (data.success) {
+        stockItems.push(data.item);
+      } else { alert(data.error || 'Failed to add item.'); return; }
+    }
+  } catch (e) {
+    alert('Network error. Please try again.');
+    return;
   }
-  saveStockItems();
+
   closeStockItemModal();
   renderInventoryTable();
 }
 
-function deleteStockItem(id) {
+async function deleteStockItem(id) {
   if (!confirm('Delete this inventory item? This cannot be undone.')) return;
-  stockItems = stockItems.filter(s => s.id !== id);
-  saveStockItems();
-  renderInventoryTable();
+  try {
+    const res = await fetch('/admin/inventory/' + id, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      stockItems = stockItems.filter(s => s.id !== id);
+      renderInventoryTable();
+    } else { alert(data.error || 'Failed to delete item.'); }
+  } catch (e) {
+    alert('Network error. Please try again.');
+  }
 }
 
 function exportInventoryCSV() {
@@ -5139,6 +5158,9 @@ function exportInventoryCSV() {
   a.download = 'inventory_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
+
+// Load inventory from server on page init
+loadInventory();
 // ── END INVENTORY ────────────────────────────────────────────────
 
 </script>
