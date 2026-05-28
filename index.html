@@ -2213,43 +2213,49 @@ async function submitBuyerOrder() {
   document.getElementById('coErrorMsg').style.display = 'none';
 
   const customer = {
-    name:        document.getElementById('coName').value.trim(),
-    contact:     document.getElementById('coContact').value.trim(),
-    province:    document.getElementById('coProvince').value.trim(),
-    municipality:document.getElementById('coMunicipality').value.trim(),
-    barangay:    document.getElementById('coBarangay').value.trim(),
-    fullAddress: document.getElementById('coFullAddress').value.trim(),
+    name:         document.getElementById('coName').value.trim(),
+    contact:      document.getElementById('coContact').value.trim(),
+    province:     document.getElementById('coProvince').value.trim(),
+    municipality: document.getElementById('coMunicipality').value.trim(),
+    barangay:     document.getElementById('coBarangay').value.trim(),
+    fullAddress:  document.getElementById('coFullAddress').value.trim(),
   };
 
-  const totalAmount = cart.filter((_, i) => cartSelectedIndices.has(i)).reduce((sum, i) => sum + i.price * i.qty, 0);
-  const items = cart.filter((_, i) => cartSelectedIndices.has(i)).map(i => ({
-    productId: i.productId,
-    name:      i.name,
-    brand:     i.brand,
-    size:      i.size,
-    color:     i.color || null,
-    price:     i.price,
-    qty:       i.qty
-  }));
+  // One order per item so admin can manage each individually
+  const selectedItems = cart.filter((_, i) => cartSelectedIndices.has(i));
 
   try {
-    const res = await fetch('/buyer/place-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customer, items, totalAmount })
-    });
-    const data = await res.json();
+    const results = await Promise.all(selectedItems.map(item => {
+      const singleItem = [{
+        productId: item.productId,
+        name:      item.name,
+        brand:     item.brand,
+        size:      item.size,
+        color:     item.color || null,
+        price:     item.price,
+        qty:       item.qty
+      }];
+      return fetch('/buyer/place-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer, items: singleItem, totalAmount: item.price * item.qty })
+      }).then(r => r.json());
+    }));
 
-    if (data.success) {
-      // Remove only checked-out items from cart
+    const allOk = results.every(d => d.success);
+    if (allOk) {
       cart = cart.filter((_, i) => !cartSelectedIndices.has(i));
       cartSelectedIndices = new Set();
       saveCart();
       document.getElementById('checkoutFormView').style.display = 'none';
-      document.getElementById('coSuccessOrderId').textContent = data.orderId ? 'Order ID: #' + data.orderId.replace('BORDER_','') : '';
+      const firstId = results[0]?.orderId ? '#' + results[0].orderId.replace('BORDER_','') : '';
+      document.getElementById('coSuccessOrderId').textContent = results.length > 1
+        ? `${results.length} orders placed successfully!`
+        : (firstId ? 'Order ID: ' + firstId : '');
       document.getElementById('checkoutSuccessView').classList.add('show');
     } else {
-      throw new Error(data.error || 'Unknown error');
+      const failed = results.filter(d => !d.success);
+      throw new Error(failed[0]?.error || 'Unknown error');
     }
   } catch (err) {
     const errEl = document.getElementById('coErrorMsg');
