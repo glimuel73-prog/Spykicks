@@ -4923,7 +4923,7 @@ async function saveInvEdit() {
         if (!p.invStock) p.invStock = {};
         sizes.forEach(({ size, stock }) => { p.invStock[size] = stock; });
         p.supplier = supplier;
-        if (wholesalePrice > 0) p.wholesalePrice = wholesalePrice;
+        p.wholesalePrice = wholesalePrice;
       }
       showToast('Stock updated successfully.');
       closeInvEdit();
@@ -5099,7 +5099,16 @@ function renderInventoryTable() {
       <td class="inv-td"><span class="inv-pill ${chanClass}">${chanLabel || '—'}</span></td>
       <td class="inv-td" style="text-align:right;font-weight:700;">₱${p.price ? Number(p.price).toLocaleString() : '—'}</td>
       <td class="inv-td" style="text-align:right;font-weight:700;color:var(--green);">₱${p.resellerPrice ? Number(p.resellerPrice).toLocaleString() : '—'}</td>
-      <td class="inv-td" style="text-align:right;font-weight:700;color:var(--blue);">₱${p.wholesalePrice ? Number(p.wholesalePrice).toLocaleString() : '—'}</td>
+      <td class="inv-td" style="text-align:right;min-width:110px;">
+        <input type="number" min="0" step="0.01" value="${p.wholesalePrice || ''}" placeholder="—"
+          data-pid="${p.id}"
+          style="width:100%;text-align:right;background:transparent;border:1px solid transparent;border-radius:5px;
+                 font-family:var(--font);font-size:13px;font-weight:700;color:var(--blue);padding:4px 7px;
+                 cursor:text;transition:border-color .15s;outline:none;"
+          onfocus="this.style.borderColor='var(--accent)';this.style.background='var(--surface)';"
+          onblur="this.style.borderColor='transparent';this.style.background='transparent';saveWholesaleInline(this);"
+          onkeydown="if(event.key==='Enter'){this.blur();}if(event.key==='Escape'){this.value=this.dataset.orig||'';this.blur();}">
+      </td>
       <td class="inv-td" style="min-width:140px;">
         <input type="text" value="${(p.supplier||'').replace(/"/g,'&quot;')}" placeholder="—"
           data-pid="${p.id}"
@@ -5113,10 +5122,37 @@ function renderInventoryTable() {
       <td class="inv-td" style="white-space:normal;min-width:200px;">${sizeHtml}</td>
       <td class="inv-td" style="text-align:right;font-weight:800;color:${stockColor};">${stockNum}</td>
       <td class="inv-td">
-        <button class="inv-act-btn" onclick="openInvEdit('${p.id}')">Edit Stock</button>
+        <button class="inv-act-btn" onclick="openInvEdit('${p.id}')">Edit</button>
       </td>
     </tr>`;
   }).join('');
+}
+
+async function saveWholesaleInline(input) {
+  const productId = input.dataset.pid;
+  const newPrice = Number(input.value) || 0;
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+  if ((p.wholesalePrice || 0) === newPrice) return; // no change
+  try {
+    const res = await fetch('/admin/update-stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ productId, sizes: [], supplier: p.supplier, wholesalePrice: newPrice })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      p.wholesalePrice = newPrice;
+      showToast('Wholesale price updated.');
+    } else {
+      showToast('Failed to update wholesale price.', true);
+      input.value = p.wholesalePrice || '';
+    }
+  } catch (e) {
+    showToast('Connection error.', true);
+    input.value = p.wholesalePrice || '';
+  }
 }
 
 async function saveSupplierInline(input) {
