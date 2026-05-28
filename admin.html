@@ -4995,6 +4995,64 @@ loadProductsFromBackend();
   });
 })();
 
+// ── Admin Orders Live SSE ─────────────────────────────────────────
+(function initAdminOrdersSSE() {
+  let es;
+  let reconnectDelay = 3000;
+
+  function connect() {
+    es = new EventSource('/events/admin-orders');
+
+    es.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'admin_orders') {
+          const prevResellerCount = allOrders.length;
+          const prevBuyerCount    = (window.allBuyerOrders || []).length;
+
+          allOrders      = msg.resellerOrders || [];
+          allBuyerOrders = msg.buyerOrders    || [];
+
+          // Flash notification if new orders arrived while on another page
+          const newReseller = allOrders.length > prevResellerCount;
+          const newBuyer    = allBuyerOrders.length > prevBuyerCount;
+          if ((newReseller || newBuyer) && !document.getElementById('page-orders')?.classList.contains('active')) {
+            showToast('🔔 New order received!');
+          }
+
+          // Re-render if orders page is open
+          if (document.getElementById('page-orders')?.classList.contains('active')) {
+            renderOrdersTable();
+            if (typeof renderBuyerOrdersTable === 'function') renderBuyerOrdersTable();
+          }
+
+          // Always update badges & dashboard counts
+          const resellerPending = allOrders.filter(o => o.status === 'pending').length;
+          const buyerPending    = allBuyerOrders.filter(o => o.status === 'pending').length;
+          const totalPending    = resellerPending + buyerPending;
+
+          const badge = document.getElementById('pendingOrdersBadge');
+          if (badge) { badge.textContent = totalPending; badge.style.display = totalPending > 0 ? 'inline-flex' : 'none'; }
+
+          const statPending = document.getElementById('statPendingOrders');
+          if (statPending) statPending.textContent = totalPending;
+
+          const buyerBadge = document.getElementById('buyerOrderBadge');
+          if (buyerBadge) { buyerBadge.textContent = buyerPending; buyerBadge.style.display = buyerPending > 0 ? 'inline-flex' : 'none'; }
+        }
+      } catch (e) {}
+    };
+
+    es.onopen = () => { reconnectDelay = 3000; };
+    es.onerror = () => {
+      es.close();
+      setTimeout(connect, reconnectDelay);
+      reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
+    };
+  }
+
+  connect();
+})();
 
 // ── INVENTORY PAGE ──────────────────────────────────────────────
 let invSortKey = 'name';
