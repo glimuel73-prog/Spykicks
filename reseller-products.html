@@ -556,13 +556,6 @@
     <div class="filter-chips" id="catChips">
       <button class="cat-chip active" onclick="filterCat('all',this)">All</button>
       <button class="cat-chip" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
-      <button class="cat-chip" onclick="filterCat('sneakers',this)">Sneakers</button>
-      <button class="cat-chip" onclick="filterCat('apparel',this)">Apparel</button>
-      <button class="cat-chip" onclick="filterCat('accessories',this)">Accessories</button>
-      <button class="cat-chip" onclick="filterCat('bags',this)">Bags</button>
-      <button class="cat-chip" onclick="filterCat('caps',this)">Caps</button>
-      <button class="cat-chip" onclick="filterCat('slippers',this)">Slippers</button>
-      <button class="cat-chip" onclick="filterCat('other',this)">Other</button>
     </div>
   </div>
 
@@ -1324,17 +1317,16 @@
       window._resellerProducts = data.products;
 
       // Build category chips for custom categories
-      const STATIC_CATS = ['all', 'new-arrivals', 'sneakers', 'apparel', 'accessories', 'bags', 'caps', 'other'];
+      const STATIC_CATS = ['all', 'new-arrivals'];
       const customCats = [...new Set(data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
       const chipsContainer = document.getElementById('catChips');
-      chipsContainer.querySelectorAll('.sort-chip[data-custom]').forEach(el => el.remove());
-      const otherChip = [...chipsContainer.querySelectorAll('.sort-chip')].find(b => b.textContent.trim() === 'Other');
+      chipsContainer.querySelectorAll('.cat-chip[data-custom]').forEach(el => el.remove());
       customCats.forEach(cat => {
         const btn = document.createElement('button');
-        btn.className = 'sort-chip'; btn.dataset.custom = '1';
+        btn.className = 'cat-chip'; btn.dataset.custom = '1';
         btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
         btn.onclick = function() { filterCat(cat, this); };
-        if (otherChip) chipsContainer.insertBefore(btn, otherChip); else chipsContainer.appendChild(btn);
+        chipsContainer.appendChild(btn);
       });
 
       // Build brand chips
