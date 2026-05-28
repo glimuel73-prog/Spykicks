@@ -687,12 +687,6 @@
     <div class="filter-chips" id="categoryChips">
       <button class="chip active" onclick="filterProducts('all',this)">All</button>
       <button class="chip" onclick="filterProducts('new-arrivals',this)">✦ New Arrivals</button>
-      <button class="chip" onclick="filterProducts('sneakers',this)">Sneakers</button>
-      <button class="chip" onclick="filterProducts('apparel',this)">Apparel</button>
-      <button class="chip" onclick="filterProducts('accessories',this)">Accessories</button>
-      <button class="chip" onclick="filterProducts('bags',this)">Bags</button>
-      <button class="chip" onclick="filterProducts('caps',this)">Caps</button>
-      <button class="chip" onclick="filterProducts('other',this)">Other</button>
     </div>
   </div>
 
@@ -1266,7 +1260,7 @@ async function loadAdminProducts() {
     buildProductsIndex(products);
 
 
-    const STATIC_CATS = ['all','new-arrivals','sneakers','apparel','accessories','bags','caps','other'];
+    const STATIC_CATS = ['all','new-arrivals'];
     const customCats = [...new Set(
       products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c))
     )];
@@ -1274,15 +1268,13 @@ async function loadAdminProducts() {
 
     chipsContainer.querySelectorAll('.chip[data-custom]').forEach(el => el.remove());
 
-    const otherChip = [...chipsContainer.querySelectorAll('.chip')].find(b => b.textContent.trim() === 'Other');
     customCats.forEach(cat => {
       const btn = document.createElement('button');
       btn.className = 'chip';
       btn.dataset.custom = '1';
       btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
       btn.onclick = function() { filterProducts(cat, this); };
-      if (otherChip) chipsContainer.insertBefore(btn, otherChip);
-      else chipsContainer.appendChild(btn);
+      chipsContainer.appendChild(btn);
     });
 
 
@@ -2747,17 +2739,16 @@ function applyLiveProducts(products) {
   buildProductsIndex(activeProducts);
 
   // Update category chips
-  const STATIC_CATS = ['all','new-arrivals','sneakers','apparel','accessories','bags','caps','other'];
+  const STATIC_CATS = ['all','new-arrivals'];
   const customCats = [...new Set(activeProducts.map(p => (p.category||'').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
   const chipsContainer = document.getElementById('categoryChips');
   chipsContainer.querySelectorAll('.chip[data-custom]').forEach(el => el.remove());
-  const otherChip = [...chipsContainer.querySelectorAll('.chip')].find(b => b.textContent.trim() === 'Other');
   customCats.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'chip'; btn.dataset.custom = '1';
     btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
     btn.onclick = function() { filterProducts(cat, this); };
-    if (otherChip) chipsContainer.insertBefore(btn, otherChip); else chipsContainer.appendChild(btn);
+    chipsContainer.appendChild(btn);
   });
 
   // Update brand chips
