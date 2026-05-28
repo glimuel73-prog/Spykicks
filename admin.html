@@ -2000,12 +2000,17 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <table id="invTable" style="width:100%;border-collapse:collapse;font-family:var(--font);font-size:13px;">
         <thead>
           <tr id="invHead" style="background:var(--surface3);border-bottom:2px solid var(--border2);">
+            <th class="inv-th" style="min-width:80px;">Actions</th>
             <th class="inv-th inv-th-sticky" style="min-width:36px;width:36px;">#</th>
+            <th class="inv-th" style="min-width:110px;cursor:pointer;" onclick="invSort('brand')">
+              Brand <span id="invSort-brand" class="inv-sort-icon"></span>
+            </th>
             <th class="inv-th inv-th-sticky" style="min-width:200px;cursor:pointer;" onclick="invSort('name')">
               Product <span id="invSort-name" class="inv-sort-icon"></span>
             </th>
-            <th class="inv-th" style="min-width:110px;cursor:pointer;" onclick="invSort('brand')">
-              Brand <span id="invSort-brand" class="inv-sort-icon"></span>
+            <th class="inv-th" style="min-width:200px;">Sizes &amp; Stock</th>
+            <th class="inv-th" style="min-width:80px;cursor:pointer;text-align:right;" onclick="invSort('totalStock')">
+              Total Stock <span id="invSort-totalStock" class="inv-sort-icon"></span>
             </th>
             <th class="inv-th" style="min-width:120px;cursor:pointer;" onclick="invSort('sku')">
               SKU <span id="invSort-sku" class="inv-sort-icon"></span>
@@ -2031,11 +2036,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             <th class="inv-th" style="min-width:140px;cursor:pointer;" onclick="invSort('supplier')">
               Supplier <span id="invSort-supplier" class="inv-sort-icon"></span>
             </th>
-            <th class="inv-th" style="min-width:200px;">Sizes &amp; Stock</th>
-            <th class="inv-th" style="min-width:80px;cursor:pointer;text-align:right;" onclick="invSort('totalStock')">
-              Total Stock <span id="invSort-totalStock" class="inv-sort-icon"></span>
-            </th>
-            <th class="inv-th" style="min-width:80px;">Actions</th>
           </tr>
         </thead>
         <tbody id="invBody"></tbody>
@@ -5085,12 +5085,17 @@ function renderInventoryTable() {
     const stockColor = stockNum === 0 ? 'var(--red)' : stockNum <= 5 ? 'var(--orange)' : 'var(--green)';
 
     return `<tr>
+      <td class="inv-td">
+        <button class="inv-act-btn" onclick="openInvEdit('${p.id}')">Edit</button>
+      </td>
       <td class="inv-td" style="color:var(--text-dim);font-size:12px;text-align:center;">${i + 1}</td>
+      <td class="inv-td">${p.brand || '—'}</td>
       <td class="inv-td" style="min-width:200px;">
         <div style="font-weight:700;color:var(--text);">${p.name || '—'}</div>
         ${p.colorway ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${p.colorway}</div>` : ''}
       </td>
-      <td class="inv-td">${p.brand || '—'}</td>
+      <td class="inv-td" style="white-space:normal;min-width:200px;">${sizeHtml}</td>
+      <td class="inv-td" style="text-align:right;font-weight:800;color:${stockColor};">${stockNum}</td>
       <td class="inv-td" style="font-family:monospace;font-size:12px;color:var(--text-muted);">${p.sku || '—'}</td>
       <td class="inv-td" style="text-transform:capitalize;">${p.category || '—'}</td>
       <td class="inv-td"><span class="inv-pill ${statusClass}">${p.status || 'draft'}</span></td>
@@ -5116,11 +5121,6 @@ function renderInventoryTable() {
           onfocus="this.style.borderColor='var(--accent)';this.style.background='var(--surface)';"
           onblur="this.style.borderColor='transparent';this.style.background='transparent';saveSupplierInline(this);"
           onkeydown="if(event.key==='Enter'){this.blur();}if(event.key==='Escape'){this.value=this.dataset.orig||'';this.blur();}">
-      </td>
-      <td class="inv-td" style="white-space:normal;min-width:200px;">${sizeHtml}</td>
-      <td class="inv-td" style="text-align:right;font-weight:800;color:${stockColor};">${stockNum}</td>
-      <td class="inv-td">
-        <button class="inv-act-btn" onclick="openInvEdit('${p.id}')">Edit</button>
       </td>
     </tr>`;
   }).join('');
