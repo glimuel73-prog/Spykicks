@@ -2056,87 +2056,142 @@
     }
   }
 
-  async function loadOrderHistory() {
+  // ── Reseller Order History (SSE live) ──────────────────────────
+  let _resellerOrders = [];
+
+  function renderOrderHistory(orders) {
+    _resellerOrders = orders || [];
     const loadEl = document.getElementById("ordersLoading");
     const listEl = document.getElementById("ordersList");
     const emptyEl = document.getElementById("ordersEmpty");
-    loadEl.style.display = "";
-    listEl.innerHTML = "";
-    emptyEl.style.display = "none";
+    if (loadEl) loadEl.style.display = "none";
 
+    const statusMeta = {
+      pending:    { cls: 'pending',    label: '⏳ Pending',       canCancel: true  },
+      approved:   { cls: 'approved',   label: '✓ Approved',       canCancel: true  },
+      processing: { cls: 'processing', label: '🔄 Processing',    canCancel: true  },
+      shipped:    { cls: 'shipped',    label: '🚚 Shipped',        canCancel: false },
+      delivered:  { cls: 'delivered',  label: '✓ Delivered',      canCancel: false },
+      rejected:   { cls: 'rejected',   label: '✗ Rejected',       canCancel: false },
+      cancelled:  { cls: 'cancelled',  label: '✕ Cancelled',      canCancel: false },
+    };
+
+    if (!_resellerOrders.length) {
+      if (emptyEl) emptyEl.style.display = "";
+      if (listEl) listEl.innerHTML = "";
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = "none";
+
+    listEl.innerHTML = _resellerOrders.map(order => {
+      const d = new Date(order.createdAt);
+      const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+      const meta = statusMeta[order.status] || statusMeta.pending;
+
+      const itemsHTML = order.items.map(i =>
+        `<div class="order-item-row">
+          <span>${i.name} <span style="color:#999;font-size:11px;">× ${i.qty} (Size ${i.size}${i.color ? ", " + i.color : ""})</span></span>
+          <span>₱${(i.price * i.qty).toLocaleString()}</span>
+        </div>`
+      ).join("");
+
+      const noteHTML = order.note ? `<div style="padding:8px 16px;font-size:12px;color:#888;font-family:Arial,sans-serif;border-top:1px solid #f0f0f0;">Note: ${order.note}</div>` : "";
+
+      const cancelRow = meta.canCancel
+        ? `<div class="order-cancel-row">
+             <button class="order-cancel-btn" id="cancelBtn_${order.id}" onclick="cancelOrder('${order.id}', this)">
+               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+               Cancel Order
+             </button>
+           </div>`
+        : `<div class="order-cancel-row">
+             <span style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;letter-spacing:.5px;">
+               ${order.status === 'cancelled' ? '✕ This order has been cancelled.'
+                 : order.status === 'shipped'  ? '🚚 Already shipped — contact admin to cancel.'
+                 : order.status === 'delivered'? '✓ Delivered — cannot be cancelled.'
+                 : '✗ This order cannot be cancelled.'}
+             </span>
+           </div>`;
+
+      return `
+        <div class="order-card">
+          <div class="order-card-header">
+            <div>
+              <div class="order-id">#${order.id.replace("ORD_","")}</div>
+              <div class="order-date">${dateStr}</div>
+            </div>
+            <span class="order-status-pill ${meta.cls}">${meta.label}</span>
+          </div>
+          <div class="order-items-list">${itemsHTML}</div>
+          ${noteHTML}
+          <div class="order-total-row">
+            <span>Total</span>
+            <span>₱${Number(order.totalAmount).toLocaleString()}</span>
+          </div>
+          ${cancelRow}
+        </div>`;
+    }).join("");
+  }
+
+  async function loadOrderHistory() {
+    const loadEl = document.getElementById("ordersLoading");
+    if (loadEl) loadEl.style.display = "";
     try {
       const res = await fetch(`/reseller/orders?email=${encodeURIComponent(email)}`);
       const data = await res.json();
-      loadEl.style.display = "none";
-
-      if (!data.orders || data.orders.length === 0) {
-        emptyEl.style.display = "";
-        return;
-      }
-
-      const statusMeta = {
-        pending:    { cls: 'pending',    label: '⏳ Pending',      canCancel: true  },
-        approved:   { cls: 'approved',   label: '✓ Approved',      canCancel: true  },
-        processing: { cls: 'processing', label: '🔄 Processing',   canCancel: true  },
-        shipped:    { cls: 'shipped',    label: '🚚 Shipped',       canCancel: false },
-        delivered:  { cls: 'delivered',  label: '✓ Delivered',     canCancel: false },
-        rejected:   { cls: 'rejected',   label: '✗ Rejected',      canCancel: false },
-        cancelled:  { cls: 'cancelled',  label: '✕ Cancelled',     canCancel: false },
-      };
-
-      listEl.innerHTML = data.orders.map(order => {
-        const d = new Date(order.createdAt);
-        const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-        const meta = statusMeta[order.status] || statusMeta.pending;
-
-        const itemsHTML = order.items.map(i =>
-          `<div class="order-item-row">
-            <span>${i.name} <span style="color:#999;font-size:11px;">× ${i.qty} (Size ${i.size}${i.color ? ", " + i.color : ""})</span></span>
-            <span>₱${(i.price * i.qty).toLocaleString()}</span>
-          </div>`
-        ).join("");
-
-        const noteHTML = order.note ? `<div style="padding:8px 16px;font-size:12px;color:#888;font-family:Arial,sans-serif;border-top:1px solid #f0f0f0;">Note: ${order.note}</div>` : "";
-       
-        const cancelRow = meta.canCancel
-          ? `<div class="order-cancel-row">
-               <button class="order-cancel-btn" id="cancelBtn_${order.id}" onclick="cancelOrder('${order.id}', this)">
-                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                 Cancel Order
-               </button>
-             </div>`
-          : `<div class="order-cancel-row">
-               <span style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;letter-spacing:.5px;">
-                 ${order.status === 'cancelled' ? '✕ This order has been cancelled.'
-                   : order.status === 'shipped' ? '🚚 Already shipped — contact admin to cancel.'
-                   : order.status === 'delivered' ? '✓ Delivered — cannot be cancelled.'
-                   : '✗ This order cannot be cancelled.'}
-               </span>
-             </div>`;
-
-        return `
-          <div class="order-card">
-            <div class="order-card-header">
-              <div>
-                <div class="order-id">#${order.id.replace("ORD_","")}</div>
-                <div class="order-date">${dateStr}</div>
-              </div>
-              <span class="order-status-pill ${meta.cls}">${meta.label}</span>
-            </div>
-            <div class="order-items-list">${itemsHTML}</div>
-            ${noteHTML}
-            <div class="order-total-row">
-              <span>Total</span>
-              <span>₱${Number(order.totalAmount).toLocaleString()}</span>
-            </div>
-            ${cancelRow}
-          </div>`;
-      }).join("");
+      renderOrderHistory(data.orders || []);
     } catch (err) {
-      loadEl.style.display = "none";
-      listEl.innerHTML = `<div style="text-align:center;padding:32px;font-family:Arial,sans-serif;font-size:12px;color:#999;">Could not load orders.</div>`;
+      if (loadEl) loadEl.style.display = "none";
+      const listEl = document.getElementById("ordersList");
+      if (listEl) listEl.innerHTML = `<div style="text-align:center;padding:32px;font-family:Arial,sans-serif;font-size:12px;color:#999;">Could not load orders.</div>`;
     }
   }
+
+  // SSE — keeps order history live when admin changes status
+  (function initResellerOrdersSSE() {
+    if (!email) return;
+    let es;
+    let reconnectDelay = 3000;
+    let isFirst = true;
+
+    function connect() {
+      es = new EventSource(`/events/reseller-orders?email=${encodeURIComponent(email)}`);
+
+      es.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'reseller_orders') {
+            const prevOrders = _resellerOrders;
+            renderOrderHistory(msg.orders || []);
+
+            // Show a toast if a status changed (not on first snapshot)
+            if (!isFirst) {
+              const changed = (msg.orders || []).find(o => {
+                const prev = prevOrders.find(p => p.id === o.id);
+                return prev && prev.status !== o.status;
+              });
+              if (changed) {
+                const labels = { pending:'Pending', approved:'Approved ✓', processing:'Processing 🔄', shipped:'Shipped 🚚', delivered:'Delivered ✓', rejected:'Rejected ✗', cancelled:'Cancelled ✕' };
+                showSSEToast(`Order #${changed.id.replace('ORD_','')} → ${labels[changed.status] || changed.status}`);
+              }
+            }
+            isFirst = false;
+          }
+        } catch (e) {}
+      };
+
+      es.onopen = () => { reconnectDelay = 3000; };
+      es.onerror = () => {
+        es.close();
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
+      };
+    }
+
+    connect();
+  })();
+
+
 
   async function cancelOrder(orderId, btn) {
     if (!confirm('Cancel this order? This cannot be undone.')) return;
@@ -2152,7 +2207,8 @@
       let data = {};
       try { data = await res.json(); } catch(_) {}
       if (res.ok && data.success) {
-        await loadOrderHistory();
+        // SSE will push the updated order list automatically
+        btn.textContent = '✕ Cancelled';
       } else {
         alert('Could not cancel: ' + (data.error || (res.ok ? 'Unknown error' : 'Server error ' + res.status)));
         btn.disabled = false;
