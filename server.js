@@ -350,6 +350,38 @@ app.post("/admin/save-product", (req, res) => {
     }
 });
 
+// Inventory-only stock update — only modifies sizes[].stock, nothing else
+app.post("/admin/update-stock", (req, res) => {
+    const { productId, sizes } = req.body;
+    if (!productId || !Array.isArray(sizes))
+        return res.json({ success: false, error: "Missing productId or sizes" });
+    try {
+        const row = db.prepare("SELECT data FROM products WHERE id = ?").get(productId);
+        if (!row) return res.json({ success: false, error: "Product not found" });
+        const product = JSON.parse(row.data);
+        // Only update the stock values; leave every other field untouched
+        if (product.sizes && product.sizes.length) {
+            product.sizes = product.sizes.map(s => {
+                const sizeLabel = typeof s === "object" ? s.size : s;
+                const incoming = sizes.find(x => x.size === sizeLabel);
+                if (incoming) {
+                    return typeof s === "object"
+                        ? { ...s, stock: Math.max(0, Number(incoming.stock) || 0) }
+                        : { size: sizeLabel, stock: Math.max(0, Number(incoming.stock) || 0) };
+                }
+                return s;
+            });
+            product.stock = product.sizes.reduce((sum, s) =>
+                sum + (typeof s === "object" ? (Number(s.stock) || 0) : 0), 0);
+        }
+        db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), productId);
+        broadcastProducts();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
 app.get("/admin/product/:id", (req, res) => {
     try {
         const row = db.prepare("SELECT data FROM products WHERE id = ?").get(req.params.id);
