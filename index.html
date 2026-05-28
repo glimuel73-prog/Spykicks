@@ -627,6 +627,11 @@
   .order-cancel-btn { background: none; border: 1px solid #fda4af; color: #e11d48; font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 7px 16px; border-radius: 6px; cursor: pointer; transition: all .2s; }
   .order-cancel-btn:hover { background: #e11d48; color: #fff; border-color: #e11d48; }
 
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.3); }
+  }
 </style>
 <body>
 
@@ -2531,62 +2536,141 @@ function renderCartOrderBtns() {
   if (noLinksEl) noLinksEl.style.display = hasBtns ? 'none' : '';
 }
 
-async function lookupOrders() {
-  const contact = document.getElementById('orderLookupContact').value.trim();
+let _ordersSSE = null;
+let _ordersSSEContact = null;
+
+function renderOrdersList(orders, contact) {
   const emptyEl = document.getElementById('ordersEmpty');
   const listEl  = document.getElementById('ordersList');
-  if (!contact) {
-    document.getElementById('orderLookupContact').style.borderColor = 'var(--red)';
-    return;
-  }
-  emptyEl.textContent = 'Loading…';
-  emptyEl.style.display = '';
-  listEl.innerHTML = '';
   try {
-    const res = await fetch('/buyer/orders?contact=' + encodeURIComponent(contact));
-    const data = await res.json();
-    const orders = data.orders || [];
     if (!orders.length) {
       emptyEl.textContent = 'No orders found for this contact number.';
+      emptyEl.style.display = '';
+      listEl.innerHTML = '';
       return;
     }
     emptyEl.style.display = 'none';
     listEl.innerHTML = orders.map(o => {
-      const d = new Date(o.createdAt);
-      const dateStr = d.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
-      const shortId = '#' + o.id.replace('BORDER_','').slice(0,12);
-      const statusLabels = { pending:'⏳ Pending', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', cancelled:'✕ Cancelled' };
-      const statusLabel = statusLabels[o.status] || o.status;
-      const addr = [o.barangay, o.municipality, o.province].filter(Boolean).join(', ');
-      const itemsHTML = o.items.map(i =>
-        `<div class="order-history-item">
-          <span><strong>${i.name}</strong>${i.size ? ` &nbsp;·&nbsp; Size: ${i.size}` : ''}${i.color ? ` &nbsp;·&nbsp; ${i.color}` : ''} &nbsp;·&nbsp; Qty: ${i.qty}</span>
-          <span style="flex-shrink:0;font-weight:700;">₱${(i.price*i.qty).toLocaleString()}</span>
-        </div>`).join('');
-      const canCancel = o.status === 'pending' || o.status === 'processing';
-      return `
-        <div class="order-history-card">
-          <div class="order-history-head">
-            <div>
-              <div class="order-history-id">${shortId}</div>
-              <div class="order-history-date">${dateStr}</div>
+        const d = new Date(o.createdAt);
+        const dateStr = d.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        const shortId = '#' + o.id.replace('BORDER_','').slice(0,12);
+        const statusLabels = { pending:'⏳ Pending', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', cancelled:'✕ Cancelled' };
+        const statusLabel = statusLabels[o.status] || o.status;
+        const addr = [o.barangay, o.municipality, o.province].filter(Boolean).join(', ');
+        const itemsHTML = o.items.map(i =>
+          `<div class="order-history-item">
+            <span><strong>${i.name}</strong>${i.size ? ` &nbsp;·&nbsp; Size: ${i.size}` : ''}${i.color ? ` &nbsp;·&nbsp; ${i.color}` : ''} &nbsp;·&nbsp; Qty: ${i.qty}</span>
+            <span style="flex-shrink:0;font-weight:700;">₱${(i.price*i.qty).toLocaleString()}</span>
+          </div>`).join('');
+        const canCancel = o.status === 'pending' || o.status === 'processing';
+        const safeContact = (contact || '').replace(/'/g, "\\'");
+        return `
+          <div class="order-history-card" id="ohcard-${o.id}">
+            <div class="order-history-head">
+              <div>
+                <div class="order-history-id">${shortId}</div>
+                <div class="order-history-date">${dateStr}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="order-status-pill ${o.status}">${statusLabel}</span>
+                ${canCancel ? `<button class="order-cancel-btn" onclick="cancelBuyerOrder('${o.id}','${safeContact}')">Cancel</button>` : ''}
+              </div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span class="order-status-pill ${o.status}">${statusLabel}</span>
-              ${canCancel ? `<button class="order-cancel-btn" onclick="cancelBuyerOrder('${o.id}','${contact.replace(/'/g,"\\'")}')">Cancel</button>` : ''}
+            ${o.status === 'shipped' || o.status === 'delivered' ? `<div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:9px 20px;font-family:Arial,sans-serif;font-size:11px;color:#92400e;letter-spacing:.3px;">📦 To cancel or return this order, please contact the page/admin directly.</div>` : ''}
+            <div class="order-history-body">
+              <div style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;margin-bottom:10px;letter-spacing:1px;">📍 ${addr}${o.fullAddress ? ' — ' + o.fullAddress : ''}</div>
+              ${itemsHTML}
+              <div class="order-history-total"><span>Total</span><span>₱${Number(o.totalAmount).toLocaleString()}</span></div>
             </div>
-          </div>
-          ${o.status === 'shipped' || o.status === 'delivered' ? `<div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:9px 20px;font-family:Arial,sans-serif;font-size:11px;color:#92400e;letter-spacing:.3px;">📦 To cancel or return this order, please contact the page/admin directly.</div>` : ''}
-          <div class="order-history-body">
-            <div style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;margin-bottom:10px;letter-spacing:1px;">📍 ${addr}${o.fullAddress ? ' — ' + o.fullAddress : ''}</div>
-            ${itemsHTML}
-            <div class="order-history-total"><span>Total</span><span>₱${Number(o.totalAmount).toLocaleString()}</span></div>
-          </div>
-        </div>`;
-    }).join('');
+          </div>`;
+      }).join('');
   } catch(e) {
     emptyEl.textContent = 'Could not load orders. Please try again.';
   }
+}
+
+
+function _setOrdersLiveIndicator(state) {
+  let el = document.getElementById('ordersLiveIndicator');
+  if (!el) return;
+  if (state === 'connected') {
+    el.innerHTML = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:5px;animation:livePulse 1.5s infinite;"></span>Live';
+    el.style.color = '#22c55e';
+  } else if (state === 'reconnecting') {
+    el.innerHTML = '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#f59e0b;margin-right:5px;"></span>Reconnecting…';
+    el.style.color = '#f59e0b';
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+function lookupOrders() {
+  const contact = (document.getElementById('orderLookupContact').value || '').trim();
+  if (!contact) {
+    document.getElementById('orderLookupContact').style.borderColor = '#ff3b30';
+    setTimeout(() => { document.getElementById('orderLookupContact').style.borderColor = '#e5e5e5'; }, 1800);
+    return;
+  }
+
+  // Close existing SSE connection if contact changed
+  if (_ordersSSE && _ordersSSEContact !== contact) {
+    _ordersSSE.close();
+    _ordersSSE = null;
+    _ordersSSEContact = null;
+  }
+
+  // Already connected for this contact — nothing to do
+  if (_ordersSSE && _ordersSSEContact === contact) return;
+
+  const emptyEl = document.getElementById('ordersEmpty');
+  const listEl  = document.getElementById('ordersList');
+  emptyEl.textContent = 'Loading orders…';
+  emptyEl.style.display = '';
+  listEl.innerHTML = '';
+
+  // Inject live indicator next to section title if not yet present
+  const sectionTitle = document.querySelector('#orders .section-title');
+  if (sectionTitle && !document.getElementById('ordersLiveIndicator')) {
+    const ind = document.createElement('span');
+    ind.id = 'ordersLiveIndicator';
+    ind.style.cssText = 'font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-left:12px;vertical-align:middle;display:inline-flex;align-items:center;';
+    sectionTitle.appendChild(ind);
+  }
+
+  function connect() {
+    const es = new EventSource('/events/orders?contact=' + encodeURIComponent(contact));
+    _ordersSSE = es;
+    _ordersSSEContact = contact;
+
+    es.onopen = () => _setOrdersLiveIndicator('connected');
+
+    es.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'orders') {
+          _setOrdersLiveIndicator('connected');
+          renderOrdersList(msg.orders, contact);
+          // Brief green glow on all cards to signal a live push
+          document.querySelectorAll('.order-history-card').forEach(card => {
+            card.style.transition = 'box-shadow 0.4s';
+            card.style.boxShadow = '0 0 0 2px #22c55e44';
+            setTimeout(() => { card.style.boxShadow = ''; }, 800);
+          });
+        }
+      } catch(err) {}
+    };
+
+    es.onerror = () => {
+      _setOrdersLiveIndicator('reconnecting');
+      es.close();
+      _ordersSSE = null;
+      setTimeout(() => {
+        if (_ordersSSEContact === contact) connect();
+      }, 5000);
+    };
+  }
+
+  connect();
 }
 
 async function cancelBuyerOrder(orderId, contact) {
@@ -2600,7 +2684,7 @@ async function cancelBuyerOrder(orderId, contact) {
     const data = await res.json();
     if (data.success) {
       showToast('Order cancelled. Stock has been restored.');
-      lookupOrders();
+      // SSE will push the updated orders list automatically
     } else {
       showToast(data.error || 'Failed to cancel order.');
     }
