@@ -11,6 +11,23 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 const sseClients = new Set();
 const sseOrderClients = new Map(); // contact -> Set of res
+const sseAdminClients = new Set(); // admin order live-feed clients
+
+function broadcastAdminOrders() {
+    if (sseAdminClients.size === 0) return;
+    try {
+        const resellerRows = db.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
+        const resellerOrders = resellerRows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+
+        const buyerRows = db.prepare("SELECT * FROM buyer_orders ORDER BY createdAt DESC").all();
+        const buyerOrders = buyerRows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+
+        const payload = JSON.stringify({ type: "admin_orders", resellerOrders, buyerOrders });
+        for (const res of sseAdminClients) {
+            try { res.write(`data: ${payload}\n\n`); } catch (e) { sseAdminClients.delete(res); }
+        }
+    } catch (e) {}
+}
 
 function broadcastOrdersToContact(contact) {
     const clients = sseOrderClients.get(contact);
@@ -234,7 +251,7 @@ app.post("/admin/delete-product", (req, res) => {
             } catch (e) {}
         }
         db.prepare("DELETE FROM products WHERE id = ?").run(id);
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false });
@@ -331,7 +348,7 @@ app.post("/admin/save-products", (req, res) => {
             for (const p of prods) stmt.run(p.id, JSON.stringify(p));
         });
         insertMany(products);
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -343,7 +360,7 @@ app.post("/admin/save-product", (req, res) => {
     if (!product || !product.id) return res.json({ success: false, error: "Missing product or id" });
     try {
         db.prepare("INSERT OR REPLACE INTO products (id, data) VALUES (?, ?)").run(product.id, JSON.stringify(product));
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -371,7 +388,7 @@ app.post("/admin/update-stock", (req, res) => {
             product.wholesalePrice = Math.max(0, Number(wholesalePrice) || 0);
         }
         db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), productId);
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -439,6 +456,7 @@ app.post("/reseller/place-order", (req, res) => {
         db.prepare(
             "INSERT INTO orders (id, resellerEmail, items, totalAmount, status, note, createdAt, updatedAt) VALUES (?, ?, ?, ?, 'pending', ?, ?, ?)"
         ).run(orderId, email, JSON.stringify(items), totalAmount || 0, note || "", now, now);
+        broadcastAdminOrders();
         res.json({ success: true, orderId });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -500,7 +518,7 @@ app.post("/reseller/cancel-order", (req, res) => {
             db.prepare("UPDATE orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
         });
         cancel();
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -557,7 +575,7 @@ app.post("/admin/approve-order", (req, res) => {
         });
 
         approve();
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -642,7 +660,7 @@ app.post("/admin/reseller-order-status", (req, res) => {
             db.prepare("UPDATE orders SET status = ?, updatedAt = ? WHERE id = ?").run(status, now, orderId);
         });
         doUpdate();
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -686,7 +704,7 @@ app.post("/admin/cancel-reseller-order", (req, res) => {
             db.prepare("UPDATE orders SET status = 'cancelled', updatedAt = ? WHERE id = ?").run(now, orderId);
         });
         doCancel();
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -758,6 +776,7 @@ app.post("/buyer/place-order", (req, res) => {
             totalAmount || 0,
             now, now
         );
+        broadcastAdminOrders();
         res.json({ success: true, orderId });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -850,7 +869,7 @@ app.post("/admin/buyer-order-status", (req, res) => {
             }
         });
         doUpdate();
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         broadcastOrdersToContact(orderRow.contact);
         res.json({ success: true });
     } catch (err) {
@@ -874,7 +893,7 @@ app.post("/admin/approve-buyer-order", (req, res) => {
             db.prepare("UPDATE buyer_orders SET status = 'processing', updatedAt = ?, stockDeducted = 1 WHERE id = ?").run(now, orderId);
         });
         approve();
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         broadcastOrdersToContact(orderRow.contact);
         res.json({ success: true });
     } catch (err) {
@@ -920,7 +939,7 @@ app.post("/buyer/cancel-order", (req, res) => {
             db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ?, stockDeducted = 0 WHERE id = ?").run(now, orderId);
         });
         cancel();
-        broadcastProducts();
+        broadcastProducts(); broadcastAdminOrders();
         broadcastOrdersToContact(contact);
         res.json({ success: true });
     } catch (err) {
@@ -1000,6 +1019,27 @@ app.get("/events/orders", (req, res) => {
         const clients = sseOrderClients.get(contact);
         if (clients) { clients.delete(res); if (clients.size === 0) sseOrderClients.delete(contact); }
     });
+});
+
+app.get("/events/admin-orders", (req, res) => {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+
+    // Send current orders immediately on connect
+    try {
+        const resellerRows = db.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
+        const resellerOrders = resellerRows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+
+        const buyerRows = db.prepare("SELECT * FROM buyer_orders ORDER BY createdAt DESC").all();
+        const buyerOrders = buyerRows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+
+        res.write(`data: ${JSON.stringify({ type: "admin_orders", resellerOrders, buyerOrders })}\n\n`);
+    } catch (e) {}
+
+    sseAdminClients.add(res);
+    req.on("close", () => sseAdminClients.delete(res));
 });
 
 // ── INVENTORY ────────────────────────────────────────────────────
