@@ -974,6 +974,84 @@ app.get("/events/orders", (req, res) => {
     });
 });
 
+// ── INVENTORY ────────────────────────────────────────────────────
+db.exec(`
+    CREATE TABLE IF NOT EXISTS inventory_items (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        sku TEXT,
+        location TEXT,
+        supplier TEXT,
+        qty INTEGER DEFAULT 0,
+        reorderPoint INTEGER DEFAULT 5,
+        lastReceived TEXT,
+        notes TEXT,
+        createdAt TEXT,
+        updatedAt TEXT
+    )
+`);
+
+// GET all inventory items
+app.get("/admin/inventory", (req, res) => {
+    try {
+        const rows = db.prepare("SELECT * FROM inventory_items ORDER BY name ASC").all();
+        res.json({ items: rows });
+    } catch (err) {
+        res.json({ items: [], error: err.message });
+    }
+});
+
+// POST add a new inventory item
+app.post("/admin/inventory", (req, res) => {
+    const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
+    if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
+    const id = "si" + Date.now() + Math.random().toString(36).slice(2, 6);
+    const now = new Date().toISOString();
+    try {
+        db.prepare(`INSERT INTO inventory_items (id, name, sku, location, supplier, qty, reorderPoint, lastReceived, notes, createdAt, updatedAt)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          .run(id, name.trim(), sku || "", location || "Warehouse A", supplier || "",
+               Number(qty) || 0, Number(reorderPoint) || 5,
+               lastReceived || new Date().toISOString().slice(0, 10), notes || "", now, now);
+        const item = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
+        res.json({ success: true, item });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// PUT update an existing inventory item
+app.put("/admin/inventory/:id", (req, res) => {
+    const { id } = req.params;
+    const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
+    if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
+    const now = new Date().toISOString();
+    try {
+        const result = db.prepare(`UPDATE inventory_items SET name=?, sku=?, location=?, supplier=?, qty=?, reorderPoint=?, lastReceived=?, notes=?, updatedAt=? WHERE id=?`)
+          .run(name.trim(), sku || "", location || "Warehouse A", supplier || "",
+               Number(qty) || 0, Number(reorderPoint) || 5,
+               lastReceived || "", notes || "", now, id);
+        if (result.changes === 0) return res.json({ success: false, error: "Item not found." });
+        const item = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
+        res.json({ success: true, item });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// DELETE an inventory item
+app.delete("/admin/inventory/:id", (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = db.prepare("DELETE FROM inventory_items WHERE id = ?").run(id);
+        if (result.changes === 0) return res.json({ success: false, error: "Item not found." });
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+// ── END INVENTORY ─────────────────────────────────────────────────
+
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
 });
