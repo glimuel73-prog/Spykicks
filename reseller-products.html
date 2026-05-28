@@ -2010,31 +2010,32 @@
     btn.disabled = true;
     btn.textContent = "Submitting...";
 
-    const totalAmount = selectedCart.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const items = selectedCart.map(i => ({
-      productId: i.productId,
-      name: i.name,
-      brand: i.brand,
-      size: i.size,
-      color: i.color || null,
-      price: i.price,
-      qty: i.qty
-    }));
-
     try {
-      const res = await fetch("/reseller/place-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, items, totalAmount, note })
-      });
-      const data = await res.json();
-      if (data.success) {
-        // Remove only the checked-out items from the cart
+      // One order per item so admin can manage each individually
+      const results = await Promise.all(selectedCart.map(item => {
+        const singleItem = [{
+          productId: item.productId,
+          name:      item.name,
+          brand:     item.brand,
+          size:      item.size,
+          color:     item.color || null,
+          price:     item.price,
+          qty:       item.qty
+        }];
+        return fetch("/reseller/place-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, items: singleItem, totalAmount: item.price * item.qty, note })
+        }).then(r => r.json());
+      }));
+
+      const allOk = results.every(d => d.success);
+      if (allOk) {
         cart = cart.filter((_, i) => !cartSelectedIndices.has(i));
         cartSelectedIndices = new Set();
         saveCart();
         document.getElementById("cartNote").value = "";
-        btn.textContent = "✓ Order Submitted!";
+        btn.textContent = results.length > 1 ? `✓ ${results.length} Orders Submitted!` : "✓ Order Submitted!";
         btn.style.background = "#27ae60";
         setTimeout(() => {
           btn.disabled = false;
@@ -2043,9 +2044,10 @@
           switchCartTab("orders");
         }, 2000);
       } else {
+        const failed = results.find(d => !d.success);
         btn.disabled = false;
         btn.textContent = "Submit Checkout Request";
-        alert("Failed to submit order: " + (data.error || "Unknown error"));
+        alert("Failed to submit order: " + (failed?.error || "Unknown error"));
       }
     } catch (err) {
       btn.disabled = false;
