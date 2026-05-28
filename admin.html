@@ -1875,7 +1875,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     </div>
 
     <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;background:var(--surface);padding:0 32px;">
-      <button id="orderTabReseller" onclick="switchOrdersTab('reseller')" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 28px;border:none;cursor:pointer;background:none;color:var(--text);border-bottom:2px solid var(--text);margin-bottom:-2px;transition:all .15s;">Reseller Orders</button>
+      <button id="orderTabReseller" onclick="switchOrdersTab('reseller')" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 28px;border:none;cursor:pointer;background:none;color:var(--text);border-bottom:2px solid var(--text);margin-bottom:-2px;transition:all .15s;">Reseller Orders
+        <span id="resellerOrderBadge" style="display:none;background:#ff3b30;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:6px;vertical-align:middle;"></span>
+      </button>
       <button id="orderTabBuyer" onclick="switchOrdersTab('buyer')" style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 28px;border:none;cursor:pointer;background:none;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;">
         Buyer Orders
         <span id="buyerOrderBadge" style="display:none;background:#ff3b30;color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;align-items:center;justify-content:center;padding:0 4px;margin-left:6px;vertical-align:middle;"></span>
@@ -4274,6 +4276,11 @@ async function loadOrders() {
     const statPending = document.getElementById('statPendingOrders');
     if (statPending) statPending.textContent = totalPending;
 
+    const resellerBadge = document.getElementById('resellerOrderBadge');
+    if (resellerBadge) {
+      resellerBadge.textContent = resellerPending;
+      resellerBadge.style.display = resellerPending > 0 ? 'inline-flex' : 'none';
+    }
     const buyerBadge = document.getElementById('buyerOrderBadge');
     if (buyerBadge) {
       buyerBadge.textContent = buyerPending;
@@ -5041,6 +5048,9 @@ loadProductsFromBackend();
 
           const statPending = document.getElementById('statPendingOrders');
           if (statPending) statPending.textContent = totalPending;
+
+          const resellerBadge = document.getElementById('resellerOrderBadge');
+          if (resellerBadge) { resellerBadge.textContent = resellerPending; resellerBadge.style.display = resellerPending > 0 ? 'inline-flex' : 'none'; }
 
           const buyerBadge = document.getElementById('buyerOrderBadge');
           if (buyerBadge) { buyerBadge.textContent = buyerPending; buyerBadge.style.display = buyerPending > 0 ? 'inline-flex' : 'none'; }
