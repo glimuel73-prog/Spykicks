@@ -3196,18 +3196,23 @@ function addColorTag(name) {
 }
 
 function getColors() {
-  return [...document.querySelectorAll('#colorTagsWrap .color-tag')].map(t => t.dataset.color).filter(Boolean);
+  const wrap = document.getElementById('colorTagsWrap');
+  if (!wrap) return [];
+  return [...wrap.querySelectorAll('.color-tag')].map(t => t.dataset.color).filter(Boolean);
 }
 
 function setColors(arr) {
   const wrap = document.getElementById('colorTagsWrap');
+  if (!wrap) return;
   wrap.querySelectorAll('.color-tag').forEach(t => t.remove());
   (arr || []).forEach(c => addColorTag(c));
 }
 
 function clearColorTags() {
-  document.getElementById('colorTagsWrap').querySelectorAll('.color-tag').forEach(t => t.remove());
-  document.getElementById('colorTagInput').value = '';
+  const wrap = document.getElementById('colorTagsWrap');
+  if (wrap) wrap.querySelectorAll('.color-tag').forEach(t => t.remove());
+  const input = document.getElementById('colorTagInput');
+  if (input) input.value = '';
   renderSizePriceTable();
 }
 
