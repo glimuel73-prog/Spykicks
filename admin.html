@@ -2025,9 +2025,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
             <th class="inv-th" style="min-width:110px;cursor:pointer;text-align:right;" onclick="invSort('resellerPrice')">
               Reseller ₱ <span id="invSort-resellerPrice" class="inv-sort-icon"></span>
             </th>
-            <th class="inv-th" style="min-width:110px;cursor:pointer;text-align:right;" onclick="invSort('wholesalePrice')">
-              Wholesale ₱ <span id="invSort-wholesalePrice" class="inv-sort-icon"></span>
-            </th>
             <th class="inv-th" style="min-width:140px;cursor:pointer;" onclick="invSort('supplier')">
               Supplier <span id="invSort-supplier" class="inv-sort-icon"></span>
             </th>
@@ -4872,7 +4869,6 @@ function openInvEdit(productId) {
 
   const overlay = document.getElementById('invEditOverlay');
   document.getElementById('invEditSupplier').value = p.supplier || '';
-  document.getElementById('invEditWholesalePrice').value = p.wholesalePrice || '';
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -4896,7 +4892,6 @@ async function saveInvEdit() {
   const productId = document.getElementById('invEditProductId').value;
   const inputs = document.querySelectorAll('#invEditSizesBody input[data-size]');
   const supplier = document.getElementById('invEditSupplier').value.trim();
-  const wholesalePrice = Number(document.getElementById('invEditWholesalePrice').value) || 0;
 
   const sizes = [...inputs].map(inp => ({
     size: inp.dataset.size,
@@ -4912,18 +4907,15 @@ async function saveInvEdit() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ productId, sizes, supplier, wholesalePrice })
+      body: JSON.stringify({ productId, sizes, supplier })
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      // Patch local invStock cache only — do NOT touch sizes[].stock or p.stock
-      // so the Products page stock display remains unchanged
       const p = products.find(x => x.id === productId);
       if (p) {
         if (!p.invStock) p.invStock = {};
         sizes.forEach(({ size, stock }) => { p.invStock[size] = stock; });
         p.supplier = supplier;
-        p.wholesalePrice = wholesalePrice;
       }
       showToast('Stock updated successfully.');
       closeInvEdit();
@@ -5044,7 +5036,7 @@ function renderInventoryTable() {
   });
 
   // Update sort icons
-  ['name','brand','sku','category','status','publishTo','price','resellerPrice','wholesalePrice','supplier','totalStock'].forEach(k => {
+  ['name','brand','sku','category','status','publishTo','price','resellerPrice','supplier','totalStock'].forEach(k => {
     const el = document.getElementById('invSort-' + k);
     if (!el) return;
     el.textContent = invSortKey === k ? (invSortDir === 1 ? ' ▲' : ' ▼') : '';
@@ -5099,16 +5091,6 @@ function renderInventoryTable() {
       <td class="inv-td"><span class="inv-pill ${chanClass}">${chanLabel || '—'}</span></td>
       <td class="inv-td" style="text-align:right;font-weight:700;">₱${p.price ? Number(p.price).toLocaleString() : '—'}</td>
       <td class="inv-td" style="text-align:right;font-weight:700;color:var(--green);">₱${p.resellerPrice ? Number(p.resellerPrice).toLocaleString() : '—'}</td>
-      <td class="inv-td" style="text-align:right;min-width:110px;">
-        <input type="number" min="0" step="0.01" value="${p.wholesalePrice || ''}" placeholder="—"
-          data-pid="${p.id}"
-          style="width:100%;text-align:right;background:transparent;border:1px solid transparent;border-radius:5px;
-                 font-family:var(--font);font-size:13px;font-weight:700;color:var(--blue);padding:4px 7px;
-                 cursor:text;transition:border-color .15s;outline:none;"
-          onfocus="this.style.borderColor='var(--accent)';this.style.background='var(--surface)';"
-          onblur="this.style.borderColor='transparent';this.style.background='transparent';saveWholesaleInline(this);"
-          onkeydown="if(event.key==='Enter'){this.blur();}if(event.key==='Escape'){this.value=this.dataset.orig||'';this.blur();}">
-      </td>
       <td class="inv-td" style="min-width:140px;">
         <input type="text" value="${(p.supplier||'').replace(/"/g,'&quot;')}" placeholder="—"
           data-pid="${p.id}"
@@ -5128,33 +5110,6 @@ function renderInventoryTable() {
   }).join('');
 }
 
-async function saveWholesaleInline(input) {
-  const productId = input.dataset.pid;
-  const newPrice = Number(input.value) || 0;
-  const p = products.find(x => x.id === productId);
-  if (!p) return;
-  if ((p.wholesalePrice || 0) === newPrice) return; // no change
-  try {
-    const res = await fetch('/admin/update-stock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ productId, sizes: [], supplier: p.supplier, wholesalePrice: newPrice })
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      p.wholesalePrice = newPrice;
-      showToast('Wholesale price updated.');
-    } else {
-      showToast('Failed to update wholesale price.', true);
-      input.value = p.wholesalePrice || '';
-    }
-  } catch (e) {
-    showToast('Connection error.', true);
-    input.value = p.wholesalePrice || '';
-  }
-}
-
 async function saveSupplierInline(input) {
   const productId = input.dataset.pid;
   const newSupplier = input.value.trim();
@@ -5166,7 +5121,7 @@ async function saveSupplierInline(input) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ productId, sizes: [], supplier: newSupplier, wholesalePrice: p.wholesalePrice })
+      body: JSON.stringify({ productId, sizes: [], supplier: newSupplier })
     });
     const data = await res.json();
     if (res.ok && data.success) {
@@ -5188,10 +5143,10 @@ function exportInventoryCSV() {
     const sizeStr = (p.sizes||[]).map(s => typeof s === 'object' ? `${s.size}:${s.stock}` : s).join(' | ');
     return [
       p.name, p.brand, p.sku, p.category, p.status, p.publishTo,
-      p.price, p.resellerPrice, p.wholesalePrice, p.supplier, sizeStr, total
+      p.price, p.resellerPrice, p.supplier, sizeStr, total
     ].map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',');
   });
-  const header = 'Name,Brand,SKU,Category,Status,Channel,Buyer Price,Reseller Price,Wholesale Price,Supplier,Sizes & Stock,Total Stock';
+  const header = 'Name,Brand,SKU,Category,Status,Channel,Buyer Price,Reseller Price,Supplier,Sizes & Stock,Total Stock';
   const csv = [header, ...rows].join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
@@ -5219,7 +5174,7 @@ function exportInventoryCSV() {
 
     <!-- Info banner -->
     <div style="background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.15);padding:10px 22px;font-family:var(--font);font-size:11px;color:#3b82f6;letter-spacing:.5px;flex-shrink:0;">
-      📦 Edit stock quantities, supplier, and wholesale price. Other product details are unchanged.
+      📦 Edit stock quantities and supplier. Other product details are unchanged.
     </div>
 
     <input type="hidden" id="invEditProductId">
@@ -5238,22 +5193,13 @@ function exportInventoryCSV() {
       </table>
     </div>
 
-    <!-- Supplier & Wholesale Price -->
-    <div style="padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:12px;">
-      <div>
-        <label style="display:block;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;">Supplier</label>
-        <input type="text" id="invEditSupplier" placeholder="e.g. ABC Trading Co."
-          style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border2);color:var(--text);
-                 font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:7px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
-      </div>
-      <div>
-        <label style="display:block;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;">Wholesale Price (₱)</label>
-        <input type="number" id="invEditWholesalePrice" placeholder="0.00" min="0" step="0.01"
-          style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border2);color:var(--text);
-                 font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:7px;outline:none;transition:border-color .2s;"
-          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
-      </div>
+    <!-- Supplier -->
+    <div style="padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;">
+      <label style="display:block;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;">Supplier</label>
+      <input type="text" id="invEditSupplier" placeholder="e.g. ABC Trading Co."
+        style="width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border2);color:var(--text);
+               font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:7px;outline:none;transition:border-color .2s;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
     </div>
 
     <!-- Footer -->
