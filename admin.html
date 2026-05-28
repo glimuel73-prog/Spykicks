@@ -4823,6 +4823,114 @@ async function deleteBuyerOrder(orderId) {
 }
 
 
+// ── INVENTORY STOCK EDIT MODAL ───────────────────────────────────
+function openInvEdit(productId) {
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+
+  const hasSizeObjects = p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null);
+
+  document.getElementById('invEditProductName').textContent = p.name || 'Product';
+  document.getElementById('invEditProductSku').textContent = p.sku ? '(' + p.sku + ')' : '';
+  document.getElementById('invEditProductId').value = productId;
+
+  const body = document.getElementById('invEditSizesBody');
+  if (!hasSizeObjects) {
+    body.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:28px;color:var(--text-dim);font-size:13px;">
+      This product has no per-size stock. Use the Products page to edit it fully.
+    </td></tr>`;
+  } else {
+    body.innerHTML = p.sizes.map((s, i) => {
+      if (typeof s !== 'object') return '';
+      const sz = s.size || s;
+      const st = Number(s.stock) || 0;
+      const cls = st === 0 ? 'out' : st <= 3 ? 'low' : '';
+      return `<tr>
+        <td style="padding:10px 16px;font-weight:800;font-size:15px;width:70px;">${sz}</td>
+        <td style="padding:10px 16px;">
+          <span class="inv-size-chip ${cls}" id="invEditChip_${i}">${sz} ×${st}</span>
+        </td>
+        <td style="padding:8px 16px;">
+          <input type="number" min="0" value="${st}" data-size="${sz}" data-idx="${i}"
+            style="width:90px;background:var(--surface);border:1px solid var(--border2);color:var(--text);
+                   font-family:var(--font);font-size:14px;font-weight:700;padding:8px 10px;border-radius:6px;
+                   outline:none;transition:border-color .2s;"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="this.style.borderColor='var(--border2)'"
+            oninput="updateInvChip(this, ${i})">
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('invEditOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function updateInvChip(input, idx) {
+  const chip = document.getElementById('invEditChip_' + idx);
+  if (!chip) return;
+  const sz = input.dataset.size;
+  const st = Math.max(0, Number(input.value) || 0);
+  const cls = st === 0 ? 'out' : st <= 3 ? 'low' : '';
+  chip.className = 'inv-size-chip ' + cls;
+  chip.innerHTML = `${sz} <span style="opacity:.7;">×${st}</span>`;
+}
+
+function closeInvEdit() {
+  document.getElementById('invEditOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function saveInvEdit() {
+  const productId = document.getElementById('invEditProductId').value;
+  const inputs = document.querySelectorAll('#invEditSizesBody input[data-size]');
+  if (!inputs.length) { closeInvEdit(); return; }
+
+  const sizes = [...inputs].map(inp => ({
+    size: inp.dataset.size,
+    stock: Math.max(0, Number(inp.value) || 0)
+  }));
+
+  const btn = document.getElementById('invEditSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    const res = await fetch('/admin/update-stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ productId, sizes })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      // Patch local cache so the table updates immediately
+      const p = products.find(x => x.id === productId);
+      if (p && p.sizes) {
+        p.sizes = p.sizes.map(s => {
+          if (typeof s !== 'object') return s;
+          const incoming = sizes.find(x => x.size === s.size);
+          return incoming ? { ...s, stock: incoming.stock } : s;
+        });
+        p.stock = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+      }
+      showToast('Stock updated successfully.');
+      closeInvEdit();
+      renderInventoryTable();
+      renderDashboard();
+    } else {
+      showToast('Failed: ' + (data.error || 'Unknown error'), true);
+    }
+  } catch (e) {
+    showToast('Connection error. Please try again.', true);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Stock';
+  }
+}
+// ── END INVENTORY STOCK EDIT MODAL ───────────────────────────────
+
 renderSizeGrid();
 checkSession(); 
 loadProductsFromBackend();
@@ -4973,7 +5081,7 @@ function renderInventoryTable() {
       <td class="inv-td" style="white-space:normal;min-width:200px;">${sizeHtml}</td>
       <td class="inv-td" style="text-align:right;font-weight:800;color:${stockColor};">${stockNum}</td>
       <td class="inv-td">
-        <button class="inv-act-btn" onclick="editProduct('${p.id}');showPage('products',document.querySelector('.nav-item[onclick*=products]'))">Edit</button>
+        <button class="inv-act-btn" onclick="openInvEdit('${p.id}')">Edit Stock</button>
       </td>
     </tr>`;
   }).join('');
@@ -4998,6 +5106,61 @@ function exportInventoryCSV() {
 // ── END INVENTORY ────────────────────────────────────────────────
 
 </script>
+
+<!-- ── Inventory Stock Edit Modal ── -->
+<div id="invEditOverlay" style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;max-height:90vh;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div>
+        <div style="font-family:var(--font);font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--text);" id="invEditProductName">Product</div>
+        <div style="font-family:monospace;font-size:12px;color:var(--text-dim);margin-top:2px;" id="invEditProductSku"></div>
+      </div>
+      <button onclick="closeInvEdit()" style="background:none;border:1px solid var(--border2);color:var(--text-muted);width:32px;height:32px;border-radius:6px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;"
+        onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'"
+        onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">×</button>
+    </div>
+
+    <!-- Info banner -->
+    <div style="background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.15);padding:10px 22px;font-family:var(--font);font-size:11px;color:#3b82f6;letter-spacing:.5px;flex-shrink:0;">
+      📦 Only stock quantities are editable here. Product details, prices, and images are unchanged.
+    </div>
+
+    <input type="hidden" id="invEditProductId">
+
+    <!-- Size / Stock table -->
+    <div style="overflow-y:auto;flex:1;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:var(--surface2);">
+            <th style="padding:10px 16px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);">Size</th>
+            <th style="padding:10px 16px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);">Current</th>
+            <th style="padding:10px 16px;text-align:left;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);">New Stock</th>
+          </tr>
+        </thead>
+        <tbody id="invEditSizesBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Footer -->
+    <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--border);flex-shrink:0;">
+      <button onclick="closeInvEdit()"
+        style="font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border:1px solid var(--border2);border-radius:6px;background:none;color:var(--text-muted);cursor:pointer;transition:all .15s;"
+        onmouseover="this.style.borderColor='var(--text-muted)';this.style.color='var(--text)'"
+        onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">Cancel</button>
+      <button id="invEditSaveBtn" onclick="saveInvEdit()"
+        style="font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;transition:all .15s;"
+        onmouseover="this.style.background='var(--accent-hover)'"
+        onmouseout="this.style.background='var(--accent)'">Save Stock</button>
+    </div>
+  </div>
+</div>
+
+<style>
+#invEditOverlay { display: none; }
+#invEditOverlay.open { display: flex; }
+</style>
 
 </body>
 </html>
