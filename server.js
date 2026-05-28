@@ -10,6 +10,20 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 const sseClients = new Set();
+const sseOrderClients = new Map(); // contact -> Set of res
+
+function broadcastOrdersToContact(contact) {
+    const clients = sseOrderClients.get(contact);
+    if (!clients || clients.size === 0) return;
+    try {
+        const rows = db.prepare("SELECT * FROM buyer_orders WHERE contact = ? ORDER BY createdAt DESC").all(contact);
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        const payload = JSON.stringify({ type: "orders", orders });
+        for (const res of clients) {
+            try { res.write(`data: ${payload}\n\n`); } catch (e) { clients.delete(res); }
+        }
+    } catch (e) {}
+}
 
 function broadcastProducts() {
     if (sseClients.size === 0) return;
@@ -809,6 +823,7 @@ app.post("/admin/buyer-order-status", (req, res) => {
         });
         doUpdate();
         broadcastProducts();
+        broadcastOrdersToContact(orderRow.contact);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -832,6 +847,7 @@ app.post("/admin/approve-buyer-order", (req, res) => {
         });
         approve();
         broadcastProducts();
+        broadcastOrdersToContact(orderRow.contact);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -855,6 +871,7 @@ app.post("/admin/reject-buyer-order", (req, res) => {
             db.prepare("UPDATE buyer_orders SET status = 'cancelled', updatedAt = ?, stockDeducted = 0 WHERE id = ?").run(now, orderId);
         });
         reject();
+        broadcastOrdersToContact(orderRow.contact);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -876,6 +893,7 @@ app.post("/buyer/cancel-order", (req, res) => {
         });
         cancel();
         broadcastProducts();
+        broadcastOrdersToContact(contact);
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -929,6 +947,31 @@ app.get("/events/products", (req, res) => {
 
     sseClients.add(res);
     req.on("close", () => sseClients.delete(res));
+});
+
+app.get("/events/orders", (req, res) => {
+    const contact = (req.query.contact || "").trim();
+    if (!contact) return res.status(400).end();
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders();
+
+    // Send current orders immediately
+    try {
+        const rows = db.prepare("SELECT * FROM buyer_orders WHERE contact = ? ORDER BY createdAt DESC").all(contact);
+        const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
+        res.write(`data: ${JSON.stringify({ type: "orders", orders })}\n\n`);
+    } catch (e) {}
+
+    if (!sseOrderClients.has(contact)) sseOrderClients.set(contact, new Set());
+    sseOrderClients.get(contact).add(res);
+
+    req.on("close", () => {
+        const clients = sseOrderClients.get(contact);
+        if (clients) { clients.delete(res); if (clients.size === 0) sseOrderClients.delete(contact); }
+    });
 });
 
 app.listen(process.env.PORT || 3000, () => {
