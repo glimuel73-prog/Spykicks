@@ -5000,6 +5000,8 @@ loadProductsFromBackend();
   let es;
   let reconnectDelay = 3000;
 
+  let isFirstMessage = true;
+
   function connect() {
     es = new EventSource('/events/admin-orders');
 
@@ -5013,12 +5015,15 @@ loadProductsFromBackend();
           allOrders      = msg.resellerOrders || [];
           allBuyerOrders = msg.buyerOrders    || [];
 
-          // Flash notification if new orders arrived while on another page
-          const newReseller = allOrders.length > prevResellerCount;
-          const newBuyer    = allBuyerOrders.length > prevBuyerCount;
-          if ((newReseller || newBuyer) && !document.getElementById('page-orders')?.classList.contains('active')) {
-            showToast('🔔 New order received!');
+          // Flash notification only for genuinely new orders, not the initial snapshot
+          if (!isFirstMessage) {
+            const newReseller = allOrders.length > prevResellerCount;
+            const newBuyer    = allBuyerOrders.length > prevBuyerCount;
+            if ((newReseller || newBuyer) && !document.getElementById('page-orders')?.classList.contains('active')) {
+              showToast('🔔 New order received!');
+            }
           }
+          isFirstMessage = false;
 
           // Re-render if orders page is open
           if (document.getElementById('page-orders')?.classList.contains('active')) {
