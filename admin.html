@@ -4843,7 +4843,8 @@ function openInvEdit(productId) {
     body.innerHTML = p.sizes.map((s, i) => {
       if (typeof s !== 'object') return '';
       const sz = s.size || s;
-      const st = Number(s.stock) || 0;
+      // Use invStock override if available, otherwise show original sizes[].stock
+      const st = (p.invStock && p.invStock[sz] != null) ? Number(p.invStock[sz]) : (Number(s.stock) || 0);
       const cls = st === 0 ? 'out' : st <= 3 ? 'low' : '';
       return `<tr>
         <td style="padding:10px 16px;font-weight:800;font-size:15px;width:70px;">${sz}</td>
@@ -4906,15 +4907,12 @@ async function saveInvEdit() {
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      // Patch local cache so the table updates immediately
+      // Patch local invStock cache only — do NOT touch sizes[].stock or p.stock
+      // so the Products page stock display remains unchanged
       const p = products.find(x => x.id === productId);
-      if (p && p.sizes) {
-        p.sizes = p.sizes.map(s => {
-          if (typeof s !== 'object') return s;
-          const incoming = sizes.find(x => x.size === s.size);
-          return incoming ? { ...s, stock: incoming.stock } : s;
-        });
-        p.stock = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
+      if (p) {
+        if (!p.invStock) p.invStock = {};
+        sizes.forEach(({ size, stock }) => { p.invStock[size] = stock; });
       }
       showToast('Stock updated successfully.');
       closeInvEdit();
@@ -4950,7 +4948,13 @@ loadProductsFromBackend();
         if (msg.type === 'products') {
           const modalOpen = document.getElementById('modalOverlay')?.classList.contains('open');
           if (!modalOpen) {
-            products = msg.products || [];
+            // Preserve any local invStock overrides when SSE pushes fresh product data
+            const incoming = msg.products || [];
+            incoming.forEach(p => {
+              const existing = products.find(x => x.id === p.id);
+              if (existing && existing.invStock) p.invStock = existing.invStock;
+            });
+            products = incoming;
             renderProductsTable();
             renderDashboard();
             if (document.getElementById('page-inventory')?.classList.contains('active')) {
@@ -4988,6 +4992,10 @@ let invSortKey = 'name';
 let invSortDir = 1; // 1 = asc, -1 = desc
 
 function invEffectiveStock(p) {
+  // Use invStock map if set by inventory edits; otherwise fall back to sizes[].stock / p.stock
+  if (p.invStock && Object.keys(p.invStock).length) {
+    return Object.values(p.invStock).reduce((sum, v) => sum + (Number(v) || 0), 0);
+  }
   if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
     return p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
   }
@@ -5053,7 +5061,8 @@ function renderInventoryTable() {
       sizeHtml = p.sizes.map(s => {
         if (typeof s !== 'object') return '';
         const sz = s.size || s;
-        const st = Number(s.stock) || 0;
+        // Use invStock override if set, otherwise fall back to sizes[].stock
+        const st = (p.invStock && p.invStock[sz] != null) ? Number(p.invStock[sz]) : (Number(s.stock) || 0);
         const cls = st === 0 ? 'out' : st <= 3 ? 'low' : '';
         return `<span class="inv-size-chip ${cls}">${sz} <span style="opacity:.7;">×${st}</span></span>`;
       }).join('');
