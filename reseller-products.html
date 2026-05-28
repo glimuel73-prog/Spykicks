@@ -219,6 +219,14 @@
   .cart-checkout-btn:hover { background: #333; }
   .cart-checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
 
+  /* Cart item checkboxes */
+  .cart-item-cb-wrap { display: flex; align-items: center; padding-top: 4px; flex-shrink: 0; }
+  .cart-item-cb { width: 18px; height: 18px; accent-color: #000; cursor: pointer; flex-shrink: 0; }
+  .cart-select-all-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .cart-select-all-label { display: flex; align-items: center; gap: 8px; font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); cursor: pointer; user-select: none; }
+  .cart-select-all-cb { width: 16px; height: 16px; accent-color: #000; cursor: pointer; }
+  .cart-selected-count { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #999; }
+
   .order-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
   .order-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
   .order-id { font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
@@ -699,6 +707,13 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       <p>Your cart is empty</p>
     </div>
+    <div id="cartSelectAllRow" class="cart-select-all-row" style="display:none;">
+      <label class="cart-select-all-label">
+        <input type="checkbox" id="cartSelectAllCb" class="cart-select-all-cb" onchange="toggleSelectAll(this.checked)">
+        Select All
+      </label>
+      <span class="cart-selected-count" id="cartSelectedCount"></span>
+    </div>
     <div id="cartItemsList"></div>
   </div>
   <div id="ordersPanel" class="cart-body" style="display:none;">
@@ -711,7 +726,7 @@
   </div>
   <div id="cartFooter" class="cart-footer" style="display:none;">
     <div class="cart-subtotal">
-      <span>Subtotal</span>
+      <span>Selected Total</span>
       <strong id="cartTotal">₱0</strong>
     </div>
     <textarea class="cart-note-field" id="cartNote" placeholder="Optional note for admin (e.g. delivery instructions)…"></textarea>
@@ -1876,25 +1891,36 @@
     setTimeout(() => { btn.textContent = "🛒 Add to Cart"; btn.classList.remove("pd-btn-added"); }, 1800);
   }
 
+  // Track which cart indices are selected for checkout
+  let cartSelectedIndices = new Set();
+
   function renderCartItems() {
     const listEl = document.getElementById("cartItemsList");
     const emptyEl = document.getElementById("cartEmpty");
     const footerEl = document.getElementById("cartFooter");
-    const totalEl = document.getElementById("cartTotal");
+    const selectAllRow = document.getElementById("cartSelectAllRow");
 
     if (cart.length === 0) {
       emptyEl.style.display = "";
       listEl.innerHTML = "";
       footerEl.style.display = "none";
+      if (selectAllRow) selectAllRow.style.display = "none";
+      cartSelectedIndices = new Set();
       return;
     }
+
+    // Keep only valid indices; select all by default on first render
+    cartSelectedIndices = new Set([...cartSelectedIndices].filter(i => i < cart.length));
+    if (cartSelectedIndices.size === 0) {
+      cart.forEach((_, i) => cartSelectedIndices.add(i));
+    }
+
     emptyEl.style.display = "none";
     footerEl.style.display = "";
+    if (selectAllRow) selectAllRow.style.display = "";
 
-    let total = 0;
     listEl.innerHTML = cart.map((item, idx) => {
       const subtotal = item.price * item.qty;
-      total += subtotal;
       const atMax = item.maxStock !== null && item.maxStock !== undefined && item.qty >= item.maxStock;
       const stockHint = item.maxStock !== null && item.maxStock !== undefined
         ? `<span style="font-size:10px;color:${atMax ? 'var(--red)' : '#999'};font-family:Arial,sans-serif;letter-spacing:1px;margin-left:4px;">${atMax ? '(max)' : item.maxStock + ' avail'}</span>`
@@ -1902,8 +1928,12 @@
       const imgHTML = item.image
         ? `<img src="${item.image}" alt="${item.name}">`
         : `<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div>`;
+      const checked = cartSelectedIndices.has(idx) ? "checked" : "";
       return `
-        <div class="cart-item">
+        <div class="cart-item" id="cart-item-row-${idx}">
+          <div class="cart-item-cb-wrap">
+            <input type="checkbox" class="cart-item-cb" ${checked} onchange="toggleCartItem(${idx}, this.checked)">
+          </div>
           <div class="cart-item-img">${imgHTML}</div>
           <div class="cart-item-info">
             <div class="cart-item-brand">${item.brand || "Reseller"}</div>
@@ -1921,7 +1951,45 @@
         </div>`;
     }).join("");
 
-    totalEl.textContent = "₱" + total.toLocaleString();
+    updateCartSelectionUI();
+  }
+
+  function toggleCartItem(idx, checked) {
+    if (checked) cartSelectedIndices.add(idx);
+    else cartSelectedIndices.delete(idx);
+    updateCartSelectionUI();
+  }
+
+  function toggleSelectAll(checked) {
+    if (checked) cart.forEach((_, i) => cartSelectedIndices.add(i));
+    else cartSelectedIndices.clear();
+    cart.forEach((_, i) => {
+      const cb = document.querySelector(`#cart-item-row-${i} .cart-item-cb`);
+      if (cb) cb.checked = checked;
+    });
+    updateCartSelectionUI();
+  }
+
+  function updateCartSelectionUI() {
+    const totalEl = document.getElementById("cartTotal");
+    const selectAllCb = document.getElementById("cartSelectAllCb");
+    const countEl = document.getElementById("cartSelectedCount");
+    const checkoutBtn = document.getElementById("checkoutBtn");
+
+    let total = 0;
+    cart.forEach((item, idx) => {
+      if (cartSelectedIndices.has(idx)) total += item.price * item.qty;
+    });
+
+    if (totalEl) totalEl.textContent = "₱" + total.toLocaleString();
+
+    const n = cartSelectedIndices.size;
+    if (countEl) countEl.textContent = n === cart.length ? "All selected" : n > 0 ? `${n} of ${cart.length} selected` : "None selected";
+    if (selectAllCb) {
+      selectAllCb.checked = n === cart.length;
+      selectAllCb.indeterminate = n > 0 && n < cart.length;
+    }
+    if (checkoutBtn) checkoutBtn.disabled = n === 0;
   }
 
   function changeQty(idx, delta) {
@@ -1935,14 +2003,15 @@
   }
 
   async function submitCheckout() {
-    if (cart.length === 0) return;
+    const selectedCart = cart.filter((_, i) => cartSelectedIndices.has(i));
+    if (selectedCart.length === 0) return;
     const btn = document.getElementById("checkoutBtn");
     const note = document.getElementById("cartNote").value.trim();
     btn.disabled = true;
     btn.textContent = "Submitting...";
 
-    const totalAmount = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const items = cart.map(i => ({
+    const totalAmount = selectedCart.reduce((sum, i) => sum + i.price * i.qty, 0);
+    const items = selectedCart.map(i => ({
       productId: i.productId,
       name: i.name,
       brand: i.brand,
@@ -1960,7 +2029,9 @@
       });
       const data = await res.json();
       if (data.success) {
-        cart = [];
+        // Remove only the checked-out items from the cart
+        cart = cart.filter((_, i) => !cartSelectedIndices.has(i));
+        cartSelectedIndices = new Set();
         saveCart();
         document.getElementById("cartNote").value = "";
         btn.textContent = "✓ Order Submitted!";
