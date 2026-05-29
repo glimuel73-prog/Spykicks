@@ -10,9 +10,9 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 const sseClients = new Set();
-const sseOrderClients = new Map(); // contact -> Set of res
-const sseAdminClients = new Set(); // admin order live-feed clients
-const sseResellerOrderClients = new Map(); // email -> Set of res
+const sseOrderClients = new Map();
+const sseAdminClients = new Set();
+const sseResellerOrderClients = new Map();
 
 function broadcastResellerOrders(email) {
     const clients = sseResellerOrderClients.get(email);
@@ -381,7 +381,6 @@ app.post("/admin/save-product", (req, res) => {
     }
 });
 
-// Inventory-only stock update — only modifies sizes[].stock, nothing else
 app.post("/admin/update-stock", (req, res) => {
     const { productId, sizes, supplier, wholesalePrice } = req.body;
     if (!productId || !Array.isArray(sizes))
@@ -390,13 +389,10 @@ app.post("/admin/update-stock", (req, res) => {
         const row = db.prepare("SELECT data FROM products WHERE id = ?").get(productId);
         if (!row) return res.json({ success: false, error: "Product not found" });
         const product = JSON.parse(row.data);
-        // Store inventory stock overrides in a separate invStock map
-        // so the original sizes[].stock and product.stock (Products page) are never touched
         if (!product.invStock) product.invStock = {};
         sizes.forEach(({ size, stock }) => {
             product.invStock[size] = Math.max(0, Number(stock) || 0);
         });
-        // Save supplier and wholesale price if provided
         if (typeof supplier === 'string') product.supplier = supplier.trim();
         if (wholesalePrice !== undefined && wholesalePrice !== null) {
             product.wholesalePrice = Math.max(0, Number(wholesalePrice) || 0);
@@ -506,7 +502,6 @@ app.post("/reseller/cancel-order", (req, res) => {
         const now = new Date().toISOString();
 
         const cancel = db.transaction(() => {
-            // Restore stock for approved/processing orders (stock was deducted on approval)
             if (orderRow.status === "approved" || orderRow.status === "processing") {
                 for (const item of items) {
                     const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
@@ -628,7 +623,6 @@ app.post("/admin/reseller-order-status", (req, res) => {
         const now = new Date().toISOString();
 
         const doUpdate = db.transaction(() => {
-            // Deduct stock when moving into an "active" state from pending/rejected/cancelled
             if (willApprove && !wasApproved) {
                 for (const item of items) {
                     const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
@@ -652,7 +646,6 @@ app.post("/admin/reseller-order-status", (req, res) => {
                     db.prepare("UPDATE products SET data = ? WHERE id = ?").run(JSON.stringify(product), item.productId);
                 }
             }
-            // Restore stock when moving out of an "active" state to cancelled/rejected
             if (!willApprove && wasApproved) {
                 for (const item of items) {
                     const prodRow = db.prepare("SELECT data FROM products WHERE id = ?").get(item.productId);
@@ -1028,7 +1021,6 @@ app.get("/events/orders", (req, res) => {
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
-    // Send current orders immediately
     try {
         const rows = db.prepare("SELECT * FROM buyer_orders WHERE contact = ? ORDER BY createdAt DESC").all(contact);
         const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
@@ -1053,7 +1045,6 @@ app.get("/events/reseller-orders", (req, res) => {
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
-    // Send current orders immediately on connect
     try {
         const rows = db.prepare("SELECT * FROM orders WHERE resellerEmail = ? ORDER BY createdAt DESC").all(email);
         const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
@@ -1075,7 +1066,6 @@ app.get("/events/admin-orders", (req, res) => {
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
-    // Send current orders immediately on connect
     try {
         const resellerRows = db.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
         const resellerOrders = resellerRows.map(r => ({ ...r, items: JSON.parse(r.items) }));
@@ -1090,7 +1080,6 @@ app.get("/events/admin-orders", (req, res) => {
     req.on("close", () => sseAdminClients.delete(res));
 });
 
-// ── INVENTORY ────────────────────────────────────────────────────
 db.exec(`
     CREATE TABLE IF NOT EXISTS inventory_items (
         id TEXT PRIMARY KEY,
@@ -1107,7 +1096,6 @@ db.exec(`
     )
 `);
 
-// GET all inventory items
 app.get("/admin/inventory", (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM inventory_items ORDER BY name ASC").all();
@@ -1117,7 +1105,6 @@ app.get("/admin/inventory", (req, res) => {
     }
 });
 
-// POST add a new inventory item
 app.post("/admin/inventory", (req, res) => {
     const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
     if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
@@ -1136,7 +1123,6 @@ app.post("/admin/inventory", (req, res) => {
     }
 });
 
-// PUT update an existing inventory item
 app.put("/admin/inventory/:id", (req, res) => {
     const { id } = req.params;
     const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
@@ -1155,7 +1141,6 @@ app.put("/admin/inventory/:id", (req, res) => {
     }
 });
 
-// DELETE an inventory item
 app.delete("/admin/inventory/:id", (req, res) => {
     const { id } = req.params;
     try {
@@ -1166,7 +1151,6 @@ app.delete("/admin/inventory/:id", (req, res) => {
         res.json({ success: false, error: err.message });
     }
 });
-// ── END INVENTORY ─────────────────────────────────────────────────
 
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
