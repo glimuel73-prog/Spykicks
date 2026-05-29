@@ -397,7 +397,6 @@ body {
 .prod-name { font-family: var(--font); font-weight: 700; font-size: 14px; color: var(--text); }
 .prod-sku { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
-/* Inventory table */
 .inv-th {
   font-family: var(--font);
   font-size: 10px;
@@ -1968,7 +1967,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 
 <div id="page-inventory" class="page">
 
-  <!-- Toolbar -->
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
     <input id="invSearch" type="text" placeholder="Search product, brand, SKU…"
       oninput="renderInventoryTable()"
@@ -1996,7 +1994,6 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     <div id="invRowCount" style="font-family:var(--font);font-size:12px;color:var(--text-dim);margin-left:auto;white-space:nowrap;"></div>
   </div>
 
-  <!-- Spreadsheet wrapper -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
     <div style="overflow-x:auto;">
       <table id="invTable" style="width:100%;border-collapse:collapse;font-family:var(--font);font-size:13px;">
@@ -4836,7 +4833,6 @@ async function deleteBuyerOrder(orderId) {
 }
 
 
-// ── INVENTORY STOCK EDIT MODAL ───────────────────────────────────
 function openInvEdit(productId) {
   const p = products.find(x => x.id === productId);
   if (!p) return;
@@ -4856,7 +4852,6 @@ function openInvEdit(productId) {
     body.innerHTML = p.sizes.map((s, i) => {
       if (typeof s !== 'object') return '';
       const sz = s.size || s;
-      // Use invStock override if available, otherwise show original sizes[].stock
       const st = (p.invStock && p.invStock[sz] != null) ? Number(p.invStock[sz]) : (Number(s.stock) || 0);
       const cls = st === 0 ? 'out' : st <= 3 ? 'low' : '';
       return `<tr>
@@ -4923,8 +4918,6 @@ async function saveInvEdit() {
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      // Patch local invStock cache only — do NOT touch sizes[].stock or p.stock
-      // so the Products page stock display remains unchanged
       if (p) {
         if (!p.invStock) p.invStock = {};
         sizes.forEach(({ size, stock }) => { p.invStock[size] = stock; });
@@ -4944,7 +4937,6 @@ async function saveInvEdit() {
     btn.textContent = 'Save Stock';
   }
 }
-// ── END INVENTORY STOCK EDIT MODAL ───────────────────────────────
 
 renderSizeGrid();
 checkSession(); 
@@ -4964,7 +4956,6 @@ loadProductsFromBackend();
         if (msg.type === 'products') {
           const modalOpen = document.getElementById('modalOverlay')?.classList.contains('open');
           if (!modalOpen) {
-            // Preserve any local invStock overrides when SSE pushes fresh product data
             const incoming = msg.products || [];
             incoming.forEach(p => {
               const existing = products.find(x => x.id === p.id);
@@ -5002,7 +4993,6 @@ loadProductsFromBackend();
   });
 })();
 
-// ── Admin Orders Live SSE ─────────────────────────────────────────
 (function initAdminOrdersSSE() {
   let es;
   let reconnectDelay = 3000;
@@ -5022,7 +5012,6 @@ loadProductsFromBackend();
           allOrders      = msg.resellerOrders || [];
           allBuyerOrders = msg.buyerOrders    || [];
 
-          // Flash notification only for genuinely new orders, not the initial snapshot
           if (!isFirstMessage) {
             const newReseller = allOrders.length > prevResellerCount;
             const newBuyer    = allBuyerOrders.length > prevBuyerCount;
@@ -5032,13 +5021,11 @@ loadProductsFromBackend();
           }
           isFirstMessage = false;
 
-          // Re-render if orders page is open
           if (document.getElementById('page-orders')?.classList.contains('active')) {
             renderOrdersTable();
             if (typeof renderBuyerOrdersTable === 'function') renderBuyerOrdersTable();
           }
 
-          // Always update badges & dashboard counts
           const resellerPending = allOrders.filter(o => o.status === 'pending').length;
           const buyerPending    = allBuyerOrders.filter(o => o.status === 'pending').length;
           const totalPending    = resellerPending + buyerPending;
@@ -5069,12 +5056,10 @@ loadProductsFromBackend();
   connect();
 })();
 
-// ── INVENTORY PAGE ──────────────────────────────────────────────
 let invSortKey = 'name';
-let invSortDir = 1; // 1 = asc, -1 = desc
+let invSortDir = 1; 
 
 function invEffectiveStock(p) {
-  // Use invStock map if set by inventory edits; otherwise fall back to sizes[].stock / p.stock
   if (p.invStock && Object.keys(p.invStock).length) {
     return Object.values(p.invStock).reduce((sum, v) => sum + (Number(v) || 0), 0);
   }
@@ -5114,7 +5099,7 @@ function renderInventoryTable() {
     return String(av).localeCompare(String(bv)) * invSortDir;
   });
 
-  // Update sort icons
+
   ['name','brand','sku','category','status','publishTo','price','resellerPrice','wholesalePrice','supplier','totalStock'].forEach(k => {
     const el = document.getElementById('invSort-' + k);
     if (!el) return;
@@ -5137,13 +5122,11 @@ function renderInventoryTable() {
     const chanClass   = p.publishTo === 'buyer' ? 'buyer' : p.publishTo === 'reseller' ? 'reseller' : 'both';
     const chanLabel   = p.publishTo === 'buyer' ? 'Buyer' : p.publishTo === 'reseller' ? 'Reseller' : 'Both';
 
-    // Build size chips
     let sizeHtml = '';
     if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object')) {
       sizeHtml = p.sizes.map(s => {
         if (typeof s !== 'object') return '';
         const sz = s.size || s;
-        // Use invStock override if set, otherwise fall back to sizes[].stock
         const st = (p.invStock && p.invStock[sz] != null) ? Number(p.invStock[sz]) : (Number(s.stock) || 0);
         const cls = st === 0 ? 'out' : st <= 3 ? 'low' : '';
         return `<span class="inv-size-chip ${cls}">${sz} <span style="opacity:.7;">×${st}</span></span>`;
@@ -5204,7 +5187,7 @@ async function saveWholesaleInline(input) {
   const newPrice = Number(input.value) || 0;
   const p = products.find(x => x.id === productId);
   if (!p) return;
-  if ((p.wholesalePrice || 0) === newPrice) return; // no change
+  if ((p.wholesalePrice || 0) === newPrice) return;
   try {
     const res = await fetch('/admin/update-stock', {
       method: 'POST',
@@ -5231,7 +5214,7 @@ async function saveSupplierInline(input) {
   const newSupplier = input.value.trim();
   const p = products.find(x => x.id === productId);
   if (!p) return;
-  if ((p.supplier || '') === newSupplier) return; // no change
+  if ((p.supplier || '') === newSupplier) return;
   try {
     const res = await fetch('/admin/update-stock', {
       method: 'POST',
@@ -5269,15 +5252,12 @@ function exportInventoryCSV() {
   a.download = 'inventory_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
-// ── END INVENTORY ────────────────────────────────────────────────
 
 </script>
 
-<!-- ── Inventory Stock Edit Modal ── -->
 <div id="invEditOverlay" style="position:fixed;inset:0;z-index:1500;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:480px;margin:20px;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;max-height:90vh;overflow:hidden;">
 
-    <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div>
         <div style="font-family:var(--font);font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--text);" id="invEditProductName">Product</div>
@@ -5288,14 +5268,12 @@ function exportInventoryCSV() {
         onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-muted)'">×</button>
     </div>
 
-    <!-- Info banner -->
     <div style="background:rgba(59,130,246,0.06);border-bottom:1px solid rgba(59,130,246,0.15);padding:10px 22px;font-family:var(--font);font-size:11px;color:#3b82f6;letter-spacing:.5px;flex-shrink:0;">
-      📦 Edit stock quantities and supplier. Other product details are unchanged.
+      📦 Edit stock quantities and supplier.
     </div>
 
     <input type="hidden" id="invEditProductId">
 
-    <!-- Size / Stock table -->
     <div style="overflow-y:auto;flex:1;">
       <table style="width:100%;border-collapse:collapse;">
         <thead>
@@ -5309,7 +5287,6 @@ function exportInventoryCSV() {
       </table>
     </div>
 
-    <!-- Supplier & Wholesale Price -->
     <div style="padding:14px 22px;border-top:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;gap:12px;">
       <div>
         <label style="display:block;font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;">Supplier</label>
@@ -5321,7 +5298,6 @@ function exportInventoryCSV() {
 
     </div>
 
-    <!-- Footer -->
     <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--border);flex-shrink:0;">
       <button onclick="closeInvEdit()"
         style="font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border:1px solid var(--border2);border-radius:6px;background:none;color:var(--text-muted);cursor:pointer;transition:all .15s;"
