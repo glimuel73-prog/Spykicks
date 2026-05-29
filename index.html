@@ -2728,6 +2728,8 @@ function applyLiveProducts(products) {
       const newStock = p.sizes?.some(s => typeof s === 'object' && s.stock != null)
         ? p.sizes.reduce((s, x) => s + (Number(x.stock)||0), 0) : Number(p.stock)||0;
       if (prevStock !== newStock) { changed = true; break; }
+      if ((p.category||'').toLowerCase() !== (prev.category||'').toLowerCase()) { changed = true; break; }
+      if ((p.brand||'') !== (prev.brand||'')) { changed = true; break; }
     }
     for (const id of prevIds) { if (!newIds.has(id)) { changed = true; break; } }
   }
