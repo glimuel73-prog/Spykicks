@@ -1278,7 +1278,6 @@ async function loadAdminProducts() {
     });
 
 
-    // Cards are now rendered by applyFiltersAndSort() from window._allProducts
 
     const brandBar = document.getElementById('brandBar');
     const brandChips = document.getElementById('brandChips');
@@ -1704,7 +1703,6 @@ function renderFavoritesPage() {
   const empty = document.getElementById("favEmpty");
   grid.innerHTML = "";
   let count = 0;
-  // Build fav cards from the products index directly
   (window._allProducts || []).filter(p => favorites.includes(String(p.id))).forEach(p => {
     const id = String(p.id);
     const div = document.createElement('div');
@@ -1749,10 +1747,8 @@ function applyFiltersAndSort() {
   const noResults = document.getElementById("shopNoResults");
   const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
 
-  // Collect all products from the index
   const allProds = window._allProducts || [];
 
-  // Filter
   const filtered = allProds.filter(p => {
     const cat = (p.category || 'other').toLowerCase();
     const catMatch = activeCategory === "all" || (activeCategory === "new-arrivals" ? !!p.newArrival : cat === activeCategory);
@@ -1765,7 +1761,6 @@ function applyFiltersAndSort() {
     return catMatch && genderMatch && brandMatch && lineMatch && modelMatch && nameMatch && statusMatch;
   });
 
-  // Sort
   filtered.sort((a, b) => {
     const pa = (a.sizes && a.sizes.length > 0 && typeof a.sizes[0] === 'object') ? (a.sizes[0].retailPrice || a.price || 0) : (a.price || 0);
     const pb = (b.sizes && b.sizes.length > 0 && typeof b.sizes[0] === 'object') ? (b.sizes[0].retailPrice || b.price || 0) : (b.price || 0);
@@ -1779,10 +1774,8 @@ function applyFiltersAndSort() {
   document.getElementById("productCount").textContent = count + " item" + (count !== 1 ? "s" : "");
   noResults.style.display = count === 0 ? "block" : "none";
 
-  // Decide: use grouped layout when showing "all" with no search, or flat grid when filtered/searched
   const useGrouped = activeCategory === "all" && activeGender === "all" && activeBrand === "all" && activeLine === "all" && activeModel === "all" && !query && activeSort === "default";
 
-  // Clear existing rendered content (groups or flat grid)
   Array.from(grid.children).forEach(child => {
     if (child.id !== 'shopNoResults') child.remove();
   });
@@ -1791,14 +1784,12 @@ function applyFiltersAndSort() {
 
   if (useGrouped) {
     grid.classList.add('grouped-mode');
-    // Group by brandLine, then brand
     const groups = new Map();
     filtered.forEach(p => {
       const key = [p.brand, p.brandLine].filter(Boolean).join(' ') || (p.brand || 'Other');
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(p);
     });
-    // If only 1 group or groups have 1 item each, fall back to flat
     const multipleGroups = groups.size > 1 || (groups.size === 1 && [...groups.values()][0].length > 1);
     if (!multipleGroups) {
       renderFlatGrid(grid, filtered);
@@ -1850,7 +1841,6 @@ function buildGroupSection(groupName, prods) {
   prods.forEach(p => { scrollEl.insertAdjacentHTML('beforeend', buildProductCard(p)); });
   scrollWrap.appendChild(scrollEl);
 
-  // Arrow buttons
   const leftArrow = document.createElement('button');
   leftArrow.className = 'scroll-arrow left hidden';
   leftArrow.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>`;
@@ -1866,7 +1856,6 @@ function buildGroupSection(groupName, prods) {
     rightArrow.classList.toggle('hidden', scrollEl.scrollLeft + scrollEl.clientWidth >= scrollEl.scrollWidth - 4);
   });
 
-  // Hide right arrow if no overflow
   requestAnimationFrame(() => {
     if (scrollEl.scrollWidth <= scrollEl.clientWidth + 4) rightArrow.classList.add('hidden');
   });
@@ -1885,39 +1874,33 @@ function viewAllGroup(groupName) {
   });
   if (!sample) return;
 
-  // Switch to the shop tab
   document.querySelectorAll('.content').forEach(d => d.classList.remove('active'));
   document.getElementById('buyer').classList.add('active');
   document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
   const shopBtn = document.getElementById('btnShop');
   if (shopBtn) shopBtn.classList.add('active');
 
-  // Reset category, gender, sort to defaults
   activeCategory = 'all';
   activeGender = 'all';
   activeSort = 'default';
 
-  // Set brand/line/model filter
+
   activeBrand = (sample.brand || '').toLowerCase();
   activeLine = sample.brandLine || 'all';
   activeModel = sample.brandModel || 'all';
 
-  // Update category chip UI - activate "All"
   document.querySelectorAll('#categoryChips .chip').forEach(c => c.classList.remove('active'));
   const allCatChip = document.querySelector('#categoryChips .chip');
   if (allCatChip) allCatChip.classList.add('active');
 
-  // Update gender chip UI
   document.querySelectorAll('#genderChipAll, #genderChipMale, #genderChipFemale, #genderChipUnisex').forEach(c => c.classList.remove('active'));
   const genderAll = document.getElementById('genderChipAll');
   if (genderAll) genderAll.classList.add('active');
 
-  // Update sort chip UI
   document.querySelectorAll('.sort-chips .sort-chip').forEach(c => c.classList.remove('active'));
   const defaultSortBtn = document.querySelector('.sort-chips .sort-chip');
   if (defaultSortBtn) defaultSortBtn.classList.add('active');
 
-  // Update brand chip UI
   const brandChips = document.getElementById('brandChips');
   if (brandChips) {
     brandChips.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
@@ -1925,12 +1908,10 @@ function viewAllGroup(groupName) {
     if (matchBtn) matchBtn.classList.add('active');
   }
 
-  // Rebuild line/model chips then apply filters
   updateLineChips();
   updateModelChips();
   applyFiltersAndSort();
 
-  // Scroll to results
   setTimeout(() => {
     const grid = document.getElementById('shopGrid');
     if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2213,7 +2194,6 @@ async function submitBuyerOrder() {
     fullAddress:  document.getElementById('coFullAddress').value.trim(),
   };
 
-  // One order per item so admin can manage each individually
   const selectedItems = cart.filter((_, i) => cartSelectedIndices.has(i));
 
   try {
@@ -2361,7 +2341,6 @@ function addToCart() {
   setTimeout(() => { btn.textContent = '🛒 Add to Cart'; btn.classList.remove('pd-btn-added'); }, 1800);
 }
 
-// Track which cart indices are selected for checkout
 let cartSelectedIndices = new Set();
 
 function renderCartItems() {
@@ -2382,9 +2361,7 @@ function renderCartItems() {
     return;
   }
 
-  // Keep only valid indices in the selected set
   cartSelectedIndices = new Set([...cartSelectedIndices].filter(i => i < cart.length));
-  // Select all by default when cart is freshly rendered (first open)
   if (cartSelectedIndices.size === 0) {
     cart.forEach((_, i) => cartSelectedIndices.add(i));
   }
@@ -2439,7 +2416,6 @@ function toggleCartItem(idx, checked) {
 function toggleSelectAll(checked) {
   if (checked) cart.forEach((_, i) => cartSelectedIndices.add(i));
   else cartSelectedIndices.clear();
-  // Refresh checkboxes on individual items
   cart.forEach((_, i) => {
     const cb = document.querySelector(`#cart-item-row-${i} .cart-item-cb`);
     if (cb) cb.checked = checked;
@@ -2610,14 +2586,12 @@ function lookupOrders() {
     return;
   }
 
-  // Close existing SSE connection if contact changed
   if (_ordersSSE && _ordersSSEContact !== contact) {
     _ordersSSE.close();
     _ordersSSE = null;
     _ordersSSEContact = null;
   }
 
-  // Already connected for this contact — nothing to do
   if (_ordersSSE && _ordersSSEContact === contact) return;
 
   const emptyEl = document.getElementById('ordersEmpty');
@@ -2626,7 +2600,6 @@ function lookupOrders() {
   emptyEl.style.display = '';
   listEl.innerHTML = '';
 
-  // Inject live indicator next to section title if not yet present
   const sectionTitle = document.querySelector('#orders .section-title');
   if (sectionTitle && !document.getElementById('ordersLiveIndicator')) {
     const ind = document.createElement('span');
@@ -2648,7 +2621,6 @@ function lookupOrders() {
         if (msg.type === 'orders') {
           _setOrdersLiveIndicator('connected');
           renderOrdersList(msg.orders, contact);
-          // Brief green glow on all cards to signal a live push
           document.querySelectorAll('.order-history-card').forEach(card => {
             card.style.transition = 'box-shadow 0.4s';
             card.style.boxShadow = '0 0 0 2px #22c55e44';
@@ -2682,7 +2654,6 @@ async function cancelBuyerOrder(orderId, contact) {
     const data = await res.json();
     if (data.success) {
       showToast('Order cancelled. Stock has been restored.');
-      // SSE will push the updated orders list automatically
     } else {
       showToast(data.error || 'Failed to cancel order.');
     }
@@ -2714,7 +2685,6 @@ function applyLiveProducts(products) {
     return;
   }
 
-  // Detect meaningful changes
   const prevIds = new Set((window._allProducts || []).map(p => String(p.id)));
   const newIds = new Set(activeProducts.map(p => String(p.id)));
   let changed = !_liveInitialized;
@@ -2743,7 +2713,6 @@ function applyLiveProducts(products) {
   _liveInitialized = true;
   buildProductsIndex(activeProducts);
 
-  // Update category chips (live)
   const STATIC_CATS = ['all','new-arrivals'];
   const customCats = [...new Set(activeProducts.map(p => (p.category||'').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))].sort();
   const chipsContainer = document.getElementById('categoryChips');
@@ -2758,7 +2727,6 @@ function applyLiveProducts(products) {
     chipsContainer.appendChild(btn);
   });
 
-  // Update brand chips
   const brandBar = document.getElementById('brandBar');
   const brandChips = document.getElementById('brandChips');
   [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
@@ -2782,7 +2750,6 @@ function applyLiveProducts(products) {
   updateFavUI();
   applyFiltersAndSort();
 
-  // Update open product drawer if visible
   if (pdCurrentId) {
     const updatedPD = activeProducts.find(p => String(p.id) === String(pdCurrentId));
     if (updatedPD) {
