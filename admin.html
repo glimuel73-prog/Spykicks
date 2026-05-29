@@ -2560,13 +2560,30 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
 <script>
 const ADMIN_HASH_DEFAULT = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
 
-let ADMIN_HASH = ADMIN_HASH_DEFAULT;
+// Token is stored in sessionStorage only (not localStorage — clears on tab close)
+const SESSION_KEY = "catalog_admin_token";
+const SESSION_DURATION = 2 * 60 * 60 * 1000;
 
-let _hashReady = fetch("/admin/password-hash")
-  .then(r => r.json())
-  .then(d => { if (d.hash) ADMIN_HASH = d.hash; })
-  .catch(() => {});
-const SESSION_KEY = "catalog_admin_session";
+function getToken() {
+  return sessionStorage.getItem(SESSION_KEY) || "";
+}
+
+function storeToken(token) {
+  sessionStorage.setItem(SESSION_KEY, token);
+}
+
+function clearToken() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+// Attach the admin token to every fetch that goes to /admin/*
+const _origFetch = window.fetch;
+window.fetch = function(url, opts = {}) {
+  if (typeof url === "string" && (url.startsWith("/admin/") || url.startsWith("/events/admin"))) {
+    opts.headers = Object.assign({}, opts.headers, { "x-admin-token": getToken() });
+  }
+  return _origFetch(url, opts);
+};
 
 
 function cpToggle(inputId, btn) {
@@ -2626,12 +2643,6 @@ async function changePassword() {
   btn.textContent = 'Verifying…';
 
   const currentHash = await sha256(currentVal);
-  if (currentHash !== ADMIN_HASH) {
-    btn.disabled = false;
-    btn.textContent = 'Change Password';
-    return cpErr('Current password is incorrect.');
-  }
-
   const newHash = await sha256(newVal);
 
   btn.textContent = 'Saving…';
@@ -2652,7 +2663,6 @@ async function changePassword() {
     btn.textContent = 'Change Password';
     return cpErr('Connection error. Please try again.');
   }
-  ADMIN_HASH = newHash;
 
 
   document.getElementById('cpCurrent').value = '';
@@ -2666,7 +2676,6 @@ async function changePassword() {
   okEl.style.display = 'block';
   setTimeout(() => { okEl.style.display = 'none'; }, 4000);
 }
-const SESSION_DURATION = 2 * 60 * 60 * 1000;
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_SECONDS = 30;
 
@@ -2694,28 +2703,32 @@ function saveAttemptData(data) {
   sessionStorage.setItem("adminAttempts", JSON.stringify(data));
 }
 
-function checkSession() {
+async function checkSession() {
+  const token = getToken();
+  if (!token) return false;
   try {
-    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-    if (s && s.token && Date.now() < s.expires) {
+    const res = await fetch("/admin/session", { headers: { "x-admin-token": token } });
+    const data = await res.json();
+    if (data.valid) {
       document.getElementById("loginScreen").classList.add("hidden");
       return true;
     }
   } catch {}
+  clearToken();
   return false;
 }
 
-function createSession() {
-  const token = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ token, expires: Date.now() + SESSION_DURATION }));
+function createSession(token) {
+  storeToken(token);
 }
 
 function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
+  const token = getToken();
+  clearToken();
+  if (token) fetch("/admin/logout", { method: "POST", headers: { "x-admin-token": token } }).catch(() => {});
 }
 
 async function doLogin() {
-  await _hashReady;
   const attempts = getAttemptData();
   const now = Date.now();
 
@@ -2729,39 +2742,61 @@ async function doLogin() {
 
   const hash = await sha256(pw);
 
-  if (hash === ADMIN_HASH) {
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+  btn.textContent = "Verifying…";
 
-    saveAttemptData({ count: 0, lockedUntil: 0 });
-    createSession();
-    document.getElementById("loginScreen").classList.add("hidden");
-    document.getElementById("loginInput").value = "";
-    renderDashboard();
-  } else {
+  try {
+    const res = await fetch("/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hash })
+    });
+    const data = await res.json();
 
-    attempts.count = (attempts.count || 0) + 1;
-    const remaining = MAX_ATTEMPTS - attempts.count;
-
-    if (attempts.count >= MAX_ATTEMPTS) {
-      attempts.lockedUntil = Date.now() + LOCKOUT_SECONDS * 1000;
-      attempts.count = 0;
-      saveAttemptData(attempts);
-      showLockout(LOCKOUT_SECONDS);
-    } else {
-      saveAttemptData(attempts);
-      const errEl = document.getElementById("loginError");
-      errEl.textContent = remaining === 1
-        ? "Incorrect password — 1 attempt left"
-        : `Incorrect password — ${remaining} attempts left`;
-      errEl.classList.add("visible");
-      document.getElementById("loginAttempts").textContent = "";
+    if (data.success && data.token) {
+      saveAttemptData({ count: 0, lockedUntil: 0 });
+      createSession(data.token);
+      document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("loginInput").value = "";
-      document.getElementById("loginInput").focus();
+      renderDashboard();
+    } else if (res.status === 429) {
+      // Server-side lockout
+      const match = (data.error || "").match(/(\d+)s/);
+      showLockout(match ? parseInt(match[1]) : 60);
+    } else {
+      attempts.count = (attempts.count || 0) + 1;
+      const remaining = MAX_ATTEMPTS - attempts.count;
 
-      const box = document.querySelector(".login-box");
-      box.style.animation = "none";
-      box.offsetHeight;
-      box.style.animation = "shake .3s ease";
+      if (attempts.count >= MAX_ATTEMPTS) {
+        attempts.lockedUntil = Date.now() + LOCKOUT_SECONDS * 1000;
+        attempts.count = 0;
+        saveAttemptData(attempts);
+        showLockout(LOCKOUT_SECONDS);
+      } else {
+        saveAttemptData(attempts);
+        const errEl = document.getElementById("loginError");
+        errEl.textContent = remaining === 1
+          ? "Incorrect password — 1 attempt left"
+          : `Incorrect password — ${remaining} attempts left`;
+        errEl.classList.add("visible");
+        document.getElementById("loginAttempts").textContent = "";
+        document.getElementById("loginInput").value = "";
+        document.getElementById("loginInput").focus();
+
+        const box = document.querySelector(".login-box");
+        box.style.animation = "none";
+        box.offsetHeight;
+        box.style.animation = "shake .3s ease";
+      }
     }
+  } catch (e) {
+    const errEl = document.getElementById("loginError");
+    errEl.textContent = "Connection error. Please try again.";
+    errEl.classList.add("visible");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Enter Admin Panel";
   }
 }
 
@@ -2803,12 +2838,14 @@ shakeStyle.textContent = `@keyframes shake { 0%,100%{transform:translateX(0)} 20
 document.head.appendChild(shakeStyle);
 
 
-setInterval(() => {
+setInterval(async () => {
   try {
-    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
-    if (!s || Date.now() >= s.expires) {
-      if (!document.getElementById("loginScreen").classList.contains("hidden")) return;
-      clearSession();
+    const token = getToken();
+    if (!token) return;
+    const res = await fetch("/admin/session", { headers: { "x-admin-token": token } });
+    const data = await res.json();
+    if (!data.valid) {
+      clearToken();
       document.getElementById("loginScreen").classList.remove("hidden");
       document.getElementById("loginInput").value = "";
       document.getElementById("loginInput").focus();
