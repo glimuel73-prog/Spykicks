@@ -685,8 +685,8 @@
   <div class="section-header">
     <span class="section-title">All Products</span>
     <div class="filter-chips" id="categoryChips">
-      <button class="chip active" onclick="filterProducts('all',this)">All</button>
-      <button class="chip" onclick="filterProducts('new-arrivals',this)">✦ New Arrivals</button>
+      <button class="chip active" data-cat="all" onclick="filterProducts('all',this)">All</button>
+      <button class="chip" data-cat="new-arrivals" onclick="filterProducts('new-arrivals',this)">✦ New Arrivals</button>
     </div>
   </div>
 
@@ -2738,16 +2738,18 @@ function applyLiveProducts(products) {
   _liveInitialized = true;
   buildProductsIndex(activeProducts);
 
-  // Update category chips
+  // Update category chips (live)
   const STATIC_CATS = ['all','new-arrivals'];
-  const customCats = [...new Set(activeProducts.map(p => (p.category||'').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
+  const customCats = [...new Set(activeProducts.map(p => (p.category||'').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))].sort();
   const chipsContainer = document.getElementById('categoryChips');
+  const activeCat = (chipsContainer.querySelector('.chip.active') || chipsContainer.querySelector('.chip'))?.dataset?.cat || 'all';
   chipsContainer.querySelectorAll('.chip[data-custom]').forEach(el => el.remove());
   customCats.forEach(cat => {
     const btn = document.createElement('button');
-    btn.className = 'chip'; btn.dataset.custom = '1';
+    btn.className = 'chip'; btn.dataset.custom = '1'; btn.dataset.cat = cat;
     btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
     btn.onclick = function() { filterProducts(cat, this); };
+    if (cat === activeCat) btn.classList.add('active');
     chipsContainer.appendChild(btn);
   });
 
