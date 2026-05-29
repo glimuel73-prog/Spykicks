@@ -58,21 +58,17 @@
   .cat-chip.active, .cat-chip:hover { border-color: #000; color: #fff; background: #000; }
   .badge-pill { background: var(--black); color: var(--white); font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
 
-  /* ── Main flat product grid (matches index) ── */
   .product-grid { display: block; width: 100%; background: #fff; }
 
-  /* Card — base (scroll/grouped mode only) */
   .product-card { background: #fff; padding: 0 0 20px; transition: background .2s, transform .2s; cursor: pointer; position: relative; overflow: visible; display: flex; flex-direction: column; }
   .product-card:hover { background: #f7f7f7; }
 
-  /* Fav btn — top-left absolute overlay on image */
   .fav-btn { position: absolute; top: 10px; left: 10px; z-index: 2; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; padding: 0; }
   .fav-btn:hover { border-color: var(--red); color: var(--red); }
   .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
   .fav-btn svg { width: 14px; height: 14px; fill: currentColor; transition: transform .15s; }
   .fav-btn.active svg { transform: scale(1.15); }
 
-  /* Image area */
   .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 0; margin-bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
   .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
   .product-img-placeholder svg { opacity: .15; width: 80px; height: 80px; }
@@ -80,10 +76,8 @@
   .product-corner-badge { position: absolute; top: 10px; right: 10px; background: var(--red); color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; text-transform: uppercase; z-index: 2; border-radius: 3px; }
   .product-new-arrival-badge { position: absolute; bottom: 8px; left: 8px; background: #000; color: #fff; font-family: Arial,sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 9px; text-transform: uppercase; z-index: 3; border-radius: 3px; }
 
-  /* Text — fixed heights for alignment */
   .product-brand { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 3px; text-transform: uppercase; color: #999; margin: 14px 16px 4px; line-height: 1.2; }
   .product-name { font-family: Arial,sans-serif; font-weight: 700; font-size: 15px; color: #111; margin: 0 16px 0; letter-spacing: .3px; line-height: 1.3; min-height: 40px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  /* Footer row: price left, tag right — always same vertical position */
   .product-footer { display: flex; align-items: center; justify-content: space-between; margin: 10px 16px 4px; flex-shrink: 0; }
   .product-price { font-family: Arial,sans-serif; font-weight: 700; font-size: 20px; color: #111; line-height: 1; }
   .product-tag { font-size: 10px; font-family: Arial,sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: #666; border: 1px solid #ddd; padding: 3px 9px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
@@ -94,7 +88,6 @@
 
   .no-results { display: none; padding: 80px 24px; text-align: center; font-family: Arial,sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
 
-  /* ── Grouped horizontal-scroll layout (used when all/unfiltered) ── */
   .product-grid.grouped-mode { display: block; }
   .product-group { background: #fff; padding: 28px 0 32px; }
   .product-group-header { display: flex; align-items: center; justify-content: space-between; padding: 0 32px 18px; }
@@ -112,7 +105,6 @@
   .scroll-arrow.hidden { opacity: 0 !important; pointer-events: none !important; }
   .product-group-scroll-wrap:hover .scroll-arrow { opacity: 1; pointer-events: all; }
 
-  /* Scroll-mode card overrides (compact) */
   .product-group-scroll .product-card { width: 210px; min-width: 210px; flex-shrink: 0; border-radius: 0; border: none; padding: 0 0 20px; box-shadow: none; background: #fff; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: visible; transition: background .15s; transform: none !important; }
   .product-group-scroll .product-card:hover { background: #fff; box-shadow: none; transform: none !important; }
   .product-group-scroll .fav-btn { position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; transform: none !important; z-index: 1; background: none !important; border: none !important; box-shadow: none !important; width: 100%; height: 36px; border-radius: 0; display: flex; align-items: center; justify-content: center; color: #ccc; flex-shrink: 0; }
@@ -130,7 +122,6 @@
   .product-group-scroll .product-tag, .product-group-scroll .product-stock, .product-group-scroll .product-colors, .product-group-scroll .product-corner-badge, .product-group-scroll .img-zoom-btn, .product-group-scroll .img-dl-btn, .product-group-scroll .product-new-arrival-badge { display: none; }
   .product-group-scroll .product-wholesale { display: block; font-size: 11px; font-weight: 700; letter-spacing: .5px; color: #3b82f6; font-family: Arial,sans-serif; margin: 2px 8px 4px; }
 
-  /* View btn — matches index */
   .product-view-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: none; color: #666; font-family: Arial,sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 8px 16px; border: 1px solid #ccc; cursor: pointer; transition: border-color .2s, color .2s, background .2s; margin: auto 16px 0; border-radius: 20px; width: calc(100% - 32px); }
   .product-view-btn:hover { border-color: #000; color: #000; background: #f5f5f5; }
   .product-view-btn svg { width: 13px; height: 13px; }
@@ -219,7 +210,6 @@
   .cart-checkout-btn:hover { background: #333; }
   .cart-checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-  /* Cart item checkboxes */
   .cart-item-cb-wrap { display: flex; align-items: center; padding-top: 4px; flex-shrink: 0; }
   .cart-item-cb { width: 18px; height: 18px; accent-color: #000; cursor: pointer; flex-shrink: 0; }
   .cart-select-all-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
@@ -248,7 +238,6 @@
   .order-status-pill.shipped     { color: #6d28d9; border-color: #c4b5fd; background: #f5f3ff; }
   .order-status-pill.delivered   { color: #166534; border-color: #4ade80; background: #f0fdf4; }
 
-  /* ── Flat grid — matches index.html ── */
   .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 24px 32px; background: #fff; width: 100%; }
   #productGrid.grouped-mode { background: #fff; display: block; }
   #productGrid:not(.grouped-mode) { display: block; background: #fff; }
@@ -257,7 +246,6 @@
   .product-grid-flat .product-card:hover { background: #f5f5f5; transform: none; box-shadow: none; }
   .product-grid-flat .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 4px; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
   .product-grid-flat .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; padding: 0; }
-  /* Text — padded inside card */
   .product-grid-flat .fav-btn { position: absolute; top: 10px; left: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); border: 1px solid #e0e0e0; color: #ccc; display: flex; align-items: center; justify-content: center; z-index: 2; }
   .product-grid-flat .fav-btn:hover { border-color: var(--red); color: var(--red); background: rgba(255,255,255,0.9); }
   .product-grid-flat .fav-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
@@ -951,7 +939,6 @@
     document.getElementById("favToggleBtn").classList.remove("active");
     document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     if (chipEl) chipEl.classList.add("active");
-    // Restore normal layout
     const favPageHeader = document.getElementById("favPageHeader");
     const mainSectionHeader = document.getElementById("mainSectionHeader");
     const sortBar = document.querySelector(".sort-bar");
@@ -970,7 +957,6 @@
     const btn = document.getElementById("favToggleBtn");
     btn.classList.toggle("active", showingFavs);
 
-    // Show/hide the favorites page header vs normal controls
     const favPageHeader = document.getElementById("favPageHeader");
     const mainSectionHeader = document.getElementById("mainSectionHeader");
     const sortBar = document.querySelector(".sort-bar");
@@ -985,7 +971,6 @@
       if (brandBar) brandBar.style.display = "none";
       document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     } else {
-      // Reset all filters back to default so grouped view is restored
       currentCat = 'all';
       activeGender = 'all';
       activeBrand = 'all';
@@ -999,7 +984,6 @@
       if (genderBar) genderBar.style.display = "";
       if (brandBar) brandBar.style.display = document.getElementById('brandChips')?.querySelectorAll('.sort-chip:not(#brandChipAll)').length > 0 ? 'block' : 'none';
 
-      // Reset chip UI states
       document.querySelectorAll("#catChips .cat-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
       document.querySelectorAll(".sort-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
       document.getElementById("rGenderAll")?.classList.add("active");
@@ -1022,7 +1006,6 @@
     const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
     const allProds = window._resellerProducts || [];
 
-    // Filter from data
     const filtered = allProds.filter(p => {
       const cat = (p.category || 'sneakers').toLowerCase();
       const gender = (p.gender || '').toLowerCase();
@@ -1044,7 +1027,6 @@
       return show;
     });
 
-    // Sort
     filtered.sort((a, b) => {
       const pa = getDisplayPrice(a);
       const pb = getDisplayPrice(b);
@@ -1059,17 +1041,14 @@
     noResults.style.display = (!showingFavs && count === 0) ? "block" : "none";
     if (showingFavs && count === 0) { favEmpty.classList.add("visible"); } else { favEmpty.classList.remove("visible"); }
 
-    // Decide: grouped when no filters active, flat when filtered
     const useGrouped = !showingFavs && currentCat === 'all' && activeGender === 'all' && activeBrand === 'all' && activeLine === 'all' && activeModel === 'all' && !query && activeSort === 'default';
 
-    // Clear all rendered content from grid
     grid.innerHTML = '';
 
     if (count === 0) return;
 
     if (useGrouped) {
       grid.classList.add('grouped-mode');
-      // Group by brand + brandLine
       const groups = new Map();
       filtered.forEach(p => {
         const key = [p.brand, p.brandLine].filter(Boolean).join(' ') || (p.brand || 'Other');
@@ -1107,7 +1086,6 @@
       wrap.insertAdjacentHTML('beforeend', buildResellerCard(p, productId));
     });
     grid.appendChild(wrap);
-    // Attach events after insertion
     wrap.querySelectorAll('.js-view-btn').forEach(btn => {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -1316,7 +1294,6 @@
 
       window._resellerProducts = data.products;
 
-      // Build category chips for custom categories
       const STATIC_CATS = ['all', 'new-arrivals'];
       const customCats = [...new Set(data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
       const chipsContainer = document.getElementById('catChips');
@@ -1329,7 +1306,6 @@
         chipsContainer.appendChild(btn);
       });
 
-      // Build brand chips
       const brands = [...new Set(data.products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
       const brandBar = document.getElementById('brandBar');
       const brandChips = document.getElementById('brandChips');
@@ -1407,7 +1383,7 @@
 
   function openPD(product, productId, category, badge, displayPrice) {
     pdSelectedSize = null; pdSelectedPrice = null; pdCurrentProduct = product; pdSelectedStock = null; pdSelectedColor = null;
-    pdCurrentProduct._displayPrice = displayPrice; // store for social links
+    pdCurrentProduct._displayPrice = displayPrice; 
     document.getElementById("pdBreadName").textContent = product.name;
     document.getElementById("pdBreadCat").textContent = category.charAt(0).toUpperCase() + category.slice(1);
     document.getElementById("pdBrand").textContent = product.brand || "Reseller Collection";
@@ -1883,7 +1859,6 @@
     setTimeout(() => { btn.textContent = "🛒 Add to Cart"; btn.classList.remove("pd-btn-added"); }, 1800);
   }
 
-  // Track which cart indices are selected for checkout
   let cartSelectedIndices = new Set();
 
   function renderCartItems() {
@@ -1901,7 +1876,6 @@
       return;
     }
 
-    // Keep only valid indices; select all by default on first render
     cartSelectedIndices = new Set([...cartSelectedIndices].filter(i => i < cart.length));
     if (cartSelectedIndices.size === 0) {
       cart.forEach((_, i) => cartSelectedIndices.add(i));
@@ -2003,7 +1977,6 @@
     btn.textContent = "Submitting...";
 
     try {
-      // One order per item so admin can manage each individually
       const results = await Promise.all(selectedCart.map(item => {
         const singleItem = [{
           productId: item.productId,
@@ -2048,7 +2021,6 @@
     }
   }
 
-  // ── Reseller Order History (SSE live) ──────────────────────────
   let _resellerOrders = [];
 
   function renderOrderHistory(orders) {
@@ -2139,7 +2111,6 @@
     }
   }
 
-  // SSE — keeps order history live when admin changes status
   (function initResellerOrdersSSE() {
     if (!email) return;
     let es;
@@ -2156,7 +2127,6 @@
             const prevOrders = _resellerOrders;
             renderOrderHistory(msg.orders || []);
 
-            // Show a toast if a status changed (not on first snapshot)
             if (!isFirst) {
               const changed = (msg.orders || []).find(o => {
                 const prev = prevOrders.find(p => p.id === o.id);
@@ -2199,7 +2169,6 @@
       let data = {};
       try { data = await res.json(); } catch(_) {}
       if (res.ok && data.success) {
-        // SSE will push the updated order list automatically
         btn.textContent = '✕ Cancelled';
       } else {
         alert('Could not cancel: ' + (data.error || (res.ok ? 'Unknown error' : 'Server error ' + res.status)));
@@ -2213,7 +2182,6 @@
     }
   }
 
-  // ════ LIGHTBOX ════
   let _lbImages = [], _lbIdx = 0;
 
   function openLightbox(images, startIdx) {
@@ -2351,7 +2319,6 @@
           window._resellerProducts = (window._resellerProducts || []).filter(p => incomingIds.has(String(p.id)));
           const _pc1 = document.getElementById('productCount'); if (_pc1) _pc1.textContent = (window._resellerProducts.length || incoming.length) + '+';
 
-          // Rebuild category chips from live data
           (function rebuildCatChips(products) {
             const STATIC = ['all', 'new-arrivals'];
             const cats = [...new Set(products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC.includes(c)))].sort();
@@ -2463,7 +2430,6 @@
               card.style.outline = '2px solid rgba(46,204,113,0.7)';
               setTimeout(() => { card.style.outline = ''; }, 2500);
 
-              // Append to brand+line group, creating one if needed
               const brand = (p.brand || 'Other').trim();
               const line = (p.brandLine || '').trim();
               const groupKey = line ? `${brand} ${line}` : brand;
@@ -2490,7 +2456,7 @@
               scrollEl.appendChild(card);
             });
 
-            // Rebuild category chips to include any new categories
+
             (function rebuildCatChips(products) {
               const STATIC = ['all', 'new-arrivals'];
               const cats = [...new Set(products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC.includes(c)))].sort();
