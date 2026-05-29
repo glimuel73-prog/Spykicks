@@ -2730,7 +2730,10 @@ function applyLiveProducts(products) {
       if (prevStock !== newStock) { changed = true; break; }
       if ((p.category||'').toLowerCase() !== (prev.category||'').toLowerCase()) { changed = true; break; }
       if ((p.brand||'') !== (prev.brand||'')) { changed = true; break; }
-    }
+      if ((p.brandLine||'') !== (prev.brandLine||'')) { changed = true; break; }
+      if ((p.brandModel||'') !== (prev.brandModel||'')) { changed = true; break; }
+      if ((p.name||'') !== (prev.name||'')) { changed = true; break; }
+      if (String(p.price||0) !== String(prev.price||0)) { changed = true; break; }    }
     for (const id of prevIds) { if (!newIds.has(id)) { changed = true; break; } }
   }
 
@@ -2763,11 +2766,17 @@ function applyLiveProducts(products) {
   if (allBrands.length > 0) {
     allBrands.forEach(brand => {
       const btn = document.createElement('button');
-      btn.className = 'sort-chip'; btn.textContent = brand;
+      btn.className = 'sort-chip';
+      if (brand.toLowerCase() === activeBrand) btn.classList.add('active');
+      btn.textContent = brand;
       btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
       brandChips.appendChild(btn);
     });
+    const allBrandChip = document.getElementById('brandChipAll');
+    if (allBrandChip) allBrandChip.classList.toggle('active', activeBrand === 'all');
     brandBar.style.display = 'block';
+    updateLineChips();
+    updateModelChips();
   } else { brandBar.style.display = 'none'; }
 
   updateFavUI();
