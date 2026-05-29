@@ -554,8 +554,8 @@
   <div class="section-header" id="mainSectionHeader">
     <span class="section-title">All Products</span>
     <div class="filter-chips" id="catChips">
-      <button class="cat-chip active" onclick="filterCat('all',this)">All</button>
-      <button class="cat-chip" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
+      <button class="cat-chip active" data-cat="all" onclick="filterCat('all',this)">All</button>
+      <button class="cat-chip" data-cat="new-arrivals" onclick="filterCat('new-arrivals',this)">&#10022; New Arrivals</button>
     </div>
   </div>
 
@@ -2350,6 +2350,25 @@
           });
           window._resellerProducts = (window._resellerProducts || []).filter(p => incomingIds.has(String(p.id)));
           const _pc1 = document.getElementById('productCount'); if (_pc1) _pc1.textContent = (window._resellerProducts.length || incoming.length) + '+';
+
+          // Rebuild category chips from live data
+          (function rebuildCatChips(products) {
+            const STATIC = ['all', 'new-arrivals'];
+            const cats = [...new Set(products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC.includes(c)))].sort();
+            const container = document.getElementById('catChips');
+            if (!container) return;
+            const activeCat = (container.querySelector('.cat-chip.active') || container.querySelector('.cat-chip'))?.dataset?.cat || 'all';
+            container.querySelectorAll('.cat-chip[data-custom]').forEach(el => el.remove());
+            cats.forEach(cat => {
+              const btn = document.createElement('button');
+              btn.className = 'cat-chip'; btn.dataset.custom = '1'; btn.dataset.cat = cat;
+              btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+              btn.onclick = function() { filterCat(cat, this); };
+              if (cat === activeCat) btn.classList.add('active');
+              container.appendChild(btn);
+            });
+          })(incoming);
+
           applyView();
 
           const currentIds = new Set((window._resellerProducts || []).map(p => String(p.id)));
@@ -2470,6 +2489,24 @@
               }
               scrollEl.appendChild(card);
             });
+
+            // Rebuild category chips to include any new categories
+            (function rebuildCatChips(products) {
+              const STATIC = ['all', 'new-arrivals'];
+              const cats = [...new Set(products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC.includes(c)))].sort();
+              const container = document.getElementById('catChips');
+              if (!container) return;
+              const activeCat = (container.querySelector('.cat-chip.active') || container.querySelector('.cat-chip'))?.dataset?.cat || 'all';
+              container.querySelectorAll('.cat-chip[data-custom]').forEach(el => el.remove());
+              cats.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'cat-chip'; btn.dataset.custom = '1'; btn.dataset.cat = cat;
+                btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+                btn.onclick = function() { filterCat(cat, this); };
+                if (cat === activeCat) btn.classList.add('active');
+                container.appendChild(btn);
+              });
+            })(window._resellerProducts || []);
 
             applyView();
             showSSEToast(`${newProducts.length} new product${newProducts.length > 1 ? 's' : ''} added!`);
