@@ -4976,8 +4976,10 @@ async function saveInvEdit() {
 }
 
 renderSizeGrid();
-checkSession(); 
-loadProductsFromBackend();
+(async () => {
+  const ok = await checkSession();
+  if (ok) loadProductsFromBackend();
+})();
 
 
 (function initSSE() {
@@ -5037,7 +5039,7 @@ loadProductsFromBackend();
   let isFirstMessage = true;
 
   function connect() {
-    es = new EventSource('/events/admin-orders');
+    es = new EventSource('/events/admin-orders?_token=' + encodeURIComponent(getToken()));
 
     es.onmessage = (event) => {
       try {
