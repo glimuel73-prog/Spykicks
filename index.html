@@ -132,7 +132,6 @@
   .pd-color-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #777; margin-left: 4px; }
   .no-results { display: none; grid-column: 1 / -1; padding: 80px 24px; text-align: center; font-family: Arial, sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #aaa; background: #fff; }
 
-  /* ── Grouped horizontal-scroll layout ── */
   .product-group { background: #fff; padding: 28px 0 32px; }
   .product-group-header { display: flex; align-items: center; justify-content: space-between; padding: 0 32px 18px; }
   .product-group-title { font-family: Arial, sans-serif; font-weight: 900; font-size: 22px; color: #111; letter-spacing: -.3px; }
@@ -141,7 +140,6 @@
   .product-group-scroll-wrap { position: relative; }
   .product-group-scroll { display: flex; gap: 0; overflow-x: auto; padding: 0 24px 16px; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
   .product-group-scroll::-webkit-scrollbar { display: none; }
-  /* Card styles inside horizontal scroll — matches reference exactly */
   .product-group-scroll .product-card {
     width: 210px; min-width: 210px; flex-shrink: 0;
     border-radius: 0; border: none;
@@ -151,7 +149,6 @@
     transition: background .15s;
   }
   .product-group-scroll .product-card:hover { box-shadow: none; transform: none; background: #fff; }
-  /* Heart icon: centered at top, above the image, not overlapping */
   .product-group-scroll .fav-btn {
     position: relative; top: auto; left: auto; right: auto; bottom: auto;
     transform: none; z-index: 1;
@@ -163,7 +160,6 @@
   .product-group-scroll .fav-btn:hover { background: none; border-color: transparent; color: #888; }
   .product-group-scroll .fav-btn.active { background: none; border-color: transparent; color: #e11d48; }
   .product-group-scroll .fav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.5; }
-  /* Image area — white bg, image contained */
   .product-group-scroll .product-img-placeholder,
   .product-group-scroll .img-card-wrap.product-img-placeholder {
     height: 170px; border-radius: 0; margin-bottom: 0;
@@ -173,7 +169,6 @@
   .product-group-scroll .img-card-wrap.product-img-placeholder img {
     object-fit: contain; padding: 0 12px; width: 100%; height: 100%;
   }
-  /* Text area below image */
   .product-group-scroll .product-card > .product-brand {
     font-size: 13px; font-weight: 700; color: #111; letter-spacing: 0;
     text-transform: none; margin: 16px 8px 2px; font-family: Arial, sans-serif;
@@ -184,7 +179,6 @@
   }
   .product-group-scroll .product-card > .product-footer { margin: 0 8px; }
   .product-group-scroll .product-price { font-size: 14px; font-weight: 700; color: #111; }
-  /* Hide non-essential elements in scroll cards */
   .product-group-scroll .product-view-btn { display: flex; margin: 6px 8px 0; width: calc(100% - 16px); font-size: 10px; padding: 7px 10px; }
   .product-group-scroll .product-tag { display: none; }
   .product-group-scroll .product-stock { display: none; }
@@ -201,7 +195,6 @@
   .scroll-arrow.right { right: 8px; }
   .product-group-scroll-wrap:hover .scroll-arrow { opacity: 1; pointer-events: all; }
   .scroll-arrow.hidden { opacity: 0 !important; pointer-events: none !important; }
-  /* flat grid used for single-group / filtered views */
   .product-grid-flat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 24px 32px; background: #fff; width: 100%; }
   #shopGrid.grouped-mode { background: #fff; display: block; }
   #shopGrid:not(.grouped-mode) { display: block; background: #fff; max-width: 100%; }
@@ -526,7 +519,6 @@
   .cart-checkout-btn:hover { background: #333; }
   .cart-checkout-btn:disabled { background: #aaa; cursor: not-allowed; }
 
-  /* Cart item checkbox */
   .cart-item-cb-wrap { display: flex; align-items: center; padding-top: 4px; flex-shrink: 0; }
   .cart-item-cb { width: 18px; height: 18px; accent-color: #000; cursor: pointer; flex-shrink: 0; }
   .cart-select-all-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 4px; border-bottom: 1px solid #e5e5e5; margin-bottom: 4px; }
