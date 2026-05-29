@@ -3,11 +3,75 @@ const cors = require("cors");
 const Database = require("better-sqlite3");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 
 const app = express();
-app.use(cors());
+
+// CORS: restrict to same origin in production
+app.use(cors({
+    origin: process.env.ALLOWED_ORIGIN || false,
+    credentials: true
+}));
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+// ── In-memory session store ───────────────────────────────────────────────────
+const sessions = new Map(); // token → { expires: timestamp }
+const SESSION_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
+
+function createServerSession() {
+    const token = crypto.randomBytes(32).toString("hex");
+    sessions.set(token, { expires: Date.now() + SESSION_DURATION_MS });
+    return token;
+}
+
+function isValidSession(token) {
+    if (!token) return false;
+    const s = sessions.get(token);
+    if (!s) return false;
+    if (Date.now() > s.expires) { sessions.delete(token); return false; }
+    return true;
+}
+
+function destroySession(token) {
+    sessions.delete(token);
+}
+
+// Purge expired sessions every 30 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [token, s] of sessions) {
+        if (now > s.expires) sessions.delete(token);
+    }
+}, 30 * 60 * 1000);
+
+// ── Brute-force protection ────────────────────────────────────────────────────
+const loginAttempts = new Map(); // ip → { count, lockedUntil }
+const MAX_ATTEMPTS = 10;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes server-side
+
+function checkBruteForce(ip) {
+    const a = loginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+    if (Date.now() < a.lockedUntil) return { locked: true, remaining: Math.ceil((a.lockedUntil - Date.now()) / 1000) };
+    return { locked: false, count: a.count };
+}
+
+function recordFailedAttempt(ip) {
+    const a = loginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+    a.count = (a.count || 0) + 1;
+    if (a.count >= MAX_ATTEMPTS) { a.lockedUntil = Date.now() + LOCKOUT_MS; a.count = 0; }
+    loginAttempts.set(ip, a);
+}
+
+function clearAttempts(ip) { loginAttempts.delete(ip); }
+
+// ── Auth middleware ───────────────────────────────────────────────────────────
+function requireAdmin(req, res, next) {
+    const token = req.headers["x-admin-token"] || req.query._token;
+    if (isValidSession(token)) return next();
+    return res.status(401).json({ success: false, error: "Unauthorized" });
+}
 
 const sseClients = new Set();
 const sseOrderClients = new Map();
@@ -75,7 +139,7 @@ const uploadsDir = path.join(DATA_DIR, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir));
 
-app.post("/admin/upload-image", (req, res) => {
+app.post("/admin/upload-image", requireAdmin, (req, res) => {
     const { base64, mimeType } = req.body;
     if (!base64 || !mimeType) return res.json({ success: false, error: "No image data" });
 
@@ -136,16 +200,52 @@ Object.entries(defaultSocials).forEach(([k, v]) => {
     if (!existing) db.prepare("INSERT INTO settings (key, value) VALUES (?, ?)").run("social_" + k, v);
 });
 
-app.get("/admin/password-hash", (req, res) => {
+// Login — rate-limited, server-side verification
+app.post("/admin/login", (req, res) => {
+    const ip = req.ip || req.connection.remoteAddress;
+    const bf = checkBruteForce(ip);
+    if (bf.locked) return res.status(429).json({ success: false, error: `Too many attempts. Try again in ${bf.remaining}s.` });
+
+    const { hash } = req.body;
+    if (!hash || typeof hash !== "string") return res.status(400).json({ success: false, error: "Missing credentials" });
+
+    const DEFAULT_HASH = "c1d381d6c4c20d3a2583c26a52ec289b83b124f2aae15e4c01a7d65d6b253c92";
     try {
         const row = db.prepare("SELECT value FROM settings WHERE key = 'admin_pw_hash'").get();
-        res.json({ hash: row ? row.value : null });
+        const storedHash = row ? row.value : DEFAULT_HASH;
+
+        // Constant-time comparison to prevent timing attacks
+        const a = Buffer.from(hash.padEnd(64, "0").slice(0, 64));
+        const b = Buffer.from(storedHash.padEnd(64, "0").slice(0, 64));
+        const match = a.length === b.length && crypto.timingSafeEqual(a, b) && hash === storedHash;
+
+        if (match) {
+            clearAttempts(ip);
+            const token = createServerSession();
+            return res.json({ success: true, token });
+        } else {
+            recordFailedAttempt(ip);
+            return res.status(401).json({ success: false, error: "Incorrect password" });
+        }
     } catch (err) {
-        res.json({ hash: null });
+        return res.status(500).json({ success: false, error: "Server error" });
     }
 });
 
-app.post("/admin/change-password", (req, res) => {
+// Logout — invalidate token
+app.post("/admin/logout", (req, res) => {
+    const token = req.headers["x-admin-token"];
+    if (token) destroySession(token);
+    res.json({ success: true });
+});
+
+// Session check — for the frontend to verify token is still valid
+app.get("/admin/session", (req, res) => {
+    const token = req.headers["x-admin-token"];
+    res.json({ valid: isValidSession(token) });
+});
+
+app.post("/admin/change-password", requireAdmin, (req, res) => {
     const { currentHash, newHash } = req.body;
     if (!currentHash || !newHash) return res.json({ success: false, error: "Missing fields" });
 
@@ -166,7 +266,7 @@ app.post("/admin/change-password", (req, res) => {
     }
 });
 
-app.get("/admin/social-links", (req, res) => {
+app.get("/admin/social-links", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'social_%'").all();
         const links = {};
@@ -177,7 +277,7 @@ app.get("/admin/social-links", (req, res) => {
     }
 });
 
-app.post("/admin/social-links", (req, res) => {
+app.post("/admin/social-links", requireAdmin, (req, res) => {
     const { links } = req.body;
     if (!links || typeof links !== "object") return res.json({ success: false });
     try {
@@ -192,7 +292,7 @@ app.post("/admin/social-links", (req, res) => {
     }
 });
 
-app.get("/admin/brand-taxonomy", (req, res) => {
+app.get("/admin/brand-taxonomy", requireAdmin, (req, res) => {
     try {
         const row = db.prepare("SELECT value FROM settings WHERE key = 'brand_taxonomy'").get();
         res.json({ taxonomy: row ? JSON.parse(row.value) : [] });
@@ -201,7 +301,7 @@ app.get("/admin/brand-taxonomy", (req, res) => {
     }
 });
 
-app.post("/admin/brand-taxonomy", (req, res) => {
+app.post("/admin/brand-taxonomy", requireAdmin, (req, res) => {
     const { taxonomy } = req.body;
     if (!Array.isArray(taxonomy)) return res.json({ success: false });
     try {
@@ -249,7 +349,7 @@ app.get("/products", (req, res) => {
     }
 });
 
-app.post("/admin/delete-product", (req, res) => {
+app.post("/admin/delete-product", requireAdmin, (req, res) => {
     const { id } = req.body;
     try {
         const row = db.prepare("SELECT data FROM products WHERE id = ?").get(id);
@@ -286,7 +386,7 @@ app.post("/apply-reseller", (req, res) => {
     }
 });
 
-app.post("/admin/approve-reseller", (req, res) => {
+app.post("/admin/approve-reseller", requireAdmin, (req, res) => {
     const { email } = req.body;
     try {
         db.prepare("UPDATE resellers SET approved = 1 WHERE email = ?").run(email);
@@ -296,7 +396,7 @@ app.post("/admin/approve-reseller", (req, res) => {
     }
 });
 
-app.post("/admin/reject-reseller", (req, res) => {
+app.post("/admin/reject-reseller", requireAdmin, (req, res) => {
     const { email } = req.body;
     try {
         db.prepare("DELETE FROM resellers WHERE email = ?").run(email);
@@ -335,7 +435,7 @@ app.get("/reseller-products", (req, res) => {
     }
 });
 
-app.get("/admin/resellers", (req, res) => {
+app.get("/admin/resellers", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT email, shopName, experience, social, approved FROM resellers ORDER BY id DESC").all();
         res.json({ resellers: rows || [] });
@@ -344,7 +444,7 @@ app.get("/admin/resellers", (req, res) => {
     }
 });
 
-app.get("/admin/reseller-count", (req, res) => {
+app.get("/admin/reseller-count", requireAdmin, (req, res) => {
     try {
         const row = db.prepare("SELECT COUNT(*) as count FROM resellers WHERE approved = 1").get();
         res.json({ count: row ? row.count : 0 });
@@ -353,7 +453,7 @@ app.get("/admin/reseller-count", (req, res) => {
     }
 });
 
-app.post("/admin/save-products", (req, res) => {
+app.post("/admin/save-products", requireAdmin, (req, res) => {
     const { products } = req.body;
     if (!Array.isArray(products)) return res.json({ success: false });
     try {
@@ -369,7 +469,7 @@ app.post("/admin/save-products", (req, res) => {
     }
 });
 
-app.post("/admin/save-product", (req, res) => {
+app.post("/admin/save-product", requireAdmin, (req, res) => {
     const { product } = req.body;
     if (!product || !product.id) return res.json({ success: false, error: "Missing product or id" });
     try {
@@ -381,7 +481,7 @@ app.post("/admin/save-product", (req, res) => {
     }
 });
 
-app.post("/admin/update-stock", (req, res) => {
+app.post("/admin/update-stock", requireAdmin, (req, res) => {
     const { productId, sizes, supplier, wholesalePrice } = req.body;
     if (!productId || !Array.isArray(sizes))
         return res.json({ success: false, error: "Missing productId or sizes" });
@@ -405,7 +505,7 @@ app.post("/admin/update-stock", (req, res) => {
     }
 });
 
-app.get("/admin/product/:id", (req, res) => {
+app.get("/admin/product/:id", requireAdmin, (req, res) => {
     try {
         const row = db.prepare("SELECT data FROM products WHERE id = ?").get(req.params.id);
         if (!row) return res.json({ product: null });
@@ -415,7 +515,7 @@ app.get("/admin/product/:id", (req, res) => {
     }
 });
 
-app.get("/admin/products", (req, res) => {
+app.get("/admin/products", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT data FROM products").all();
         const products = rows.map(r => JSON.parse(r.data));
@@ -425,7 +525,7 @@ app.get("/admin/products", (req, res) => {
     }
 });
 
-app.post("/admin/add-reseller", (req, res) => {
+app.post("/admin/add-reseller", requireAdmin, (req, res) => {
     const { email } = req.body;
     if (!email) return res.json({ success: false, error: "Email required" });
     try {
@@ -534,7 +634,7 @@ app.post("/reseller/cancel-order", (req, res) => {
     }
 });
 
-app.get("/admin/orders", (req, res) => {
+app.get("/admin/orders", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM orders ORDER BY createdAt DESC").all();
         const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
@@ -544,7 +644,7 @@ app.get("/admin/orders", (req, res) => {
     }
 });
 
-app.post("/admin/approve-order", (req, res) => {
+app.post("/admin/approve-order", requireAdmin, (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
 
@@ -592,7 +692,7 @@ app.post("/admin/approve-order", (req, res) => {
     }
 });
 
-app.post("/admin/reject-order", (req, res) => {
+app.post("/admin/reject-order", requireAdmin, (req, res) => {
     const { orderId, reason } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
@@ -608,7 +708,7 @@ app.post("/admin/reject-order", (req, res) => {
     }
 });
 
-app.post("/admin/reseller-order-status", (req, res) => {
+app.post("/admin/reseller-order-status", requireAdmin, (req, res) => {
     const { orderId, status } = req.body;
     if (!orderId || !status) return res.json({ success: false, error: "Missing fields" });
     const allowed = ['pending', 'approved', 'processing', 'shipped', 'delivered', 'rejected', 'cancelled'];
@@ -679,7 +779,7 @@ app.post("/admin/reseller-order-status", (req, res) => {
     }
 });
 
-app.post("/admin/cancel-reseller-order", (req, res) => {
+app.post("/admin/cancel-reseller-order", requireAdmin, (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
@@ -724,7 +824,7 @@ app.post("/admin/cancel-reseller-order", (req, res) => {
     }
 });
 
-app.post("/admin/delete-order", (req, res) => {
+app.post("/admin/delete-order", requireAdmin, (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
@@ -739,7 +839,7 @@ app.post("/admin/delete-order", (req, res) => {
     }
 });
 
-app.get("/admin/order-count", (req, res) => {
+app.get("/admin/order-count", requireAdmin, (req, res) => {
     try {
         const row = db.prepare("SELECT COUNT(*) as count FROM orders WHERE status = 'pending'").get();
         res.json({ count: row ? row.count : 0 });
@@ -799,7 +899,7 @@ app.post("/buyer/place-order", (req, res) => {
     }
 });
 
-app.get("/admin/buyer-orders", (req, res) => {
+app.get("/admin/buyer-orders", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM buyer_orders ORDER BY createdAt DESC").all();
         const orders = rows.map(r => ({ ...r, items: JSON.parse(r.items) }));
@@ -859,7 +959,7 @@ function restoreBuyerStock(items) {
     }
 }
 
-app.post("/admin/buyer-order-status", (req, res) => {
+app.post("/admin/buyer-order-status", requireAdmin, (req, res) => {
     const { orderId, status } = req.body;
     if (!orderId || !status) return res.json({ success: false, error: "Missing fields" });
     const allowed = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
@@ -893,7 +993,7 @@ app.post("/admin/buyer-order-status", (req, res) => {
     }
 });
 
-app.post("/admin/approve-buyer-order", (req, res) => {
+app.post("/admin/approve-buyer-order", requireAdmin, (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
@@ -917,7 +1017,7 @@ app.post("/admin/approve-buyer-order", (req, res) => {
     }
 });
 
-app.post("/admin/reject-buyer-order", (req, res) => {
+app.post("/admin/reject-buyer-order", requireAdmin, (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
@@ -963,7 +1063,7 @@ app.post("/buyer/cancel-order", (req, res) => {
     }
 });
 
-app.post("/admin/delete-buyer-order", (req, res) => {
+app.post("/admin/delete-buyer-order", requireAdmin, (req, res) => {
     const { orderId } = req.body;
     if (!orderId) return res.json({ success: false, error: "orderId required" });
     try {
@@ -975,7 +1075,7 @@ app.post("/admin/delete-buyer-order", (req, res) => {
     }
 });
 
-app.get("/admin/buyer-order-count", (req, res) => {
+app.get("/admin/buyer-order-count", requireAdmin, (req, res) => {
     try {
         const row = db.prepare("SELECT COUNT(*) as count FROM buyer_orders WHERE status = 'pending'").get();
         res.json({ count: row ? row.count : 0 });
@@ -1060,7 +1160,7 @@ app.get("/events/reseller-orders", (req, res) => {
     });
 });
 
-app.get("/events/admin-orders", (req, res) => {
+app.get("/events/admin-orders", requireAdmin, (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -1096,7 +1196,7 @@ db.exec(`
     )
 `);
 
-app.get("/admin/inventory", (req, res) => {
+app.get("/admin/inventory", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM inventory_items ORDER BY name ASC").all();
         res.json({ items: rows });
@@ -1105,7 +1205,7 @@ app.get("/admin/inventory", (req, res) => {
     }
 });
 
-app.post("/admin/inventory", (req, res) => {
+app.post("/admin/inventory", requireAdmin, (req, res) => {
     const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
     if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
     const id = "si" + Date.now() + Math.random().toString(36).slice(2, 6);
@@ -1123,7 +1223,7 @@ app.post("/admin/inventory", (req, res) => {
     }
 });
 
-app.put("/admin/inventory/:id", (req, res) => {
+app.put("/admin/inventory/:id", requireAdmin, (req, res) => {
     const { id } = req.params;
     const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
     if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
@@ -1141,7 +1241,7 @@ app.put("/admin/inventory/:id", (req, res) => {
     }
 });
 
-app.delete("/admin/inventory/:id", (req, res) => {
+app.delete("/admin/inventory/:id", requireAdmin, (req, res) => {
     const { id } = req.params;
     try {
         const result = db.prepare("DELETE FROM inventory_items WHERE id = ?").run(id);
