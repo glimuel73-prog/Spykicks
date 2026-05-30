@@ -2985,9 +2985,14 @@ async function loadResellerCount() {
 
 async function loadPendingOrderCount() {
   try {
-    const res = await fetch('/admin/order-count');
-    const data = await res.json();
-    const count = data.count || 0;
+    const token = getToken();
+    const [r1, r2] = await Promise.all([
+      fetch('/admin/order-count', { headers: { 'x-admin-token': token } }),
+      fetch('/admin/buyer-order-count', { headers: { 'x-admin-token': token } })
+    ]);
+    const d1 = await r1.json();
+    const d2 = await r2.json();
+    const count = (d1.count || 0) + (d2.count || 0);
     const el = document.getElementById('statPendingOrders');
     if (el) el.textContent = count;
     const badge = document.getElementById('pendingOrdersBadge');
