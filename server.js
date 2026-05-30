@@ -321,6 +321,44 @@ app.get("/brand-taxonomy", (req, res) => {
     }
 });
 
+// ── New Arrivals (featured list chosen by admin) ─────────────────────────────
+app.get("/new-arrivals", (req, res) => {
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'new_arrivals_ids'").get();
+        const ids = row ? JSON.parse(row.value) : [];
+        if (ids.length === 0) return res.json({ products: [] });
+        const allRows = db.prepare("SELECT data FROM products").all();
+        const allProducts = allRows.map(r => JSON.parse(r.data));
+        const products = ids
+            .map(id => allProducts.find(p => String(p.id) === String(id)))
+            .filter(p => p && (!p.status || p.status === "active") && (p.publishTo === "buyer" || p.publishTo === "both" || !p.publishTo));
+        res.json({ products });
+    } catch (err) {
+        res.json({ products: [] });
+    }
+});
+
+app.get("/admin/new-arrivals", requireAdmin, (req, res) => {
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'new_arrivals_ids'").get();
+        res.json({ ids: row ? JSON.parse(row.value) : [] });
+    } catch (err) {
+        res.json({ ids: [] });
+    }
+});
+
+app.post("/admin/new-arrivals", requireAdmin, (req, res) => {
+    const { ids } = req.body;
+    if (!Array.isArray(ids)) return res.json({ success: false, error: "ids must be an array" });
+    try {
+        db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('new_arrivals_ids', ?)").run(JSON.stringify(ids));
+        broadcastProducts();
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
 app.get("/social-links", (req, res) => {
     try {
         const rows = db.prepare("SELECT key, value FROM settings WHERE key LIKE 'social_%'").all();
