@@ -1290,6 +1290,14 @@ app.delete("/admin/inventory/:id", requireAdmin, (req, res) => {
     }
 });
 
+// ── Clean URLs (no .html extension) ──────────────────────────────────────────
+const htmlPages = ["index", "admin", "vip-login", "reseller-products"];
+htmlPages.forEach(page => {
+    app.get(`/${page}`, (req, res) => {
+        res.sendFile(path.join(__dirname, `${page}.html`));
+    });
+});
+
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
 });
