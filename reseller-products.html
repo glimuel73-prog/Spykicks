@@ -1073,6 +1073,13 @@
 
     const useGrouped = !showingFavs && currentCat === 'all' && activeGender === 'all' && activeBrand === 'all' && activeLine === 'all' && activeModel === 'all' && !query && activeSort === 'default';
 
+    // Hide New Arrivals section when any filter is active
+    const naSection = document.getElementById('newArrivalsSection');
+    if (naSection) {
+      if (useGrouped) naSection.classList.add('visible');
+      else naSection.classList.remove('visible');
+    }
+
     grid.innerHTML = '';
 
     if (count === 0) return;
@@ -2112,10 +2119,7 @@
         <div class="order-card">
           <div class="order-card-header">
             <div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div class="order-id">#${order.id.replace("ORD_","")}</div>
-                <button onclick="event.stopPropagation();navigator.clipboard.writeText('#${order.id.replace('ORD_','')}').then(()=>{this.textContent='✓';this.style.color='#2ecc71';setTimeout(()=>{this.textContent='⎘';this.style.color='';},1500)})" title="Copy order ID" style="background:none;border:none;cursor:pointer;font-size:13px;color:#aaa;padding:0 2px;line-height:1;transition:color .15s;">⎘</button>
-              </div>
+              <div class="order-id">#${order.id.replace("ORD_","")}</div>
               <div class="order-date">${dateStr}</div>
             </div>
             <span class="order-status-pill ${meta.cls}">${meta.label}</span>
