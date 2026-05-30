@@ -2839,10 +2839,20 @@ function renderNewArrivals(products) {
   }
   section.classList.add('visible');
   products.forEach(p => {
-    const div = document.createElement('div');
-    div.innerHTML = buildProductCard(p);
-    const card = div.firstElementChild;
-    if (card) scroll.appendChild(card);
+    const img = (p.images && p.images[0])
+      ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">`
+      : `<svg viewBox="0 0 80 40" fill="none" style="opacity:.15;width:80px;height:80px;"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#999"/></svg>`;
+    const price = p.price ? '₱' + Number(p.price).toLocaleString() : '';
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.onclick = () => openPD(p.id);
+    card.innerHTML = `
+      <div class="product-img-placeholder">${img}</div>
+      <div class="product-brand">${p.brand || ''}</div>
+      <div class="product-name">${p.name || ''}</div>
+      <div class="product-price" style="margin-top:auto;padding-top:10px;">${price}</div>
+    `;
+    scroll.appendChild(card);
   });
 }
 
