@@ -1615,6 +1615,10 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
     </div>
 
     <div class="nav-section-label" style="margin-top:16px;">Management</div>
+    <div class="nav-item" onclick="showPage('new-arrivals', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      New Arrivals
+    </div>
     <div class="nav-item" onclick="showPage('resellers', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
       Resellers
@@ -1829,6 +1833,47 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       <p>No products found</p>
     </div>
     <div class="card-table" id="productsCardTable"></div>
+  </div>
+
+  <!-- ── New Arrivals Management Panel ── -->
+  <div id="page-new-arrivals" class="page">
+    <div class="section-hdr">
+      <h2>New Arrivals</h2>
+      <div class="filter-bar">
+        <span style="font-family:var(--font);font-size:12px;color:var(--text-muted);">Select which products appear in the New Arrivals section on the shop.</span>
+      </div>
+    </div>
+
+    <!-- Search + controls -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <input id="naSearch" type="text" placeholder="Search products…" oninput="naFilterProducts()" style="flex:1;min-width:180px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:13px;padding:9px 14px;border-radius:6px;outline:none;">
+      <span id="naSelectedCount" style="font-family:var(--font);font-size:12px;color:var(--text-muted);white-space:nowrap;">0 selected</span>
+      <button onclick="naSaveList()" style="background:var(--accent);color:#fff;border:none;font-family:var(--font);font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:10px 22px;border-radius:6px;cursor:pointer;transition:background .2s;">Save List</button>
+    </div>
+
+    <!-- Two-column layout: available | selected -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+
+      <!-- Available products -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);">All Products</span>
+          <span id="naAvailableCount" style="font-family:var(--font);font-size:11px;color:var(--text-dim);">0 products</span>
+        </div>
+        <div id="naAvailableList" style="max-height:520px;overflow-y:auto;padding:8px 0;"></div>
+      </div>
+
+      <!-- Selected new arrivals -->
+      <div style="background:var(--surface);border:2px solid var(--accent);border-radius:8px;overflow:hidden;">
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text);">✦ New Arrivals List</span>
+          <button onclick="naClearAll()" style="background:none;border:none;font-family:var(--font);font-size:11px;color:var(--red);cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-weight:700;padding:2px 8px;">Clear All</button>
+        </div>
+        <div id="naSelectedList" style="max-height:520px;overflow-y:auto;padding:8px 0;">
+          <div style="padding:40px 24px;text-align:center;font-family:var(--font);font-size:12px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;" id="naEmptyMsg">No products selected yet.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="page-resellers" class="page">
@@ -2904,6 +2949,7 @@ function showPage(page, el) {
   if (page === 'settings') { loadSocialLinks(); }
   if (page === 'orders') loadOrders();
   if (page === 'inventory') renderInventoryTable();
+  if (page === 'new-arrivals') loadNewArrivalsPage();
 }
 
 
@@ -5290,6 +5336,126 @@ function exportInventoryCSV() {
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   a.download = 'inventory_' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
+}
+
+// ── New Arrivals Management ───────────────────────────────────────────────────
+let _naAllProducts = [];
+let _naSelectedIds = new Set();
+
+async function loadNewArrivalsPage() {
+  // Load all products and current selected IDs in parallel
+  try {
+    const token = getToken();
+    const [prodRes, idsRes] = await Promise.all([
+      fetch('/admin/products', { headers: { 'x-admin-token': token } }),
+      fetch('/admin/new-arrivals', { headers: { 'x-admin-token': token } })
+    ]);
+    const prodData = await prodRes.json();
+    const idsData = await idsRes.json();
+    _naAllProducts = (prodData.products || []).filter(p => !p.status || p.status === 'active');
+    _naSelectedIds = new Set((idsData.ids || []).map(String));
+  } catch(e) {
+    _naAllProducts = [...products].filter(p => !p.status || p.status === 'active');
+    _naSelectedIds = new Set();
+  }
+  naRender();
+}
+
+function naFilterProducts() {
+  naRender();
+}
+
+function naRender() {
+  const query = (document.getElementById('naSearch')?.value || '').toLowerCase().trim();
+  const avail = document.getElementById('naAvailableList');
+  const sel = document.getElementById('naSelectedList');
+  const emptyMsg = document.getElementById('naEmptyMsg');
+  if (!avail || !sel) return;
+
+  const filtered = _naAllProducts.filter(p =>
+    !query || (p.name||'').toLowerCase().includes(query) || (p.brand||'').toLowerCase().includes(query)
+  );
+
+  document.getElementById('naAvailableCount').textContent = filtered.length + ' product' + (filtered.length !== 1 ? 's' : '');
+  document.getElementById('naSelectedCount').textContent = _naSelectedIds.size + ' selected';
+
+  // Render available list
+  avail.innerHTML = '';
+  filtered.forEach(p => {
+    const isSelected = _naSelectedIds.has(String(p.id));
+    const img = (p.images && p.images[0]) ? `<img src="${p.images[0]}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#f5f5f5;flex-shrink:0;">` : `<div style="width:44px;height:44px;background:var(--surface3);border-radius:4px;border:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--border2);' + (isSelected ? 'background:#f0fdf4;' : '');
+    row.onmouseenter = () => { if (!isSelected) row.style.background = 'var(--surface2)'; };
+    row.onmouseleave = () => { row.style.background = isSelected ? '#f0fdf4' : ''; };
+    row.innerHTML = img + `
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.brand || ''} ${p.name || ''}</div>
+        <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);">₱${Number(p.price||0).toLocaleString()}</div>
+      </div>
+      <button style="background:${isSelected ? 'var(--accent)' : 'none'};border:1.5px solid ${isSelected ? 'var(--accent)' : 'var(--border2)'};color:${isSelected ? '#fff' : 'var(--text-muted)'};width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;flex-shrink:0;" title="${isSelected ? 'Remove from New Arrivals' : 'Add to New Arrivals'}">${isSelected ? '✓' : '+'}</button>
+    `;
+    row.onclick = () => naToggle(p.id);
+    avail.appendChild(row);
+  });
+
+  // Render selected list
+  const selectedProds = [..._naSelectedIds]
+    .map(id => _naAllProducts.find(p => String(p.id) === id))
+    .filter(Boolean);
+
+  if (selectedProds.length === 0) {
+    sel.innerHTML = '<div id="naEmptyMsg" style="padding:40px 24px;text-align:center;font-family:var(--font);font-size:12px;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;">No products selected yet.</div>';
+  } else {
+    sel.innerHTML = '';
+    selectedProds.forEach((p, i) => {
+      const img = (p.images && p.images[0]) ? `<img src="${p.images[0]}" style="width:44px;height:44px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#f5f5f5;flex-shrink:0;">` : `<div style="width:44px;height:44px;background:var(--surface3);border-radius:4px;border:1px solid var(--border);flex-shrink:0;"></div>`;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border2);background:#fff;';
+      row.innerHTML = `<span style="font-family:var(--font);font-size:10px;color:var(--text-dim);width:16px;flex-shrink:0;text-align:center;">${i+1}</span>` + img + `
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:var(--font);font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.brand || ''} ${p.name || ''}</div>
+          <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);">₱${Number(p.price||0).toLocaleString()}</div>
+        </div>
+        <button onclick="naRemove('${p.id}')" style="background:none;border:1.5px solid var(--border2);color:var(--red);width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:all .15s;" title="Remove">×</button>
+      `;
+      sel.appendChild(row);
+    });
+  }
+}
+
+function naToggle(id) {
+  const sid = String(id);
+  if (_naSelectedIds.has(sid)) _naSelectedIds.delete(sid);
+  else _naSelectedIds.add(sid);
+  naRender();
+}
+
+function naRemove(id) {
+  _naSelectedIds.delete(String(id));
+  naRender();
+}
+
+function naClearAll() {
+  if (!confirm('Remove all products from the New Arrivals list?')) return;
+  _naSelectedIds.clear();
+  naRender();
+}
+
+async function naSaveList() {
+  const token = getToken();
+  try {
+    const res = await fetch('/admin/new-arrivals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+      body: JSON.stringify({ ids: [..._naSelectedIds] })
+    });
+    const data = await res.json();
+    if (data.success) showToast('New Arrivals list saved! (' + _naSelectedIds.size + ' products)');
+    else showToast('Error saving: ' + (data.error || 'unknown'), true);
+  } catch(e) {
+    showToast('Network error saving New Arrivals', true);
+  }
 }
 
 </script>
