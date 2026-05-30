@@ -1780,9 +1780,9 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <div class="quick-action-label">Inventory</div>
       </div>
       <div class="quick-action-item" onclick="showPage('orders', document.getElementById('navOrders'))" style="position:relative;">
-        <div class="quick-action-icon">
+        <div class="quick-action-icon" style="position:relative;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-          <span id="quickOrdersBadge" style="display:none;position:absolute;top:-6px;right:-6px;background:#ff3b30;color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;">0</span>
+          <span id="quickOrdersBadge" style="display:none;position:absolute;top:-10px;right:-10px;background:#ff3b30;color:#fff;font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:9px;justify-content:center;align-items:center;padding:0 5px;z-index:10;line-height:18px;text-align:center;box-shadow:0 0 0 2px #fff;">0</span>
         </div>
         <div class="quick-action-label">Orders</div>
       </div>
@@ -2992,6 +2992,8 @@ async function loadPendingOrderCount() {
     if (el) el.textContent = count;
     const badge = document.getElementById('pendingOrdersBadge');
     if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'inline-flex' : 'none'; }
+    const qb = document.getElementById('quickOrdersBadge');
+    if (qb) { qb.textContent = count; qb.style.display = count > 0 ? 'flex' : 'none'; }
   } catch { }
 }
 
@@ -4361,10 +4363,8 @@ async function loadOrders() {
       badge.textContent = totalPending;
       badge.style.display = totalPending > 0 ? 'inline-flex' : 'none';
     }
-    const qb2 = document.getElementById('quickOrdersBadge');
-    if (qb2) { qb2.textContent = totalPending; qb2.style.display = totalPending > 0 ? 'inline-flex' : 'none'; }
     const qb = document.getElementById('quickOrdersBadge');
-    if (qb) { qb.textContent = totalPending; qb.style.display = totalPending > 0 ? 'inline-flex' : 'none'; }
+    if (qb) { qb.textContent = totalPending; qb.style.display = totalPending > 0 ? 'flex' : 'none'; }
     const statPending = document.getElementById('statPendingOrders');
     if (statPending) statPending.textContent = totalPending;
 
@@ -5135,7 +5135,7 @@ renderSizeGrid();
           const badge = document.getElementById('pendingOrdersBadge');
           if (badge) { badge.textContent = totalPending; badge.style.display = totalPending > 0 ? 'inline-flex' : 'none'; }
           const qb = document.getElementById('quickOrdersBadge');
-          if (qb) { qb.textContent = totalPending; qb.style.display = totalPending > 0 ? 'inline-flex' : 'none'; }
+          if (qb) { qb.textContent = totalPending; qb.style.display = totalPending > 0 ? 'flex' : 'none'; }
 
           const statPending = document.getElementById('statPendingOrders');
           if (statPending) statPending.textContent = totalPending;
