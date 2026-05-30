@@ -484,6 +484,19 @@
     .product-img-placeholder { height: auto; aspect-ratio: 1/1; }
     .pd-specs { grid-template-columns: 1fr; }
   }
+
+  /* ── New Arrivals Section ── */
+  #newArrivalsSection { background: #fff; border-bottom: 1px solid #efefef; display: none; padding-bottom: 28px; }
+  #newArrivalsSection.visible { display: block; }
+  .na-header { display: flex; align-items: center; justify-content: space-between; padding: 28px 40px 16px; }
+  .na-eyebrow { font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 6px; }
+  .na-title { font-family: Arial, sans-serif; font-weight: 900; font-size: 24px; color: #111; letter-spacing: -.3px; display: flex; align-items: center; gap: 10px; }
+  .na-title-badge { background: #111; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; vertical-align: middle; }
+  #naResellerGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0; background: #fff; padding: 0 40px; }
+  @media (max-width: 768px) {
+    #naResellerGrid { padding: 0 12px; grid-template-columns: repeat(2, 1fr) !important; }
+    .na-header { padding: 20px 16px 12px; }
+  }
 </style>
 </head>
 <body>
@@ -587,6 +600,17 @@
       <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#ccc;flex-shrink:0;">Model</span>
       <div id="modelChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
+  </div>
+
+  <!-- ── New Arrivals Feature Section ── -->
+  <div id="newArrivalsSection">
+    <div class="na-header">
+      <div>
+        <div class="na-eyebrow">Just In</div>
+        <div class="na-title">New Arrivals <span class="na-title-badge">✦ New</span></div>
+      </div>
+    </div>
+    <div id="naResellerGrid"></div>
   </div>
 
   <div class="product-grid" id="productGrid"></div>
@@ -1323,6 +1347,7 @@
 
       updateFavCount();
       applyView();
+      loadResellerNewArrivals();
 
     } catch (err) {
       document.getElementById("loading").innerHTML = `
@@ -2509,6 +2534,71 @@
     el._t = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; }, 3000);
   }
 
+
+// ── New Arrivals Section ─────────────────────────────────────────────────────
+  window._naRShown = 12;
+  window._naRProducts = [];
+
+  window.naRRenderCards = function() {
+    const grid = document.getElementById('naResellerGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const visible = window._naRProducts.slice(0, window._naRShown);
+    visible.forEach(p => {
+      const img = (p.images && p.images[0])
+        ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">`
+        : `<svg viewBox="0 0 80 40" fill="none" style="opacity:.15;width:80px;height:80px;"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#999"/></svg>`;
+      const displayPrice = getDisplayPrice ? getDisplayPrice(p) : (p.price || 0);
+      const price = '₱' + Number(displayPrice).toLocaleString();
+      const wholesale = p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : '';
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.onclick = () => openPD(p, String(p.id), p.category || '', '', displayPrice);
+      card.innerHTML = `
+        <div class="product-img-placeholder">${img}</div>
+        <div class="product-brand">${p.brand || ''}</div>
+        <div class="product-name">${p.name || ''}</div>
+        ${wholesale}
+        <div class="product-price" style="margin:10px 16px 0;">${price}</div>
+        <button class="product-view-btn" onclick="event.stopPropagation();openPD(window._naRProducts.find(x=>String(x.id)==='${p.id}'),String('${p.id}'),'${p.category||''}','',${displayPrice})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          View Details
+        </button>
+      `;
+      grid.appendChild(card);
+    });
+    const remaining = window._naRProducts.length - window._naRShown;
+    if (remaining > 0) {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:16px 0 8px;';
+      btn.innerHTML = `<button onclick="window._naRShown+=12;window.naRRenderCards();" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:12px 36px;cursor:pointer;border-radius:20px;transition:all .2s;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">View More (${remaining} remaining)</button>`;
+      grid.appendChild(btn);
+    } else if (window._naRShown > 12) {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:16px 0 8px;';
+      btn.innerHTML = `<button onclick="window._naRShown=12;window.naRRenderCards();document.getElementById('newArrivalsSection').scrollIntoView({behavior:'smooth'});" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:12px 36px;cursor:pointer;border-radius:20px;transition:all .2s;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">Show Less</button>`;
+      grid.appendChild(btn);
+    }
+  };
+
+  async function loadResellerNewArrivals() {
+    try {
+      const res = await fetch('/new-arrivals');
+      const data = await res.json();
+      const section = document.getElementById('newArrivalsSection');
+      if (!data.products || data.products.length === 0) { section.classList.remove('visible'); return; }
+      // Filter to only products visible to resellers
+      const resellerProds = (data.products || []).filter(p => {
+        const pt = p.publishTo || 'both';
+        return pt === 'reseller' || pt === 'both';
+      });
+      if (resellerProds.length === 0) { section.classList.remove('visible'); return; }
+      window._naRProducts = resellerProds;
+      window._naRShown = 12;
+      section.classList.add('visible');
+      window.naRRenderCards();
+    } catch(e) {}
+  }
 
 </script>
 </body>
