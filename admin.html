@@ -5331,38 +5331,32 @@ function exportInventoryCSV() {
 async function naToggleSingle(id) {
   const token = getToken();
   const sid = String(id);
-  // Fetch current list
-  let currentIds = [];
-  try {
-    const res = await fetch('/admin/new-arrivals', { headers: { 'x-admin-token': token } });
-    const data = await res.json();
-    currentIds = (data.ids || []).map(String);
-  } catch(e) {
-    currentIds = products.filter(p => p.newArrival).map(p => String(p.id));
-  }
 
-  const isNew = currentIds.includes(sid);
-  let updatedIds;
-  if (isNew) {
-    updatedIds = currentIds.filter(i => i !== sid);
-  } else {
-    updatedIds = [...currentIds, sid];
-  }
+  // Read state directly from local products array — no server fetch needed
+  const prod = products.find(p => String(p.id) === sid);
+  if (!prod) return;
 
-  // Save updated list
+  const isNew = !!prod.newArrival;
+
+  // Flip local state and re-render immediately (optimistic update)
+  prod.newArrival = !isNew;
+  renderProductsTable();
+
+  // Build updated list from local state and persist to server
+  const updatedIds = products.filter(p => p.newArrival).map(p => String(p.id));
   try {
     await fetch('/admin/new-arrivals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
       body: JSON.stringify({ ids: updatedIds })
     });
-  } catch(e) { /* fall through to local update */ }
-
-  // Update local product state and re-render
-  const prod = products.find(p => String(p.id) === sid);
-  if (prod) prod.newArrival = !isNew;
-  renderProductsTable();
-  showToast(isNew ? 'Removed from New Arrivals' : 'Marked as New Arrival ✦');
+    showToast(isNew ? 'Removed from New Arrivals' : 'Marked as New Arrival ✦');
+  } catch(e) {
+    // Revert on failure
+    prod.newArrival = isNew;
+    renderProductsTable();
+    showToast('Failed to save — please try again', true);
+  }
 }
 
 // ── New Arrivals Management ───────────────────────────────────────────────────
