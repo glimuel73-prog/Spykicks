@@ -473,12 +473,6 @@ app.get("/reseller-products", (req, res) => {
     }
 });
 
-// Alias for clean URL
-app.get("/reseller", (req, res, next) => {
-    if (req.query.email) return next(); // let /reseller-products handler serve data
-    res.sendFile(path.join(__dirname, "reseller-products.html"));
-});
-
 app.get("/admin/resellers", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT email, shopName, experience, social, approved FROM resellers ORDER BY id DESC").all();
@@ -1299,6 +1293,30 @@ app.delete("/admin/inventory/:id", requireAdmin, (req, res) => {
 // ── Clean URLs ────────────────────────────────────────────────────────────────
 app.get("/buyer",          (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 app.get("/reseller-login", (req, res) => res.sendFile(path.join(__dirname, "vip-login.html")));
+app.get("/admin",          (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+
+// /reseller: serve data when ?email= is present, serve page otherwise
+app.get("/reseller", (req, res) => {
+    if (req.query.email) {
+        const email = req.query.email;
+        try {
+            const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
+            if (!row) return res.json({ authorized: false });
+            const rows = db.prepare("SELECT data FROM products").all();
+            const products = rows
+                .map(r => JSON.parse(r.data))
+                .filter(p => {
+                    const active = !p.status || p.status === "active";
+                    const pt = p.publishTo || "both";
+                    return active && (pt === "reseller" || pt === "both");
+                });
+            return res.json({ authorized: true, products });
+        } catch (err) {
+            return res.json({ authorized: false });
+        }
+    }
+    res.sendFile(path.join(__dirname, "reseller-products.html"));
+});
 
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
