@@ -5034,6 +5034,7 @@ renderSizeGrid();
             incoming.forEach(p => {
               const existing = products.find(x => x.id === p.id);
               if (existing && existing.invStock) p.invStock = existing.invStock;
+              if (existing && existing.newArrival !== undefined) p.newArrival = existing.newArrival;
             });
             products = incoming;
             renderProductsTable();
