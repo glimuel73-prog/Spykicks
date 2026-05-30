@@ -2618,26 +2618,20 @@ function lookupOrders() {
   emptyEl.style.display = '';
   listEl.innerHTML = '';
 
-  const sectionTitle = document.querySelector('#orders .section-title');
-  if (sectionTitle && !document.getElementById('ordersLiveIndicator')) {
-    const ind = document.createElement('span');
-    ind.id = 'ordersLiveIndicator';
-    ind.style.cssText = 'font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-left:12px;vertical-align:middle;display:inline-flex;align-items:center;';
-    sectionTitle.appendChild(ind);
-  }
+
 
   function connect() {
     const es = new EventSource('/events/orders?contact=' + encodeURIComponent(contact));
     _ordersSSE = es;
     _ordersSSEContact = contact;
 
-    es.onopen = () => _setOrdersLiveIndicator('connected');
+    es.onopen = () => {};
 
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
         if (msg.type === 'orders') {
-          _setOrdersLiveIndicator('connected');
+          // live indicator removed
           renderOrdersList(msg.orders, contact);
           document.querySelectorAll('.order-history-card').forEach(card => {
             card.style.transition = 'box-shadow 0.4s';
@@ -2649,7 +2643,7 @@ function lookupOrders() {
     };
 
     es.onerror = () => {
-      _setOrdersLiveIndicator('reconnecting');
+      // live indicator removed
       es.close();
       _ordersSSE = null;
       setTimeout(() => {
