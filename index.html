@@ -2873,6 +2873,11 @@ function renderNewArrivals(products) {
       btn.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:16px 0 8px;';
       btn.innerHTML = `<button onclick="window._naShown+=12;window.naRenderCards();" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:12px 36px;cursor:pointer;border-radius:20px;transition:all .2s;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">View More (${remaining} remaining)</button>`;
       scroll.appendChild(btn);
+    } else if (window._naShown > 12) {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:16px 0 8px;';
+      btn.innerHTML = `<button onclick="window._naShown=12;window.naRenderCards();document.getElementById('newArrivalsSection').scrollIntoView({behavior:'smooth'});" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:12px 36px;cursor:pointer;border-radius:20px;transition:all .2s;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">Show Less</button>`;
+      scroll.appendChild(btn);
     }
   };
   window.naRenderCards();
