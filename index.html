@@ -2838,26 +2838,42 @@ function renderNewArrivals(products) {
     return;
   }
   section.classList.add('visible');
-  products.forEach(p => {
-    const img = (p.images && p.images[0])
-      ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">`
-      : `<svg viewBox="0 0 80 40" fill="none" style="opacity:.15;width:80px;height:80px;"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#999"/></svg>`;
-    const price = p.price ? '₱' + Number(p.price).toLocaleString() : '';
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.onclick = () => openPD(p.id);
-    card.innerHTML = `
-      <div class="product-img-placeholder">${img}</div>
-      <div class="product-brand">${p.brand || ''}</div>
-      <div class="product-name">${p.name || ''}</div>
-      <div class="product-price" style="margin-top:auto;padding-top:10px;">${price}</div>
-      <button class="product-view-btn" onclick="event.stopPropagation();openPD('${p.id}')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        View Details
-      </button>
-    `;
-    scroll.appendChild(card);
-  });
+  let naShown = 12;
+  function naRenderCards() {
+    scroll.innerHTML = '';
+    const visible = products.slice(0, naShown);
+    visible.forEach(p => {
+      const img = (p.images && p.images[0])
+        ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">`
+        : `<svg viewBox="0 0 80 40" fill="none" style="opacity:.15;width:80px;height:80px;"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#999"/></svg>`;
+      const price = p.price ? '₱' + Number(p.price).toLocaleString() : '';
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.onclick = () => openPD(p.id);
+      card.innerHTML = `
+        <div class="product-img-placeholder">${img}</div>
+        <div class="product-brand">${p.brand || ''}</div>
+        <div class="product-name">${p.name || ''}</div>
+        <div class="product-price" style="margin-top:auto;padding-top:10px;">${price}</div>
+        <button class="product-view-btn" onclick="event.stopPropagation();openPD('${p.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          View Details
+        </button>
+      `;
+      scroll.appendChild(card);
+    });
+    // View More button
+    const existing = document.getElementById('naViewMoreBtn');
+    if (existing) existing.remove();
+    if (naShown < products.length) {
+      const btn = document.createElement('div');
+      btn.id = 'naViewMoreBtn';
+      btn.style.cssText = 'grid-column:1/-1;display:flex;justify-content:center;padding:16px 0 8px;';
+      btn.innerHTML = `<button onclick="naShown+=12;naRenderCards();" style="background:none;border:1px solid #ccc;color:#666;font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:12px 36px;cursor:pointer;border-radius:20px;transition:all .2s;" onmouseover="this.style.borderColor='#000';this.style.color='#000'" onmouseout="this.style.borderColor='#ccc';this.style.color='#666'">View More (${products.length - naShown} remaining)</button>`;
+      scroll.appendChild(btn);
+    }
+  }
+  naRenderCards();
 }
 
 async function loadNewArrivals() {
