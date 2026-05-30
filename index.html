@@ -2823,7 +2823,7 @@ function startLiveUpdates() {
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
-        if (msg.type === 'products') applyLiveProducts(msg.products);
+        if (msg.type === 'products') { applyLiveProducts(msg.products); loadNewArrivals(); }
       } catch (err) {}
     };
     es.onerror = () => { es.close(); setTimeout(connect, 5000); };
