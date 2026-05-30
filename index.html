@@ -26,7 +26,7 @@
 
   .ticker { background: var(--black); border-bottom: 1px solid var(--border); overflow: hidden; white-space: nowrap; padding: 7px 0; }
   .ticker-inner { display: inline-block; animation: ticker 22s linear infinite; }
-  .ticker span { font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-muted); margin: 0 36px; }
+  .ticker span { font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #fff; margin: 0 36px; }
   @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
   .header { background: var(--white); border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
@@ -74,10 +74,13 @@
   #newArrivalsSection { background: #fff; border-bottom: 1px solid #efefef; display: none; padding-bottom: 28px; }
   #newArrivalsSection.visible { display: block; }
   .na-header { display: flex; align-items: center; justify-content: space-between; padding: 28px 40px 16px; }
-  .na-eyebrow { font-family: Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: #999; margin-bottom: 6px; }
   .na-title { font-family: Arial, sans-serif; font-weight: 900; font-size: 24px; color: #111; letter-spacing: -.3px; display: flex; align-items: center; gap: 10px; }
   .na-title-badge { background: #111; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; vertical-align: middle; }
   #newArrivalsScroll.product-grid { padding: 0 40px; }
+  @media (max-width: 768px) {
+    #newArrivalsScroll.product-grid { padding: 0 12px; grid-template-columns: repeat(2, 1fr) !important; }
+    .na-header { padding: 20px 16px 12px; }
+  }
 
   .section-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px 18px; max-width: 100%; margin: 0 auto; flex-wrap: wrap; gap: 12px; background: #f9f9f9; }
   .section-title { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #111; }
@@ -741,7 +744,6 @@
   <div id="newArrivalsSection">
     <div class="na-header">
       <div>
-        <div class="na-eyebrow">Just In</div>
         <div class="na-title">New Arrivals <span class="na-title-badge">✦ New</span></div>
       </div>
     </div>
