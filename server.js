@@ -473,6 +473,12 @@ app.get("/reseller-products", (req, res) => {
     }
 });
 
+// Alias for clean URL
+app.get("/reseller", (req, res, next) => {
+    if (req.query.email) return next(); // let /reseller-products handler serve data
+    res.sendFile(path.join(__dirname, "reseller-products.html"));
+});
+
 app.get("/admin/resellers", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT email, shopName, experience, social, approved FROM resellers ORDER BY id DESC").all();
@@ -1290,13 +1296,9 @@ app.delete("/admin/inventory/:id", requireAdmin, (req, res) => {
     }
 });
 
-// ── Clean URLs (no .html extension) ──────────────────────────────────────────
-const htmlPages = ["index", "admin", "vip-login", "reseller-products"];
-htmlPages.forEach(page => {
-    app.get(`/${page}`, (req, res) => {
-        res.sendFile(path.join(__dirname, `${page}.html`));
-    });
-});
+// ── Clean URLs ────────────────────────────────────────────────────────────────
+app.get("/buyer",          (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+app.get("/reseller-login", (req, res) => res.sendFile(path.join(__dirname, "vip-login.html")));
 
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
