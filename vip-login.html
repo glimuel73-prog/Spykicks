@@ -263,7 +263,7 @@
 <body>
 
 <div class="left-panel">
-  <a href="https://brochure-availablestocks.up.railway.app/index" class="logo">CATALOG & AVAILABLE STOCKS</a>
+  <a href="https://brochure-availablestocks.up.railway.app/buyer" class="logo">CATALOG & AVAILABLE STOCKS</a>
 
   <div class="left-content">
     <div class="eyebrow">Reseller Access</div>
@@ -284,18 +284,18 @@
   </div>
   <button class="btn-primary" id="loginBtn" onclick="login()">Access Dashboard</button>
 
-  <a href="https://brochure-availablestocks.up.railway.app/index" class="back-link">← Back to store</a>
+  <a href="https://brochure-availablestocks.up.railway.app/buyer" class="back-link">← Back to store</a>
 </div>
 
 <script>
 if (window.location.protocol === 'file:') {
-  window.location.replace('https://brochure-availablestocks.up.railway.app/vip-login' + window.location.search);
+  window.location.replace('https://brochure-availablestocks.up.railway.app/reseller-login' + window.location.search);
 }
 
 window.onload = async () => {
   const saved = localStorage.getItem("resellerEmail");
   if (saved) {
-    window.location.href = "https://brochure-availablestocks.up.railway.app/reseller-products";
+    window.location.href = "https://brochure-availablestocks.up.railway.app/reseller";
     return;
   }
 
@@ -330,7 +330,7 @@ async function login() {
 
     if (data.verified) {
       localStorage.setItem("resellerEmail", email);
-      window.location.href = "https://brochure-availablestocks.up.railway.app/reseller-products";
+      window.location.href = "https://brochure-availablestocks.up.railway.app/reseller";
     } else {
       showError("This email is not approved as a reseller. Please apply first or contact admin.");
       btn.disabled = false;
