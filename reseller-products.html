@@ -549,7 +549,7 @@
 <div id="unauthorized" class="state-box">
   <h2 style="color:var(--red);">Access<span style="display:block;">Denied.</span></h2>
   <p>You are not an approved reseller.</p>
-  <a href="https://brochure-availablestocks.up.railway.app/index.html">← Back to Store</a>
+  <a href="https://brochure-availablestocks.up.railway.app/index">← Back to Store</a>
 </div>
 
 <div id="mainContent">
@@ -795,7 +795,7 @@
 
 <script>
   const email = localStorage.getItem("resellerEmail");
-  if (!email) window.location.href = "https://brochure-availablestocks.up.railway.app/vip-login.html";
+  if (!email) window.location.href = "https://brochure-availablestocks.up.railway.app/vip-login";
 
   const COLOR_NAME_MAP_R = {
     red:'#e53935',crimson:'#c62828',rose:'#e91e63',pink:'#f48fb1',
@@ -1736,7 +1736,7 @@
 
   function logout() {
     localStorage.removeItem("resellerEmail");
-    window.location.href = "https://brochure-availablestocks.up.railway.app/index.html";
+    window.location.href = "https://brochure-availablestocks.up.railway.app/index";
   }
 
   const RESELLER_DESCS = [
