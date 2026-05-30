@@ -5072,7 +5072,7 @@ renderSizeGrid();
   let es;
   let reconnectDelay = 3000;
 
-  let isFirstMessage = true;
+  let knownOrderIds = null; // null = not yet initialised
 
   function connect() {
     es = new EventSource('/events/admin-orders?_token=' + encodeURIComponent(getToken()));
@@ -5081,20 +5081,24 @@ renderSizeGrid();
       try {
         const msg = JSON.parse(event.data);
         if (msg.type === 'admin_orders') {
-          const prevResellerCount = allOrders.length;
-          const prevBuyerCount    = (window.allBuyerOrders || []).length;
-
           allOrders      = msg.resellerOrders || [];
           allBuyerOrders = msg.buyerOrders    || [];
 
-          if (!isFirstMessage) {
-            const newReseller = allOrders.length > prevResellerCount;
-            const newBuyer    = allBuyerOrders.length > prevBuyerCount;
-            if ((newReseller || newBuyer) && !document.getElementById('page-orders')?.classList.contains('active')) {
+          const incomingIds = new Set([
+            ...allOrders.map(o => String(o.id)),
+            ...allBuyerOrders.map(o => String(o.id))
+          ]);
+
+          if (knownOrderIds === null) {
+            // First message — just seed the known set, no toast
+            knownOrderIds = incomingIds;
+          } else {
+            const hasNew = [...incomingIds].some(id => !knownOrderIds.has(id));
+            if (hasNew && !document.getElementById('page-orders')?.classList.contains('active')) {
               showToast('🔔 New order received!');
             }
+            knownOrderIds = incomingIds;
           }
-          isFirstMessage = false;
 
           if (document.getElementById('page-orders')?.classList.contains('active')) {
             renderOrdersTable();
