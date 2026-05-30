@@ -2362,8 +2362,7 @@
           })(incoming);
 
           applyView();
-
-          const currentIds = new Set((window._resellerProducts || []).map(p => String(p.id)));
+          loadResellerNewArrivals();
           const newProducts = incoming.filter(p => !currentIds.has(String(p.id)));
 
           if (newProducts.length > 0) {
