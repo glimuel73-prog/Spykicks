@@ -297,7 +297,7 @@
   .sort-chip.active, .sort-chip:hover { border-color: var(--black); color: var(--white); background: var(--black); }
   .visible-count-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; flex-shrink: 0; margin-left: auto; }
 
-  .brand-bar { display: flex; align-items: center; gap: 8px; padding: 10px 40px; background: var(--bg2); flex-wrap: wrap; width: 100%; }
+  .brand-bar { align-items: center; gap: 8px; padding: 10px 40px; background: var(--bg2); flex-wrap: wrap; width: 100%; }
 
   #loading, #unauthorized, #mainContent { display: none; }
   .state-box { max-width: 1400px; margin: 80px auto; padding: 0 40px; text-align: center; }
@@ -1442,16 +1442,13 @@
 
       document.getElementById("mainContent").style.display = "block";
       const _wm = document.getElementById("welcomeMsg"); if (_wm) _wm.innerHTML = `Welcome back, <strong>${email}</strong> 🎉`;
-      const _pc = document.getElementById("productCount"); if (_pc) _pc.textContent = window._resellerProducts.length + "+";
-      document.getElementById("visibleCount").textContent = window._resellerProducts.length + " items";
+      const _pc = document.getElementById("productCount"); if (_pc) _pc.textContent = data.products.length + "+";
+      document.getElementById("visibleCount").textContent = data.products.length + " items";
 
-      window._resellerProducts = (data.products || []).filter(p => {
-        const pt = p.publishTo || 'both';
-        return pt === 'reseller' || pt === 'both';
-      });
+      window._resellerProducts = data.products;
 
       const STATIC_CATS = ['all', 'new-arrivals'];
-      const customCats = [...new Set(window._resellerProducts.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
+      const customCats = [...new Set(data.products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))];
       const chipsContainer = document.getElementById('catChips');
       chipsContainer.querySelectorAll('.cat-chip[data-custom]').forEach(el => el.remove());
       customCats.forEach(cat => {
@@ -1462,7 +1459,7 @@
         chipsContainer.appendChild(btn);
       });
 
-      const brands = [...new Set(window._resellerProducts.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
+      const brands = [...new Set(data.products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
       const brandBar = document.getElementById('brandBar');
       const brandChips = document.getElementById('brandChips');
       brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)').forEach(el => el.remove());
@@ -2465,10 +2462,17 @@
 
           if (!_firstMessageConsumed) {
             _firstMessageConsumed = true;
-            incoming.forEach(p => {
-              const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
-              if (idx !== -1) window._resellerProducts[idx] = p;
-            });
+            if (!window._resellerProducts || window._resellerProducts.length === 0) {
+              // onload hasn't populated products yet — use SSE data directly
+              window._resellerProducts = incoming;
+              applyView();
+            } else {
+              // onload already populated — just patch any updated products
+              incoming.forEach(p => {
+                const idx = window._resellerProducts.findIndex(x => x.id === p.id);
+                if (idx !== -1) window._resellerProducts[idx] = p;
+              });
+            }
             return;
           }
 
