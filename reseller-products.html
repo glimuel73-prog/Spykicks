@@ -1059,9 +1059,29 @@
   }
 
   // ── Card Carousel ─────────────────────────────────────────────────────────────
+  function _carouselImgs(wrap) {
+    try { return JSON.parse(decodeURIComponent(escape(atob(wrap.dataset.imgsB64 || '')))); } catch { return []; }
+  }
+
+  function cardOpenLightbox(btn) {
+    const wrap = btn.closest('[data-imgs-b64]');
+    if (!wrap) return;
+    const imgs = _carouselImgs(wrap);
+    openLightbox(imgs, Number(wrap.dataset.idx) || 0);
+  }
+
+  function cardDownloadImg(btn) {
+    const wrap = btn.closest('[data-imgs-b64]');
+    if (!wrap) return;
+    const imgs = _carouselImgs(wrap);
+    const idx = Number(wrap.dataset.idx) || 0;
+    const src = imgs[idx] || imgs[0];
+    if (src) downloadImage(src, 'product-image.jpg');
+  }
+
   function cardCarouselNav(wrap, dir) {
     if (!wrap) return;
-    const imgs = JSON.parse(wrap.dataset.imgs || '[]');
+    const imgs = _carouselImgs(wrap);
     if (imgs.length <= 1) return;
     let idx = Number(wrap.dataset.idx) || 0;
     idx = Math.max(0, Math.min(imgs.length - 1, idx + dir));
@@ -1069,7 +1089,7 @@
   }
 
   function cardCarouselGoTo(wrap, idx) {
-    const imgs = JSON.parse(wrap.dataset.imgs || '[]');
+    const imgs = _carouselImgs(wrap);
     if (!imgs.length) return;
     idx = Math.max(0, Math.min(imgs.length - 1, idx));
     wrap.dataset.idx = idx;
@@ -1080,15 +1100,11 @@
     const next = wrap.querySelector('.card-carousel-arrow.next');
     if (prev) prev.classList.toggle('hidden', idx === 0);
     if (next) next.classList.toggle('hidden', idx === imgs.length - 1);
-    // sync img-zoom-btn data-idx
-    const zoomBtn = wrap.querySelector('.img-zoom-btn');
-    if (zoomBtn) zoomBtn.dataset.idx = idx;
   }
 
   function initCardCarousels(root) {
-    (root || document).querySelectorAll('.img-card-wrap[data-imgs]').forEach(wrap => {
-      let imgs;
-      try { imgs = JSON.parse(wrap.dataset.imgs); } catch { return; }
+    (root || document).querySelectorAll('.img-card-wrap[data-imgs-b64]').forEach(wrap => {
+      const imgs = _carouselImgs(wrap);
       if (!imgs || imgs.length <= 1) return;
       if (wrap._carouselInited) return;
       wrap._carouselInited = true;
@@ -1234,18 +1250,7 @@
         if (prod) openPD(prod, pid, this.dataset.cat, this.dataset.badge || '', getDisplayPrice(prod));
       });
     });
-    wrap.querySelectorAll('.img-zoom-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        try { openLightbox(JSON.parse(this.dataset.imgs), 0); } catch(err) {}
-      });
-    });
-    wrap.querySelectorAll('.img-dl-btn').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        downloadImage(this.dataset.src, this.dataset.name + '.jpg');
-      });
-    });
+    setTimeout(() => initCardCarousels(wrap), 0);
   }
 
   function buildResellerCard(p, productId) {
@@ -1260,23 +1265,23 @@
     }
     const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
 
-    const imgsJson = hasImg ? JSON.stringify(p.images).replace(/"/g,'&quot;') : '[]';
-    const slides = hasImg ? p.images.map(src => `<div class="card-carousel-slide"><img src="${src}" alt="${p.name}"></div>`).join('') : '';
+    const imgsAttr = hasImg ? btoa(unescape(encodeURIComponent(JSON.stringify(p.images)))) : '';
+    const slides = hasImg ? p.images.map(src => `<div class="card-carousel-slide"><img src="${src}" alt="${(p.name||'').replace(/"/g,'&quot;')}"></div>`).join('') : '';
     const dots = hasImg && p.images.length > 1 ? `<div class="card-carousel-dots">${p.images.map((_,i) => `<div class="card-carousel-dot${i===0?' active':''}"></div>`).join('')}</div>` : '';
     const arrows = hasImg && p.images.length > 1
-      ? `<button class="card-carousel-arrow prev hidden" onclick="event.stopPropagation();cardCarouselNav(this.closest('.img-card-wrap'),-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-         <button class="card-carousel-arrow next" onclick="event.stopPropagation();cardCarouselNav(this.closest('.img-card-wrap'),1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`
+      ? `<button class="card-carousel-arrow prev hidden" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+         <button class="card-carousel-arrow next" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`
       : '';
     const imgHTML = hasImg
-      ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;" data-imgs="${imgsJson}" data-idx="0">
+      ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;" data-imgs-b64="${imgsAttr}" data-idx="0">
           <div class="card-carousel">
             <div class="card-carousel-track">${slides}</div>
             ${dots}
           </div>
           ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
           ${arrows}
-          <button class="img-zoom-btn" title="View full image" data-imgs='${JSON.stringify(p.images).replace(/'/g,"&#39;")}' data-idx="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
-          <button class="img-dl-btn" title="Download image" data-src="${p.images[0]}" data-name="${(p.name||'product').replace(/"/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+          <button class="img-zoom-btn" title="View full image" class="img-zoom-btn" onclick="event.stopPropagation();cardOpenLightbox(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
+          <button class="img-dl-btn" title="Download image" onclick="event.stopPropagation();cardDownloadImg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
         </div>`
       : `<div class="product-img-placeholder" style="position:relative;">
           ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
