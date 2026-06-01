@@ -1179,8 +1179,8 @@ function buildProductCard(p) {
 
   // Store images as a base64-safe attribute to avoid quote escaping issues
   const imgsAttr = hasImg ? btoa(unescape(encodeURIComponent(JSON.stringify(p.images)))) : '';
-  const slides = hasImg ? p.images.map(src => `<div class="card-carousel-slide"><img src="${src}" alt="${name.replace(/"/g,'&quot;')}"></div>`).join('') : '';
-  const dots = hasImg && p.images.length > 1 ? `<div class="card-carousel-dots">${p.images.map((_,i) => `<div class="card-carousel-dot${i===0?' active':''}"></div>`).join('')}</div>` : '';
+  const slides = hasImg ? p.images.map(function(src){ return '<div class="card-carousel-slide"><img src="' + src + '" alt="' + name.replace(/"/g,'&quot;') + '"></div>'; }).join('') : '';
+  const dots = hasImg && p.images.length > 1 ? '<div class="card-carousel-dots">' + p.images.map(function(_,i){ return '<div class="card-carousel-dot' + (i===0?' active':'') + '"></div>'; }).join('') + '</div>' : '';
   const arrows = hasImg && p.images.length > 1
     ? `<button class="card-carousel-arrow prev hidden" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
        <button class="card-carousel-arrow next" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`
