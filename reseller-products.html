@@ -1145,6 +1145,7 @@
   }
 
   function applyView() {
+    const grid = document.getElementById("productGrid");
     const favEmpty = document.getElementById("favEmpty");
     const noResults = document.getElementById("noResults");
     const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
