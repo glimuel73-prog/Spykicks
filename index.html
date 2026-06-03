@@ -174,13 +174,17 @@
   .product-group-scroll .fav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.5; }
   .product-group-scroll .product-img-placeholder,
   .product-group-scroll .img-card-wrap.product-img-placeholder {
-    height: 170px; border-radius: 0; margin-bottom: 0;
-    background: #fff; position: relative; flex-shrink: 0;
+    height: 170px; width: 100%; border-radius: 0; margin-bottom: 0;
+    background: #fff; position: relative; flex-shrink: 0; overflow: hidden;
   }
   .product-group-scroll .product-img-placeholder img,
   .product-group-scroll .img-card-wrap.product-img-placeholder img {
     object-fit: contain; padding: 0 12px; width: 100%; height: 100%;
   }
+  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel { width: 100%; height: 100%; }
+  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-track { height: 100%; }
+  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-slide { height: 100%; }
+  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-slide img { object-fit: contain; padding: 0 12px; }
   .product-group-scroll .product-card > .product-brand {
     font-size: 13px; font-weight: 700; color: #111; letter-spacing: 0;
     text-transform: none; margin: 16px 8px 2px; font-family: Arial, sans-serif;
@@ -440,10 +444,12 @@
     .product-grid { grid-template-columns: repeat(2, 1fr); }
     .product-card { padding: 14px; }
     .product-img-placeholder,
-    .img-card-wrap.product-img-placeholder { height: auto; aspect-ratio: 1/1; width: 100%; }
+    .img-card-wrap.product-img-placeholder { height: auto; aspect-ratio: 1/1; width: 100%; overflow: hidden; }
     .img-card-wrap.product-img-placeholder .card-carousel,
     .img-card-wrap.product-img-placeholder .card-carousel-track { height: 100%; }
     .img-card-wrap.product-img-placeholder .card-carousel-slide { height: 100%; }
+    .img-card-wrap.product-img-placeholder .card-carousel-slide img { object-fit: contain; padding: 4px; }
+    .product-img-placeholder img { object-fit: contain; }
     .product-name { font-size: 14px; }
     .product-price { font-size: 18px; }
     .product-category-tag { display: none; }
