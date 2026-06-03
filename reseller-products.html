@@ -131,7 +131,7 @@
   .pd-color-dot.selected { outline: 2px solid #111; outline-offset: 3px; transform: scale(1.15); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
   .pd-selected-color-label { font-size: 12px; color: #555; font-family: Arial, sans-serif; letter-spacing: 1px; margin-top: 6px; min-height: 18px; }
 
-  .img-card-wrap { position: relative; }
+  .img-card-wrap { position: relative; width: 100%; }
   .img-card-wrap:hover .img-dl-btn { opacity: 1; }
   .img-dl-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.72); color: #fff; border: none; border-radius: 6px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity .2s, background .15s; z-index: 4; }
   .img-dl-btn:hover { background: rgba(0,0,0,0.92); }
@@ -446,7 +446,11 @@
     .product-group-scroll .product-img-placeholder { height: 170px; }
     .product-grid-flat { grid-template-columns: repeat(2, 1fr); gap: 16px; background: #fff; padding: 12px; }
     .product-grid-flat .product-card { padding: 0 0 12px; }
-    .product-grid-flat .product-img-placeholder { height: auto; aspect-ratio: 1/1; border-radius: 0; margin-bottom: 10px; }
+    .product-grid-flat .product-img-placeholder,
+    .product-grid-flat .img-card-wrap.product-img-placeholder { height: auto; aspect-ratio: 1/1; border-radius: 0; margin-bottom: 10px; width: 100%; }
+    .product-grid-flat .img-card-wrap.product-img-placeholder .card-carousel,
+    .product-grid-flat .img-card-wrap.product-img-placeholder .card-carousel-track { height: 100%; }
+    .product-grid-flat .img-card-wrap.product-img-placeholder .card-carousel-slide { height: 100%; }
     .product-grid-flat .product-brand { margin: 0 10px 3px; font-size: 9px; }
     .product-grid-flat .product-name { font-size: 12px; margin: 0 10px 8px; }
     .product-grid-flat .product-footer { margin: 0 10px 6px; }
@@ -496,7 +500,11 @@
 
   @media (max-width: 400px) {
     #naResellerGrid .product-card { width: auto !important; min-width: 0 !important; }
-    .product-img-placeholder { height: auto; aspect-ratio: 1/1; }
+    .product-img-placeholder,
+    .img-card-wrap.product-img-placeholder { height: auto; aspect-ratio: 1/1; width: 100%; }
+    .img-card-wrap.product-img-placeholder .card-carousel,
+    .img-card-wrap.product-img-placeholder .card-carousel-track { height: 100%; }
+    .img-card-wrap.product-img-placeholder .card-carousel-slide { height: 100%; }
     .pd-specs { grid-template-columns: 1fr; }
   }
 
