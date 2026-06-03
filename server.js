@@ -1222,39 +1222,60 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS inventory_items (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        sku TEXT,
-        location TEXT,
-        supplier TEXT,
-        qty INTEGER DEFAULT 0,
+        brand TEXT DEFAULT '',
+        colorway TEXT DEFAULT '',
+        sku TEXT DEFAULT '',
+        category TEXT DEFAULT '',
+        status TEXT DEFAULT 'active',
+        publishTo TEXT DEFAULT 'both',
+        price REAL DEFAULT 0,
+        resellerPrice REAL DEFAULT 0,
+        wholesalePrice REAL DEFAULT 0,
+        supplier TEXT DEFAULT '',
+        sizes TEXT DEFAULT '[]',
+        location TEXT DEFAULT 'Warehouse A',
         reorderPoint INTEGER DEFAULT 5,
-        lastReceived TEXT,
-        notes TEXT,
+        lastReceived TEXT DEFAULT '',
+        notes TEXT DEFAULT '',
         createdAt TEXT,
         updatedAt TEXT
     )
 `);
+// Add missing columns to existing tables (ALTER TABLE IF NOT EXISTS column is not supported in older SQLite)
+['brand','colorway','sku','category','status','publishTo','price','resellerPrice','wholesalePrice','sizes','location','reorderPoint','lastReceived','notes'].forEach(col => {
+    try { db.exec(`ALTER TABLE inventory_items ADD COLUMN ${col} TEXT DEFAULT ''`); } catch(e) {}
+});
 
 app.get("/admin/inventory", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM inventory_items ORDER BY name ASC").all();
-        res.json({ items: rows });
+        const items = rows.map(r => ({
+            ...r,
+            sizes: (() => { try { return JSON.parse(r.sizes || '[]'); } catch(e) { return []; } })(),
+            price: Number(r.price) || 0,
+            resellerPrice: Number(r.resellerPrice) || 0,
+            wholesalePrice: Number(r.wholesalePrice) || 0,
+        }));
+        res.json({ items });
     } catch (err) {
         res.json({ items: [], error: err.message });
     }
 });
 
 app.post("/admin/inventory", requireAdmin, (req, res) => {
-    const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
+    const { name, brand, colorway, sku, category, status, publishTo, price, resellerPrice, wholesalePrice, supplier, sizes, location, reorderPoint, lastReceived, notes } = req.body;
     if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
     const id = "si" + Date.now() + Math.random().toString(36).slice(2, 6);
     const now = new Date().toISOString();
     try {
-        db.prepare(`INSERT INTO inventory_items (id, name, sku, location, supplier, qty, reorderPoint, lastReceived, notes, createdAt, updatedAt)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-          .run(id, name.trim(), sku || "", location || "Warehouse A", supplier || "",
-               Number(qty) || 0, Number(reorderPoint) || 5,
-               lastReceived || new Date().toISOString().slice(0, 10), notes || "", now, now);
-        const item = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
+        db.prepare(`INSERT INTO inventory_items (id, name, brand, colorway, sku, category, status, publishTo, price, resellerPrice, wholesalePrice, supplier, sizes, location, reorderPoint, lastReceived, notes, createdAt, updatedAt)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          .run(id, name.trim(), brand || "", colorway || "", sku || "", category || "", status || "active", publishTo || "both",
+               Number(price) || 0, Number(resellerPrice) || 0, Number(wholesalePrice) || 0,
+               supplier || "", JSON.stringify(sizes || []), location || "Warehouse A",
+               Number(reorderPoint) || 5, lastReceived || now.slice(0, 10), notes || "", now, now);
+        const row = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
+        const item = { ...row, sizes: (() => { try { return JSON.parse(row.sizes || '[]'); } catch(e) { return []; } })(), price: Number(row.price)||0, resellerPrice: Number(row.resellerPrice)||0, wholesalePrice: Number(row.wholesalePrice)||0 };
         res.json({ success: true, item });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -1263,16 +1284,18 @@ app.post("/admin/inventory", requireAdmin, (req, res) => {
 
 app.put("/admin/inventory/:id", requireAdmin, (req, res) => {
     const { id } = req.params;
-    const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
+    const { name, brand, colorway, sku, category, status, publishTo, price, resellerPrice, wholesalePrice, supplier, sizes, location, reorderPoint, lastReceived, notes } = req.body;
     if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
     const now = new Date().toISOString();
     try {
-        const result = db.prepare(`UPDATE inventory_items SET name=?, sku=?, location=?, supplier=?, qty=?, reorderPoint=?, lastReceived=?, notes=?, updatedAt=? WHERE id=?`)
-          .run(name.trim(), sku || "", location || "Warehouse A", supplier || "",
-               Number(qty) || 0, Number(reorderPoint) || 5,
-               lastReceived || "", notes || "", now, id);
+        const result = db.prepare(`UPDATE inventory_items SET name=?, brand=?, colorway=?, sku=?, category=?, status=?, publishTo=?, price=?, resellerPrice=?, wholesalePrice=?, supplier=?, sizes=?, location=?, reorderPoint=?, lastReceived=?, notes=?, updatedAt=? WHERE id=?`)
+          .run(name.trim(), brand || "", colorway || "", sku || "", category || "", status || "active", publishTo || "both",
+               Number(price) || 0, Number(resellerPrice) || 0, Number(wholesalePrice) || 0,
+               supplier || "", JSON.stringify(sizes || []), location || "Warehouse A",
+               Number(reorderPoint) || 5, lastReceived || "", notes || "", now, id);
         if (result.changes === 0) return res.json({ success: false, error: "Item not found." });
-        const item = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
+        const row = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
+        const item = { ...row, sizes: (() => { try { return JSON.parse(row.sizes || '[]'); } catch(e) { return []; } })(), price: Number(row.price)||0, resellerPrice: Number(row.resellerPrice)||0, wholesalePrice: Number(row.wholesalePrice)||0 };
         res.json({ success: true, item });
     } catch (err) {
         res.json({ success: false, error: err.message });
