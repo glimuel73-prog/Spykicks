@@ -1145,6 +1145,7 @@
   }
 
   function applyView() {
+    const grid = document.getElementById("productGrid");
     const favEmpty = document.getElementById("favEmpty");
     const noResults = document.getElementById("noResults");
     const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
@@ -2462,10 +2463,17 @@
 
           if (!_firstMessageConsumed) {
             _firstMessageConsumed = true;
-            incoming.forEach(p => {
-              const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
-              if (idx !== -1) window._resellerProducts[idx] = p;
-            });
+            if (!window._resellerProducts || window._resellerProducts.length === 0) {
+              // onload hasn't populated products yet — use SSE data directly
+              window._resellerProducts = incoming;
+              applyView();
+            } else {
+              // onload already populated — just patch any updated products
+              incoming.forEach(p => {
+                const idx = window._resellerProducts.findIndex(x => x.id === p.id);
+                if (idx !== -1) window._resellerProducts[idx] = p;
+              });
+            }
             return;
           }
 
