@@ -2059,10 +2059,9 @@ function viewAllGroup(groupName) {
   activeGender = 'all';
   activeSort = 'default';
 
-
   activeBrand = (sample.brand || '').toLowerCase();
   activeLine = sample.brandLine || 'all';
-  activeModel = sample.brandModel || 'all';
+  activeModel = 'all';
 
   document.querySelectorAll('#categoryChips .chip').forEach(c => c.classList.remove('active'));
   const allCatChip = document.querySelector('#categoryChips .chip');
@@ -2078,12 +2077,21 @@ function viewAllGroup(groupName) {
 
   const brandChips = document.getElementById('brandChips');
   if (brandChips) {
-    brandChips.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
-    const matchBtn = [...brandChips.querySelectorAll('.sort-chip')].find(b => b.textContent.trim().toLowerCase() === activeBrand);
+    brandChips.querySelectorAll('.brand-dd-item').forEach(c => c.classList.remove('active'));
+    const matchBtn = [...brandChips.querySelectorAll('.brand-dd-item')].find(b => b.textContent.trim().toLowerCase() === activeBrand);
     if (matchBtn) matchBtn.classList.add('active');
   }
+  const brandLbl = document.getElementById('brandDropdownLabel');
+  if (brandLbl) brandLbl.textContent = sample.brand || activeBrand;
 
   updateLineChips();
+  if (activeLine !== 'all') {
+    document.querySelectorAll('#lineChips .brand-dd-item').forEach(c => {
+      if (c.textContent.trim().toLowerCase() === activeLine.toLowerCase()) c.classList.add('active');
+    });
+    const lineLbl = document.getElementById('lineDropdownLabel');
+    if (lineLbl) lineLbl.textContent = sample.brandLine || activeLine;
+  }
   updateModelChips();
   applyFiltersAndSort();
 
