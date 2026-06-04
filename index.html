@@ -3130,33 +3130,39 @@ function _positionDropdownMenu(menuId, btnId) {
   const btn = document.getElementById(btnId);
   if (!menu || !btn) return;
   if (window.innerWidth > 768) return;
-  // Move to body to escape will-change/transform stacking contexts
+  // Move to body to escape will-change/transform containing blocks
   if (menu.parentNode !== document.body) {
     menu._ddOrigParent = menu.parentNode;
     menu._ddOrigNextSibling = menu.nextSibling;
     document.body.appendChild(menu);
   }
-  menu.style.position = 'fixed';
-  menu.style.left = '12px';
-  menu.style.right = '12px';
-  menu.style.width = 'calc(100vw - 24px)';
-  menu.style.zIndex = '999999';
-  menu.style.maxHeight = '55vh';
-  menu.style.overflowY = 'auto';
-  menu.style.borderRadius = '16px';
-  menu.style.boxShadow = '0 8px 40px rgba(0,0,0,0.18)';
-  menu.style.background = '#fff';
-  menu.style.border = '1px solid #e0e0e0';
+  // Wipe ALL inline styles so nothing fights our positioning
+  menu.removeAttribute('style');
   const rect = btn.getBoundingClientRect();
   const spaceBelow = window.innerHeight - rect.bottom - 12;
   const spaceAbove = rect.top - 12;
-  if (spaceBelow >= 120 || spaceBelow >= spaceAbove) {
-    menu.style.top = (rect.bottom + 8) + 'px';
-    menu.style.bottom = 'auto';
-  } else {
-    menu.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
-    menu.style.top = 'auto';
-  }
+  const top = (spaceBelow >= 120 || spaceBelow >= spaceAbove)
+    ? (rect.bottom + 8)
+    : null;
+  const bottom = top === null ? (window.innerHeight - rect.top + 8) : null;
+  // Apply all styles cleanly
+  Object.assign(menu.style, {
+    display: 'block',
+    position: 'fixed',
+    left: '12px',
+    right: '12px',
+    width: 'calc(100vw - 24px)',
+    top: top !== null ? top + 'px' : 'auto',
+    bottom: bottom !== null ? bottom + 'px' : 'auto',
+    zIndex: '999999',
+    maxHeight: '55vh',
+    overflowY: 'auto',
+    borderRadius: '16px',
+    boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
+    background: '#fff',
+    border: '1px solid #e0e0e0',
+    minWidth: '0',
+  });
 }
 
 function _restoreDropdownMenu(menuId) {
@@ -3169,28 +3175,31 @@ function _restoreDropdownMenu(menuId) {
       menu._ddOrigParent.appendChild(menu);
     }
   }
+  // Restore to hidden desktop state
+  menu.removeAttribute('style');
+  menu.style.display = 'none';
 }
 
 function toggleBrandDropdown() {
   const menu = document.getElementById('brandDropdownMenu');
   const arrow = document.getElementById('brandDropdownArrow');
-  const isOpen = menu.style.display !== 'none';
+  const isOpen = menu.style.display === 'block';
   closeAllBrandDropdowns();
-  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('brandDropdownMenu','brandDropdownBtn'); }
+  if (!isOpen) { arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('brandDropdownMenu','brandDropdownBtn'); }
 }
 function toggleLineDropdown() {
   const menu = document.getElementById('lineDropdownMenu');
   const arrow = document.getElementById('lineDropdownArrow');
-  const isOpen = menu.style.display !== 'none';
+  const isOpen = menu.style.display === 'block';
   closeAllBrandDropdowns();
-  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('lineDropdownMenu','lineDropdownBtn'); }
+  if (!isOpen) { arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('lineDropdownMenu','lineDropdownBtn'); }
 }
 function toggleModelDropdown() {
   const menu = document.getElementById('modelDropdownMenu');
   const arrow = document.getElementById('modelDropdownArrow');
-  const isOpen = menu.style.display !== 'none';
+  const isOpen = menu.style.display === 'block';
   closeAllBrandDropdowns();
-  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('modelDropdownMenu','modelDropdownBtn'); }
+  if (!isOpen) { arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('modelDropdownMenu','modelDropdownBtn'); }
 }
 function closeAllBrandDropdowns() {
   ['brandDropdownMenu','lineDropdownMenu','modelDropdownMenu'].forEach(id => {
