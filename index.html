@@ -3565,7 +3565,14 @@ function startLiveUpdates() {
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
-        if (msg.type === 'products') { applyLiveProducts(msg.products); loadNewArrivals(); }
+        // Legacy full-payload support kept for backward compat
+        if (msg.type === 'products') { applyLiveProducts(msg.products); loadNewArrivals(); return; }
+        // Lightweight ping: re-fetch products via HTTP instead of receiving full payload over SSE
+        if (msg.type === 'products_updated') {
+          fetch('/products').then(r => r.json()).then(d => {
+            if (d.products) { applyLiveProducts(d.products); loadNewArrivals(); }
+          }).catch(() => {});
+        }
       } catch (err) {}
     };
     es.onerror = () => { es.close(); setTimeout(connect, 5000); };
