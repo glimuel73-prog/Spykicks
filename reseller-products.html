@@ -69,7 +69,7 @@
   .fav-btn svg { width: 14px; height: 14px; fill: currentColor; transition: transform .15s; }
   .fav-btn.active svg { transform: scale(1.15); }
 
-  .product-img-placeholder { height: 200px; background: #f0f0f0; border-radius: 0; margin-bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
+  .product-img-placeholder { height: 200px; background: transparent; border-radius: 0; margin-bottom: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
   .product-img-placeholder img { width: 100%; height: 100%; object-fit: cover; }
   .product-img-placeholder svg { opacity: .15; width: 80px; height: 80px; }
 
@@ -550,9 +550,9 @@
     #naResellerGrid { padding: 0 12px; grid-template-columns: repeat(2, 1fr) !important; gap: 0; background: #fff; align-items: stretch; }
     .na-header { padding: 20px 16px 12px; }
     #naResellerGrid .product-card { padding: 12px 12px 14px; background: #fff; border: none; border-radius: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-    #naResellerGrid .product-img-placeholder { border-radius: 4px; margin-bottom: 10px; background: #f0f0f0; flex-shrink: 0; overflow: hidden; position: relative; }
-    #naResellerGrid .img-card-wrap { background: #f0f0f0; border-radius: 4px; margin-bottom: 10px; flex-shrink: 0; overflow: hidden; }
-    #naResellerGrid .img-card-wrap.product-img-placeholder { background: #f0f0f0; }
+    #naResellerGrid .product-img-placeholder { border-radius: 4px; margin-bottom: 10px; background: transparent; flex-shrink: 0; overflow: hidden; position: relative; }
+    #naResellerGrid .img-card-wrap { background: transparent; border-radius: 4px; margin-bottom: 10px; flex-shrink: 0; overflow: hidden; }
+    #naResellerGrid .img-card-wrap.product-img-placeholder { background: transparent; }
     #naResellerGrid .img-card-wrap .card-carousel-slide img,
     #naResellerGrid .img-card-wrap.product-img-placeholder .card-carousel-slide img { object-fit: contain; padding: 4px; position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
     #naResellerGrid .product-brand { font-size: 9px; letter-spacing: 2px; margin: 0 0 3px; flex-shrink: 0; }
@@ -1324,7 +1324,7 @@
       : '';
     const imgHTML = hasImg
       ? `<div class="img-card-wrap" style="width:100%;position:relative;flex-shrink:0;" data-imgs-b64="${imgsAttr}" data-idx="0">
-          <div style="width:100%;padding-top:100%;position:relative;overflow:hidden;background:#f0f0f0;">
+          <div style="width:100%;padding-top:100%;position:relative;overflow:hidden;background:transparent;">
             <div class="card-carousel" style="position:absolute;inset:0;width:100%;height:100%;overflow:hidden;">
               <div class="card-carousel-track" style="height:100%;display:flex;">${slides}</div>
               ${dots}
@@ -2770,7 +2770,7 @@
            <button class="card-carousel-arrow next" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>` : '';
       const imgHTML = hasImg
         ? `<div class="img-card-wrap" style="width:100%;position:relative;flex-shrink:0;" data-imgs-b64="${imgsAttr}" data-idx="0">
-            <div style="width:100%;padding-top:100%;position:relative;overflow:hidden;background:#f0f0f0;">
+            <div style="width:100%;padding-top:100%;position:relative;overflow:hidden;background:transparent;">
               <div class="card-carousel" style="position:absolute;inset:0;width:100%;height:100%;overflow:hidden;">
                 <div class="card-carousel-track" style="height:100%;display:flex;">${slides}</div>${dots}
               </div>
