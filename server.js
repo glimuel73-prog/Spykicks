@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
 const Database = require("better-sqlite3");
 const path = require("path");
 const fs = require("fs");
@@ -7,14 +8,18 @@ const crypto = require("crypto");
 
 const app = express();
 
+// ── Gzip compression for all responses ───────────────────────────────────────
+app.use(compression());
+
 // CORS: restrict to same origin in production
 app.use(cors({
     origin: process.env.ALLOWED_ORIGIN || false,
     credentials: true
 }));
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+// Reduce JSON body limit — 50mb is excessive; images should use /uploads endpoint
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // ── In-memory session store ───────────────────────────────────────────────────
 const sessions = new Map(); // token → { expires: timestamp }
@@ -137,7 +142,7 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const uploadsDir = path.join(DATA_DIR, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-app.use("/uploads", express.static(uploadsDir));
+app.use("/uploads", express.static(uploadsDir, { maxAge: "7d", immutable: true }));
 
 app.post("/admin/upload-image", requireAdmin, (req, res) => {
     const { base64, mimeType } = req.body;
@@ -154,7 +159,7 @@ app.post("/admin/upload-image", requireAdmin, (req, res) => {
     }
 });
 
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname), { maxAge: "1h", etag: true }));
 
 const db = new Database(path.join(DATA_DIR, "users.db"));
 
