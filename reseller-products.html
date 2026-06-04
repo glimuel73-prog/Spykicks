@@ -311,7 +311,7 @@
   .sort-chip.active, .sort-chip:hover { border-color: var(--black); color: var(--white); background: var(--black); }
   .visible-count-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; flex-shrink: 0; margin-left: auto; }
 
-  .brand-bar { align-items: center; gap: 8px; padding: 10px 40px; background: var(--bg2); flex-wrap: wrap; width: 100%; position: relative; z-index: 10; }
+  .brand-bar { align-items: center; gap: 8px; padding: 10px 40px; background: var(--bg2); flex-wrap: wrap; width: 100%; }
 
   /* Brand dropdown items */
   .brand-dd-item {
@@ -359,7 +359,7 @@
       width: calc(100vw - 24px) !important;
       max-height: 55vh;
       overflow-y: auto;
-      z-index: 9999 !important;
+      z-index: 500 !important;
       border-radius: 16px !important;
       box-shadow: 0 8px 40px rgba(0,0,0,0.18) !important;
     }
@@ -466,6 +466,19 @@
   .footer-copy { font-size: 11px; color: #555; letter-spacing: 2px; text-transform: uppercase; font-family: Arial,sans-serif; }
 
   @media (max-width: 768px) {
+
+    /* Hide all desktop filter bars — replaced by mobile filter panel */
+    #mainSectionHeader,
+    .sort-bar,
+    .gender-bar-reseller,
+    #brandBar { display: none !important; }
+
+    /* Show mobile filter trigger bar */
+    #mobileFilterBar { display: flex !important; }
+
+    /* Mobile filter panel chip style */
+    .mfp-chip { padding: 7px 14px; border: 1px solid #ccc; background: none; color: #666; font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 20px; white-space: nowrap; transition: all .15s; }
+    .mfp-chip.active, .mfp-chip:hover { border-color: #000; color: #fff; background: #000; }
 
     .header-top { padding: 0 12px; height: auto; flex-wrap: wrap; gap: 0; align-items: center; }
     .logo {
@@ -703,6 +716,68 @@
   <div class="fav-page-header" id="favPageHeader">
     <span class="fav-page-title">My Favorites</span>
     <button class="fav-back-btn" onclick="toggleFavView()">← Back to Shop</button>
+  </div>
+
+  <!-- ── Mobile Filter Bar (hamburger trigger) ── -->
+  <div id="mobileFilterBar" style="display:none;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border-bottom:1px solid #eee;position:sticky;top:0;z-index:90;">
+    <span style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#111;font-weight:700;" id="mobileFilterTitle">All Products</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span id="mobileActiveFiltersCount" style="display:none;background:#000;color:#fff;font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;"></span>
+      <button onclick="openMobileFilters()" style="display:flex;align-items:center;gap:7px;background:none;border:1px solid #ccc;color:#333;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:7px 14px;border-radius:20px;cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+        Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Mobile Filter Panel (bottom sheet) ── -->
+  <div id="mobileFilterOverlay" onclick="closeMobileFilters()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9990;"></div>
+  <div id="mobileFilterPanel" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;z-index:9991;max-height:88dvh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);padding:0 0 32px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1;">
+      <span style="font-family:Arial,sans-serif;font-weight:700;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#111;">Filters</span>
+      <button onclick="closeMobileFilters()" style="background:none;border:1px solid #ddd;color:#888;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;">✕</button>
+    </div>
+    <!-- Category -->
+    <div style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:10px;">Category</div>
+      <div id="mfpCatChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <!-- Sort -->
+    <div style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:10px;">Sort By</div>
+      <div id="mfpSortChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <!-- Gender -->
+    <div style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:10px;">Gender</div>
+      <div id="mfpGenderChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <!-- Brand -->
+    <div id="mfpBrandSection" style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;display:none;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:10px;">Brand</div>
+      <div id="mfpBrandChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <!-- Line -->
+    <div id="mfpLineSection" style="padding:16px 20px 12px;border-bottom:1px solid #f0f0f0;display:none;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:10px;">Line</div>
+      <div id="mfpLineChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <!-- Model -->
+    <div id="mfpModelSection" style="padding:16px 20px 12px;display:none;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:10px;">Model</div>
+      <div id="mfpModelChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <!-- Search -->
+    <div style="padding:16px 20px 12px;border-top:1px solid #f0f0f0;">
+      <div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;margin-bottom:10px;">Search</div>
+      <div style="position:relative;">
+        <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;fill:none;stroke:#aaa;stroke-width:2;pointer-events:none;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="mfpSearchInput" type="text" placeholder="Search products…" oninput="document.getElementById('searchInput').value=this.value;applyView();" style="width:100%;padding:10px 14px 10px 34px;border:1px solid #ddd;border-radius:20px;font-family:Arial,sans-serif;font-size:13px;outline:none;background:#f9f9f9;">
+      </div>
+    </div>
+    <div style="padding:0 20px;">
+      <button onclick="closeMobileFilters()" style="width:100%;background:#000;color:#fff;font-family:Arial,sans-serif;font-weight:700;font-size:12px;letter-spacing:3px;text-transform:uppercase;padding:14px;border:none;border-radius:12px;cursor:pointer;">Show Results</button>
+    </div>
   </div>
 
   <div class="section-header" id="mainSectionHeader">
@@ -2669,42 +2744,22 @@
     const arrow = document.getElementById('brandDropdownArrow');
     const isOpen = menu.style.display !== 'none';
     closeAllBrandDropdowns();
-    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('brandDropdownMenu','brandDropdownBtn'); _showFilterBackdrop(); }
+    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('brandDropdownMenu','brandDropdownBtn'); }
   }
   function toggleLineDropdown() {
     const menu = document.getElementById('lineDropdownMenu');
     const arrow = document.getElementById('lineDropdownArrow');
     const isOpen = menu.style.display !== 'none';
     closeAllBrandDropdowns();
-    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('lineDropdownMenu','lineDropdownBtn'); _showFilterBackdrop(); }
+    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('lineDropdownMenu','lineDropdownBtn'); }
   }
   function toggleModelDropdown() {
     const menu = document.getElementById('modelDropdownMenu');
     const arrow = document.getElementById('modelDropdownArrow');
     const isOpen = menu.style.display !== 'none';
     closeAllBrandDropdowns();
-    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('modelDropdownMenu','modelDropdownBtn'); _showFilterBackdrop(); }
+    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('modelDropdownMenu','modelDropdownBtn'); }
   }
-  // ── Dropdown backdrop (mobile only) ──────────────────────────────────────────
-  (function() {
-    const bd = document.createElement('div');
-    bd.id = 'filterDropdownBackdrop';
-    bd.style.cssText = 'display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.25);-webkit-tap-highlight-color:transparent;';
-    bd.addEventListener('click', function() { closeAllBrandDropdowns(); });
-    document.body.appendChild(bd);
-  })();
-
-  function _showFilterBackdrop() {
-    if (window.innerWidth <= 768) {
-      const bd = document.getElementById('filterDropdownBackdrop');
-      if (bd) bd.style.display = 'block';
-    }
-  }
-  function _hideFilterBackdrop() {
-    const bd = document.getElementById('filterDropdownBackdrop');
-    if (bd) bd.style.display = 'none';
-  }
-
   function closeAllBrandDropdowns() {
     ['brandDropdownMenu','lineDropdownMenu','modelDropdownMenu'].forEach(id => {
       const el = document.getElementById(id);
@@ -2714,7 +2769,6 @@
       const el = document.getElementById(id);
       if (el) el.style.transform = '';
     });
-    _hideFilterBackdrop();
   }
   document.addEventListener('click', e => {
     const wrap = document.getElementById('brandDropdownWrap');
@@ -3066,6 +3120,166 @@
       window.naRRenderCards();
     } catch(e) {}
   }
+
+  // ── Mobile Filter Panel ──────────────────────────────────────────────────────
+  function openMobileFilters() {
+    if (window.innerWidth > 768) return;
+    _mfpSync();
+    const overlay = document.getElementById('mobileFilterOverlay');
+    const panel   = document.getElementById('mobileFilterPanel');
+    overlay.style.display = 'block';
+    panel.style.display   = 'block';
+    // Sync search input
+    const mfpSearch = document.getElementById('mfpSearchInput');
+    if (mfpSearch) mfpSearch.value = document.getElementById('searchInput')?.value || '';
+    requestAnimationFrame(() => { panel.style.transform = 'translateY(0)'; });
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileFilters() {
+    const panel   = document.getElementById('mobileFilterPanel');
+    const overlay = document.getElementById('mobileFilterOverlay');
+    panel.style.transform = 'translateY(100%)';
+    setTimeout(() => {
+      panel.style.display   = 'none';
+      overlay.style.display = 'none';
+    }, 300);
+    document.body.style.overflow = '';
+    _updateMobileFilterBadge();
+  }
+
+  function _mfpChip(label, isActive, onclick) {
+    return `<button class="mfp-chip${isActive?' active':''}" onclick="${onclick}">${label}</button>`;
+  }
+
+  function _mfpSync() {
+    // Category chips
+    const catEl = document.getElementById('mfpCatChips');
+    if (catEl) {
+      const src = document.querySelectorAll('#catChips .cat-chip');
+      catEl.innerHTML = Array.from(src).map(b =>
+        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
+          `filterCat('${b.dataset.cat}',this);_mfpSyncBack('cat','${b.dataset.cat}')`)
+      ).join('');
+    }
+
+    // Sort chips
+    const sortEl = document.getElementById('mfpSortChips');
+    if (sortEl) {
+      const src = document.querySelectorAll('#sortChips .sort-chip');
+      const sortMap = ['default','price-asc','price-desc','name'];
+      sortEl.innerHTML = Array.from(src).map((b, i) =>
+        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
+          `sortProducts('${sortMap[i]||'default'}',this);_mfpSyncBack('sort','${sortMap[i]||'default'}')`)
+      ).join('');
+    }
+
+    // Gender chips
+    const genderEl = document.getElementById('mfpGenderChips');
+    if (genderEl) {
+      const src = document.querySelectorAll('.gender-bar-reseller .sort-chip');
+      const gMap = ['all','male','female','unisex'];
+      genderEl.innerHTML = Array.from(src).map((b, i) =>
+        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
+          `filterGender('${gMap[i]||'all'}',this);_mfpSyncBack('gender','${gMap[i]||'all'}')`)
+      ).join('');
+    }
+
+    // Brand section
+    const brandItems = document.querySelectorAll('#brandChips .brand-dd-item');
+    const brandSection = document.getElementById('mfpBrandSection');
+    const brandEl = document.getElementById('mfpBrandChips');
+    if (brandSection && brandEl && brandItems.length > 1) {
+      brandSection.style.display = 'block';
+      brandEl.innerHTML = Array.from(brandItems).map(b =>
+        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
+          `filterBrand('${b.textContent.trim()==='All Brands'?'all':b.textContent.trim()}',this);_mfpSyncBack('brand','')`)
+      ).join('');
+    } else if (brandSection) {
+      brandSection.style.display = 'none';
+    }
+
+    // Line section
+    const lineItems = document.querySelectorAll('#lineChips .brand-dd-item');
+    const lineSection = document.getElementById('mfpLineSection');
+    const lineEl = document.getElementById('mfpLineChips');
+    if (lineSection && lineEl && lineItems.length > 0) {
+      lineSection.style.display = 'block';
+      lineEl.innerHTML = Array.from(lineItems).map(b =>
+        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
+          `filterLine('${b.textContent.trim()}',this);_mfpSyncBack('line','')`)
+      ).join('');
+    } else if (lineSection) {
+      lineSection.style.display = 'none';
+    }
+
+    // Model section
+    const modelItems = document.querySelectorAll('#modelChips .brand-dd-item');
+    const modelSection = document.getElementById('mfpModelSection');
+    const modelEl = document.getElementById('mfpModelChips');
+    if (modelSection && modelEl && modelItems.length > 0) {
+      modelSection.style.display = 'block';
+      modelEl.innerHTML = Array.from(modelItems).map(b =>
+        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
+          `filterModel('${b.textContent.trim()}',this);_mfpSyncBack('model','')`)
+      ).join('');
+    } else if (modelSection) {
+      modelSection.style.display = 'none';
+    }
+  }
+
+  function _mfpSyncBack(type, val) {
+    // Sync active state back to panel chips after filter applied
+    setTimeout(() => {
+      if (type === 'cat') {
+        document.querySelectorAll('#mfpCatChips .mfp-chip').forEach((c, i) => {
+          const src = document.querySelectorAll('#catChips .cat-chip');
+          if (src[i]) c.classList.toggle('active', src[i].classList.contains('active'));
+        });
+      } else if (type === 'sort') {
+        document.querySelectorAll('#mfpSortChips .mfp-chip').forEach((c, i) => {
+          const src = document.querySelectorAll('#sortChips .sort-chip');
+          if (src[i]) c.classList.toggle('active', src[i].classList.contains('active'));
+        });
+      } else if (type === 'gender') {
+        document.querySelectorAll('#mfpGenderChips .mfp-chip').forEach((c, i) => {
+          const src = document.querySelectorAll('.gender-bar-reseller .sort-chip');
+          if (src[i]) c.classList.toggle('active', src[i].classList.contains('active'));
+        });
+      } else {
+        _mfpSync(); // full resync for brand/line/model
+      }
+    }, 50);
+  }
+
+  function _updateMobileFilterBadge() {
+    const badge = document.getElementById('mobileActiveFiltersCount');
+    if (!badge) return;
+    let count = 0;
+    const activeCat = document.querySelector('#catChips .cat-chip.active');
+    if (activeCat && activeCat.dataset.cat !== 'all') count++;
+    const activeSort = document.querySelector('#sortChips .sort-chip.active');
+    if (activeSort && !activeSort.textContent.includes('Featured')) count++;
+    const activeGender = document.querySelector('.gender-bar-reseller .sort-chip.active');
+    if (activeGender && activeGender.textContent.includes('All') === false) count++;
+    const activeBrand = document.querySelector('#brandChips .brand-dd-item.active');
+    if (activeBrand && !activeBrand.textContent.includes('All Brands')) count++;
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Patch applyView to also update the badge
+  const _origApplyView = typeof applyView === 'function' ? applyView : null;
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof applyView === 'function') {
+      const _orig = applyView;
+      window.applyView = function() { _orig.apply(this, arguments); _updateMobileFilterBadge(); };
+    }
+  });
 
 </script>
 </body>
