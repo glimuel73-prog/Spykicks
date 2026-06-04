@@ -351,17 +351,16 @@
     #lineDropdownMenu,
     #modelDropdownMenu {
       position: fixed !important;
-      top: auto !important;
       left: 12px !important;
       right: 12px !important;
-      bottom: auto !important;
       min-width: 0 !important;
       width: calc(100vw - 24px) !important;
       max-height: 55vh;
       overflow-y: auto;
-      z-index: 9999 !important;
+      z-index: 99999 !important;
       border-radius: 16px !important;
       box-shadow: 0 8px 40px rgba(0,0,0,0.18) !important;
+      background: #fff !important;
     }
     #brandChips,
     #lineChips,
@@ -470,6 +469,18 @@
     /* Show filters inline on mobile — no hidden panel */
     #mobileFilterBar { display: none !important; }
 
+    /* Fix dropdown z-index: disable card hover transform (stacking context culprit) */
+    .product-card:hover { transform: none !important; }
+    #brandBar {
+      position: relative;
+      z-index: 200 !important;
+    }
+    /* Ensure product grid doesn't stack above brandBar */
+    .product-grid, #shopGrid, #newArrivalsSection {
+      position: relative;
+      z-index: 1;
+    }
+
     /* Section header: title + category chips */
     #mainSectionHeader {
       display: flex !important;
@@ -561,10 +572,11 @@
       font-size: 10px !important; padding: 5px 10px 6px !important; gap: 5px !important;
     }
     #brandDropdownMenu, #lineDropdownMenu, #modelDropdownMenu {
-      position: fixed !important; top: auto !important; left: 12px !important; right: 12px !important;
-      bottom: auto !important; min-width: 0 !important; width: calc(100vw - 24px) !important;
-      max-height: 55vh; overflow-y: auto; z-index: 9999 !important;
+      position: fixed !important; left: 12px !important; right: 12px !important;
+      min-width: 0 !important; width: calc(100vw - 24px) !important;
+      max-height: 55vh; overflow-y: auto; z-index: 99999 !important;
       border-radius: 16px !important; box-shadow: 0 8px 40px rgba(0,0,0,0.18) !important;
+      background: #fff !important;
     }
     #brandChips, #lineChips, #modelChips {
       display: grid !important; grid-template-columns: repeat(2, 1fr) !important;
@@ -2840,16 +2852,6 @@
     const menu = document.getElementById(menuId);
     const btn = document.getElementById(btnId);
     if (!menu || !btn) return;
-    // Move to body to escape stacking contexts from product cards
-    if (menu.parentNode !== document.body) {
-      menu._originalParent = menu.parentNode;
-      document.body.appendChild(menu);
-    }
-    menu.style.position = 'fixed';
-    menu.style.left = '12px';
-    menu.style.right = '12px';
-    menu.style.width = 'auto';
-    menu.style.zIndex = '999999';
     const rect = btn.getBoundingClientRect();
     const spaceBelow = window.innerHeight - rect.bottom - 12;
     const spaceAbove = rect.top - 12;
