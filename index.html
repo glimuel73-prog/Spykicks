@@ -1614,6 +1614,7 @@ async function loadAdminProducts() {
 
   try {
     const res = await fetch('/products');
+    if (res.ok) window._productsEtag = res.headers.get('ETag') || '';
     const data = await res.json();
     const products = data.products || [];
 
@@ -3551,10 +3552,10 @@ function startLiveUpdates() {
   // an SSE connection to be established (SSE has no HTTP cache and adds ~200ms+
   // of connection overhead before the first data arrives).
   Promise.all([
-    fetch('/products').then(r => r.json()),
+    fetch('/products').then(r => { if (r.ok) window._productsEtag = r.headers.get('ETag') || ''; return r.status === 304 ? { products: null } : r.json(); }),
     fetch('/new-arrivals').then(r => r.json())
   ]).then(([prodData, naData]) => {
-    applyLiveProducts(prodData.products || []);
+    if (prodData.products) applyLiveProducts(prodData.products);
     renderNewArrivals(naData.products || []);
   }).catch(() => {});
 
@@ -3569,8 +3570,13 @@ function startLiveUpdates() {
         if (msg.type === 'products') { applyLiveProducts(msg.products); loadNewArrivals(); return; }
         // Lightweight ping: re-fetch products via HTTP instead of receiving full payload over SSE
         if (msg.type === 'products_updated') {
-          fetch('/products').then(r => r.json()).then(d => {
-            if (d.products) { applyLiveProducts(d.products); loadNewArrivals(); }
+          const headers = window._productsEtag ? { 'If-None-Match': window._productsEtag } : {};
+          fetch('/products', { headers }).then(r => {
+            if (r.status === 304) return null;
+            if (r.ok) window._productsEtag = r.headers.get('ETag') || window._productsEtag;
+            return r.json();
+          }).then(d => {
+            if (d && d.products) { applyLiveProducts(d.products); loadNewArrivals(); }
           }).catch(() => {});
         }
       } catch (err) {}
