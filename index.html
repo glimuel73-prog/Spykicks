@@ -2235,8 +2235,10 @@ function filterProducts(cat, btn) {
 
 function filterGender(gender, btn) {
   activeGender = gender;
+  const gMap = { all:'genderChipAll', male:'genderChipMale', female:'genderChipFemale', unisex:'genderChipUnisex' };
   document.querySelectorAll("#genderChipAll, #genderChipMale, #genderChipFemale, #genderChipUnisex").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  else if (gMap[gender]) { const el = document.getElementById(gMap[gender]); if (el) el.classList.add("active"); }
   applyFiltersAndSort();
 }
 
@@ -2246,8 +2248,18 @@ function filterBrand(brand, btn) {
   activeModel = "all";
   document.querySelectorAll("#brandChips .brand-dd-item").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  else {
+    // Find and mark the matching brand chip active even when called from mobile (btn=null)
+    document.querySelectorAll("#brandChips .brand-dd-item").forEach(c => {
+      const val = c.id === 'brandChipAll' ? 'all' : (c.dataset.brand || c.textContent.trim().toLowerCase());
+      if (val === brand) c.classList.add("active");
+    });
+  }
   const lbl = document.getElementById("brandDropdownLabel");
-  if (lbl) lbl.textContent = brand === 'all' ? 'All Brands' : (btn ? btn.textContent : brand);
+  if (lbl) {
+    const matchBtn = document.querySelector(`#brandChips .brand-dd-item.active`);
+    lbl.textContent = brand === 'all' ? 'All Brands' : (matchBtn ? matchBtn.textContent : brand);
+  }
   if (typeof closeAllBrandDropdowns === 'function') closeAllBrandDropdowns();
   updateLineChips();
   applyFiltersAndSort();
@@ -2258,8 +2270,18 @@ function filterLine(line, btn) {
   activeModel = "all";
   document.querySelectorAll("#lineChips .brand-dd-item").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  else {
+    document.querySelectorAll("#lineChips .brand-dd-item").forEach(c => {
+      const val = c.textContent.trim();
+      const isAll = val.toLowerCase().startsWith('all ');
+      if (isAll ? line === 'all' : val.toLowerCase() === line.toLowerCase()) c.classList.add("active");
+    });
+  }
   const lbl = document.getElementById("lineDropdownLabel");
-  if (lbl) lbl.textContent = line === 'all' ? 'All Lines' : (btn ? btn.textContent : line);
+  if (lbl) {
+    const matchBtn = document.querySelector('#lineChips .brand-dd-item.active');
+    lbl.textContent = line === 'all' ? 'All Lines' : (matchBtn ? matchBtn.textContent : line);
+  }
   const modLbl = document.getElementById("modelDropdownLabel");
   if (modLbl) modLbl.textContent = 'All Models';
   if (typeof closeAllBrandDropdowns === 'function') closeAllBrandDropdowns();
@@ -2271,8 +2293,18 @@ function filterModel(model, btn) {
   activeModel = model;
   document.querySelectorAll("#modelChips .brand-dd-item").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  else {
+    document.querySelectorAll("#modelChips .brand-dd-item").forEach(c => {
+      const val = c.textContent.trim();
+      const isAll = val.toLowerCase().startsWith('all ');
+      if (isAll ? model === 'all' : val.toLowerCase() === model.toLowerCase()) c.classList.add("active");
+    });
+  }
   const lbl = document.getElementById("modelDropdownLabel");
-  if (lbl) lbl.textContent = model === 'all' ? 'All Models' : (btn ? btn.textContent : model);
+  if (lbl) {
+    const matchBtn = document.querySelector('#modelChips .brand-dd-item.active');
+    lbl.textContent = model === 'all' ? 'All Models' : (matchBtn ? matchBtn.textContent : model);
+  }
   if (typeof closeAllBrandDropdowns === 'function') closeAllBrandDropdowns();
   applyFiltersAndSort();
 }
@@ -3466,8 +3498,10 @@ function _mfpBuild() {
 
 function _mfpFilterCat(cat) {
   activeCategory = cat;
+  // Mark desktop source chips so _mfpBuild re-renders correctly
   document.querySelectorAll('#categoryChips .chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
   applyFiltersAndSort();
+  // Re-sync panel chips to match
   document.querySelectorAll('#mfpCatChips .mfp-chip').forEach((c, i) => {
     const src = document.querySelectorAll('#categoryChips .chip');
     if (src[i]) c.classList.toggle('active', src[i].classList.contains('active'));
@@ -3476,25 +3510,51 @@ function _mfpFilterCat(cat) {
 }
 function _mfpSort(sort) {
   sortProducts(sort, null);
+  // Re-sync sort chips on desktop so _mfpBuild reflects correct active state
   const sortKeys = ['default','price-asc','price-desc','name'];
+  document.querySelectorAll('.sort-chips .sort-chip').forEach((c, i) => c.classList.toggle('active', sortKeys[i] === sort));
   document.querySelectorAll('#mfpSortChips .mfp-chip').forEach((c,i) => c.classList.toggle('active', sortKeys[i] === sort));
   _updateMobileFilterBadge();
 }
 function _mfpGender(gender) {
-  filterGender(gender, null);
+  activeGender = gender;
+  // Mark desktop gender chips active so _mfpBuild re-renders with correct state
+  const gIds = ['genderChipAll','genderChipMale','genderChipFemale','genderChipUnisex'];
   const gKeys = ['all','male','female','unisex'];
+  gIds.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', gKeys[i] === gender);
+  });
+  applyFiltersAndSort();
   document.querySelectorAll('#mfpGenderChips .mfp-chip').forEach((c,i) => c.classList.toggle('active', gKeys[i] === gender));
   _updateMobileFilterBadge();
 }
 function _mfpBrand(brand) {
+  // Mark desktop brand chip active so _mfpBuild re-renders with correct state
+  document.querySelectorAll('#brandChips .brand-dd-item').forEach(c => {
+    const val = c.id === 'brandChipAll' ? 'all' : (c.dataset.brand || c.textContent.trim().toLowerCase());
+    c.classList.toggle('active', val === brand);
+  });
   filterBrand(brand, null);
   setTimeout(() => { _mfpBuild(); _updateMobileFilterBadge(); }, 60);
 }
 function _mfpLine(line) {
+  // Mark desktop line chip active so _mfpBuild re-renders with correct state
+  document.querySelectorAll('#lineChips .brand-dd-item').forEach(c => {
+    const val = c.textContent.trim();
+    const isAll = val.toLowerCase().startsWith('all ');
+    c.classList.toggle('active', isAll ? line === 'all' : val.toLowerCase() === line.toLowerCase());
+  });
   filterLine(line, null);
   setTimeout(() => { _mfpBuild(); _updateMobileFilterBadge(); }, 60);
 }
 function _mfpModel(model) {
+  // Mark desktop model chip active so _mfpBuild re-renders with correct state
+  document.querySelectorAll('#modelChips .brand-dd-item').forEach(c => {
+    const val = c.textContent.trim();
+    const isAll = val.toLowerCase().startsWith('all ');
+    c.classList.toggle('active', isAll ? model === 'all' : val.toLowerCase() === model.toLowerCase());
+  });
   filterModel(model, null);
   setTimeout(() => { _mfpBuild(); _updateMobileFilterBadge(); }, 60);
 }
