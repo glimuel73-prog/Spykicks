@@ -1502,7 +1502,7 @@ function buildProductCard(p) {
 
   // Store images as a base64-safe attribute to avoid quote escaping issues
   const imgsAttr = hasImg ? btoa(unescape(encodeURIComponent(JSON.stringify(p.images)))) : '';
-  const slides = hasImg ? p.images.map(function(src){ return '<div class="card-carousel-slide"><img src="' + src + '" alt="' + name.replace(/"/g,'&quot;') + '"></div>'; }).join('') : '';
+  const slides = hasImg ? p.images.map(function(src){ return '<div class="card-carousel-slide"><img src="' + src + '" alt="' + name.replace(/"/g,'&quot;') + '" loading="lazy" decoding="async"></div>'; }).join('') : '';
   const dots = hasImg && p.images.length > 1 ? '<div class="card-carousel-dots">' + p.images.map(function(_,i){ return '<div class="card-carousel-dot' + (i===0?' active':'') + '"></div>'; }).join('') + '</div>' : '';
   const arrows = hasImg && p.images.length > 1
     ? `<button class="card-carousel-arrow prev hidden" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -2155,6 +2155,14 @@ function showTab(tabId, btn) {
 }
 
 let activeCategory = "all", activeSort = "default", activeGender = "all", activeBrand = "all", activeLine = "all", activeModel = "all";
+
+// Debounce filter/sort re-renders so rapid filter changes don't thrash the DOM
+let _applyTimer = null;
+const _applyFiltersNow = typeof applyFiltersAndSort !== 'undefined' ? null : null; // placeholder
+function debouncedApply() {
+  clearTimeout(_applyTimer);
+  _applyTimer = setTimeout(() => applyFiltersAndSort(), 60);
+}
 
 function applyFiltersAndSort() {
   const grid = document.getElementById("shopGrid");
@@ -3497,6 +3505,19 @@ function startLiveUpdates() {
     grid.insertBefore(loadingEl, noResults);
   }
 
+  // ── Fast first render via HTTP fetch (instant, cached) ────────────────────
+  // Load products immediately via REST so the page renders without waiting for
+  // an SSE connection to be established (SSE has no HTTP cache and adds ~200ms+
+  // of connection overhead before the first data arrives).
+  Promise.all([
+    fetch('/products').then(r => r.json()),
+    fetch('/new-arrivals').then(r => r.json())
+  ]).then(([prodData, naData]) => {
+    applyLiveProducts(prodData.products || []);
+    renderNewArrivals(naData.products || []);
+  }).catch(() => {});
+
+  // ── SSE for live stock/price updates after initial render ─────────────────
   let es;
   function connect() {
     es = new EventSource('/events/products');
@@ -3508,7 +3529,8 @@ function startLiveUpdates() {
     };
     es.onerror = () => { es.close(); setTimeout(connect, 5000); };
   }
-  connect();
+  // Small delay so the fetch() render gets priority and SSE doesn't race
+  setTimeout(connect, 1500);
 }
 
 // ── New Arrivals Section ──────────────────────────────────────────────────────
@@ -3530,7 +3552,7 @@ function renderNewArrivals(products) {
     visible.forEach(p => {
       const hasImg = p.images && p.images.length > 0;
       const imgsAttr = hasImg ? btoa(unescape(encodeURIComponent(JSON.stringify(p.images)))) : '';
-      const slides = hasImg ? p.images.map(function(src){ return '<div class="card-carousel-slide"><img src="' + src + '" alt="' + (p.name||'product').replace(/"/g,'&quot;') + '"></div>'; }).join('') : '';
+      const slides = hasImg ? p.images.map(function(src){ return '<div class="card-carousel-slide"><img src="' + src + '" alt="' + (p.name||'product').replace(/"/g,'&quot;') + '" loading="lazy" decoding="async"></div>'; }).join('') : '';
       const dots = hasImg && p.images.length > 1 ? '<div class="card-carousel-dots">' + p.images.map(function(_,di){ return '<div class="card-carousel-dot' + (di===0?' active':'') + '"></div>'; }).join('') + '</div>' : '';
       const arrows = hasImg && p.images.length > 1
         ? `<button class="card-carousel-arrow prev hidden" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -3586,8 +3608,7 @@ async function loadNewArrivals() {
   } catch(e) {}
 }
 
-loadNewArrivals();
-
+// loadNewArrivals() is now called inside startLiveUpdates() for parallel loading
 startLiveUpdates();
 
 // ── Mobile Filter Panel ──────────────────────────────────────────────────────
