@@ -381,10 +381,16 @@ app.get("/products", (req, res) => {
             .map(r => JSON.parse(r.data))
             .filter(p => {
                 const active = !p.status || p.status === "active";
-                const pt = p.publishTo || "both"; 
+                const pt = p.publishTo || "both";
                 return active && (pt === "buyer" || pt === "both");
             });
-        res.json({ products });
+        const body = JSON.stringify({ products });
+        const etag = `"${crypto.createHash("sha1").update(body).digest("hex").slice(0, 16)}"`;
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("ETag", etag);
+        if (req.headers["if-none-match"] === etag) return res.status(304).end();
+        res.setHeader("Content-Type", "application/json");
+        res.end(body);
     } catch (err) {
         res.json({ products: [] });
     }
@@ -470,7 +476,13 @@ app.get("/reseller-products", (req, res) => {
                 const pt = p.publishTo || "both";
                 return active && (pt === "reseller" || pt === "both");
             });
-        res.json({ authorized: true, products });
+        const body = JSON.stringify({ authorized: true, products });
+        const etag = `"${crypto.createHash("sha1").update(body).digest("hex").slice(0, 16)}"`;
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("ETag", etag);
+        if (req.headers["if-none-match"] === etag) return res.status(304).end();
+        res.setHeader("Content-Type", "application/json");
+        res.end(body);
     } catch (err) {
         res.json({ authorized: false });
     }
