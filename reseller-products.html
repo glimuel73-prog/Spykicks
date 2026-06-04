@@ -3121,165 +3121,175 @@
     } catch(e) {}
   }
 
+
   // ── Mobile Filter Panel ──────────────────────────────────────────────────────
-  function openMobileFilters() {
-    if (window.innerWidth > 768) return;
-    _mfpSync();
+  function _mfpChipHTML(label, isActive, onclickCode) {
+    const esc = label.replace(/'/g, "\\'");
+    return `<button class="mfp-chip${isActive?' active':''}" onclick="${onclickCode}">${label}</button>`;
+  }
+
+  function _mfpBuild() {
+    // Category
+    const catEl = document.getElementById('mfpCatChips');
+    if (catEl) {
+      catEl.innerHTML = '';
+      document.querySelectorAll('#catChips .cat-chip').forEach(b => {
+        catEl.insertAdjacentHTML('beforeend',
+          _mfpChipHTML(b.textContent.trim(), b.classList.contains('active'),
+            `_mfpFilterCat('${b.dataset.cat}')`));
+      });
+    }
+    // Sort
+    const sortEl = document.getElementById('mfpSortChips');
+    if (sortEl) {
+      const sortKeys = ['default','price-asc','price-desc','name'];
+      sortEl.innerHTML = '';
+      document.querySelectorAll('#sortChips .sort-chip').forEach((b, i) => {
+        sortEl.insertAdjacentHTML('beforeend',
+          _mfpChipHTML(b.textContent.trim(), b.classList.contains('active'),
+            `_mfpSort('${sortKeys[i]||'default'}')`));
+      });
+    }
+    // Gender
+    const genderEl = document.getElementById('mfpGenderChips');
+    if (genderEl) {
+      const gKeys = ['all','male','female','unisex'];
+      genderEl.innerHTML = '';
+      document.querySelectorAll('#rGenderAll,#rGenderMale,#rGenderFemale,#rGenderUnisex').forEach((b, i) => {
+        genderEl.insertAdjacentHTML('beforeend',
+          _mfpChipHTML(b.textContent.trim(), b.classList.contains('active'),
+            `_mfpGender('${gKeys[i]||'all'}')`));
+      });
+    }
+    // Brand
+    const brandItems = document.querySelectorAll('#brandChips .brand-dd-item');
+    const brandSection = document.getElementById('mfpBrandSection');
+    const brandEl = document.getElementById('mfpBrandChips');
+    if (brandSection && brandEl) {
+      if (brandItems.length > 1) {
+        brandSection.style.display = 'block';
+        brandEl.innerHTML = '';
+        brandItems.forEach(b => {
+          const val = b.id === 'brandChipAll' ? 'all' : (b.dataset.brand || b.textContent.trim());
+          brandEl.insertAdjacentHTML('beforeend',
+            _mfpChipHTML(b.textContent.trim(), b.classList.contains('active'),
+              `_mfpBrand('${val.replace(/'/g,"\\'")}')`));
+        });
+      } else {
+        brandSection.style.display = 'none';
+      }
+    }
+    // Line
+    const lineItems = document.querySelectorAll('#lineChips .brand-dd-item');
+    const lineSection = document.getElementById('mfpLineSection');
+    const lineEl = document.getElementById('mfpLineChips');
+    if (lineSection && lineEl) {
+      if (lineItems.length > 0) {
+        lineSection.style.display = 'block';
+        lineEl.innerHTML = '';
+        lineItems.forEach(b => {
+          const val = b.textContent.trim();
+          lineEl.insertAdjacentHTML('beforeend',
+            _mfpChipHTML(val, b.classList.contains('active'),
+              `_mfpLine('${val.replace(/'/g,"\\'")}')`));
+        });
+      } else {
+        lineSection.style.display = 'none';
+      }
+    }
+    // Model
+    const modelItems = document.querySelectorAll('#modelChips .brand-dd-item');
+    const modelSection = document.getElementById('mfpModelSection');
+    const modelEl = document.getElementById('mfpModelChips');
+    if (modelSection && modelEl) {
+      if (modelItems.length > 0) {
+        modelSection.style.display = 'block';
+        modelEl.innerHTML = '';
+        modelItems.forEach(b => {
+          const val = b.textContent.trim();
+          modelEl.insertAdjacentHTML('beforeend',
+            _mfpChipHTML(val, b.classList.contains('active'),
+              `_mfpModel('${val.replace(/'/g,"\\'")}')`));
+        });
+      } else {
+        modelSection.style.display = 'none';
+      }
+    }
+  }
+
+  // These shims call the real filter functions with null btn, then re-highlight panel chips
+  function _mfpFilterCat(cat) {
+    currentCat = cat;
+    document.querySelectorAll('#catChips .cat-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+    applyView();
+    document.querySelectorAll('#mfpCatChips .mfp-chip').forEach(c => c.classList.toggle('active', c.textContent.trim() === document.querySelector(`#catChips .cat-chip[data-cat="${cat}"]`)?.textContent.trim()));
+    _updateMobileFilterBadge();
+  }
+  function _mfpSort(sort) {
+    sortProducts(sort, null);
+    const sortKeys = ['default','price-asc','price-desc','name'];
+    document.querySelectorAll('#mfpSortChips .mfp-chip').forEach((c,i) => c.classList.toggle('active', sortKeys[i] === sort));
+    _updateMobileFilterBadge();
+  }
+  function _mfpGender(gender) {
+    filterGender(gender, null);
+    const gKeys = ['all','male','female','unisex'];
+    document.querySelectorAll('#mfpGenderChips .mfp-chip').forEach((c,i) => c.classList.toggle('active', gKeys[i] === gender));
+    _updateMobileFilterBadge();
+  }
+  function _mfpBrand(brand) {
+    filterBrand(brand, null);
+    setTimeout(() => { _mfpBuild(); _updateMobileFilterBadge(); }, 60);
+  }
+  function _mfpLine(line) {
+    // Find matching item in lineChips
+    const match = Array.from(document.querySelectorAll('#lineChips .brand-dd-item')).find(b => b.textContent.trim() === line);
+    filterLine(line === 'all' || (match && match.classList.contains('active') === false) ? line : line, null);
+    setTimeout(() => { _mfpBuild(); _updateMobileFilterBadge(); }, 60);
+  }
+  function _mfpModel(model) {
+    filterModel(model, null);
+    setTimeout(() => { _mfpBuild(); _updateMobileFilterBadge(); }, 60);
+  }
+
+  window.openMobileFilters = function() {
+    _mfpBuild();
     const overlay = document.getElementById('mobileFilterOverlay');
     const panel   = document.getElementById('mobileFilterPanel');
     overlay.style.display = 'block';
     panel.style.display   = 'block';
-    // Sync search input
     const mfpSearch = document.getElementById('mfpSearchInput');
     if (mfpSearch) mfpSearch.value = document.getElementById('searchInput')?.value || '';
     requestAnimationFrame(() => { panel.style.transform = 'translateY(0)'; });
     document.body.style.overflow = 'hidden';
-  }
+  };
 
-  function closeMobileFilters() {
+  window.closeMobileFilters = function() {
     const panel   = document.getElementById('mobileFilterPanel');
     const overlay = document.getElementById('mobileFilterOverlay');
+    if (!panel) return;
     panel.style.transform = 'translateY(100%)';
-    setTimeout(() => {
-      panel.style.display   = 'none';
-      overlay.style.display = 'none';
-    }, 300);
+    setTimeout(() => { panel.style.display = 'none'; overlay.style.display = 'none'; }, 300);
     document.body.style.overflow = '';
     _updateMobileFilterBadge();
-  }
-
-  function _mfpChip(label, isActive, onclick) {
-    return `<button class="mfp-chip${isActive?' active':''}" onclick="${onclick}">${label}</button>`;
-  }
-
-  function _mfpSync() {
-    // Category chips
-    const catEl = document.getElementById('mfpCatChips');
-    if (catEl) {
-      const src = document.querySelectorAll('#catChips .cat-chip');
-      catEl.innerHTML = Array.from(src).map(b =>
-        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
-          `filterCat('${b.dataset.cat}',this);_mfpSyncBack('cat','${b.dataset.cat}')`)
-      ).join('');
-    }
-
-    // Sort chips
-    const sortEl = document.getElementById('mfpSortChips');
-    if (sortEl) {
-      const src = document.querySelectorAll('#sortChips .sort-chip');
-      const sortMap = ['default','price-asc','price-desc','name'];
-      sortEl.innerHTML = Array.from(src).map((b, i) =>
-        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
-          `sortProducts('${sortMap[i]||'default'}',this);_mfpSyncBack('sort','${sortMap[i]||'default'}')`)
-      ).join('');
-    }
-
-    // Gender chips
-    const genderEl = document.getElementById('mfpGenderChips');
-    if (genderEl) {
-      const src = document.querySelectorAll('.gender-bar-reseller .sort-chip');
-      const gMap = ['all','male','female','unisex'];
-      genderEl.innerHTML = Array.from(src).map((b, i) =>
-        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
-          `filterGender('${gMap[i]||'all'}',this);_mfpSyncBack('gender','${gMap[i]||'all'}')`)
-      ).join('');
-    }
-
-    // Brand section
-    const brandItems = document.querySelectorAll('#brandChips .brand-dd-item');
-    const brandSection = document.getElementById('mfpBrandSection');
-    const brandEl = document.getElementById('mfpBrandChips');
-    if (brandSection && brandEl && brandItems.length > 1) {
-      brandSection.style.display = 'block';
-      brandEl.innerHTML = Array.from(brandItems).map(b =>
-        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
-          `filterBrand('${b.textContent.trim()==='All Brands'?'all':b.textContent.trim()}',this);_mfpSyncBack('brand','')`)
-      ).join('');
-    } else if (brandSection) {
-      brandSection.style.display = 'none';
-    }
-
-    // Line section
-    const lineItems = document.querySelectorAll('#lineChips .brand-dd-item');
-    const lineSection = document.getElementById('mfpLineSection');
-    const lineEl = document.getElementById('mfpLineChips');
-    if (lineSection && lineEl && lineItems.length > 0) {
-      lineSection.style.display = 'block';
-      lineEl.innerHTML = Array.from(lineItems).map(b =>
-        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
-          `filterLine('${b.textContent.trim()}',this);_mfpSyncBack('line','')`)
-      ).join('');
-    } else if (lineSection) {
-      lineSection.style.display = 'none';
-    }
-
-    // Model section
-    const modelItems = document.querySelectorAll('#modelChips .brand-dd-item');
-    const modelSection = document.getElementById('mfpModelSection');
-    const modelEl = document.getElementById('mfpModelChips');
-    if (modelSection && modelEl && modelItems.length > 0) {
-      modelSection.style.display = 'block';
-      modelEl.innerHTML = Array.from(modelItems).map(b =>
-        _mfpChip(b.textContent.trim(), b.classList.contains('active'),
-          `filterModel('${b.textContent.trim()}',this);_mfpSyncBack('model','')`)
-      ).join('');
-    } else if (modelSection) {
-      modelSection.style.display = 'none';
-    }
-  }
-
-  function _mfpSyncBack(type, val) {
-    // Sync active state back to panel chips after filter applied
-    setTimeout(() => {
-      if (type === 'cat') {
-        document.querySelectorAll('#mfpCatChips .mfp-chip').forEach((c, i) => {
-          const src = document.querySelectorAll('#catChips .cat-chip');
-          if (src[i]) c.classList.toggle('active', src[i].classList.contains('active'));
-        });
-      } else if (type === 'sort') {
-        document.querySelectorAll('#mfpSortChips .mfp-chip').forEach((c, i) => {
-          const src = document.querySelectorAll('#sortChips .sort-chip');
-          if (src[i]) c.classList.toggle('active', src[i].classList.contains('active'));
-        });
-      } else if (type === 'gender') {
-        document.querySelectorAll('#mfpGenderChips .mfp-chip').forEach((c, i) => {
-          const src = document.querySelectorAll('.gender-bar-reseller .sort-chip');
-          if (src[i]) c.classList.toggle('active', src[i].classList.contains('active'));
-        });
-      } else {
-        _mfpSync(); // full resync for brand/line/model
-      }
-    }, 50);
-  }
+  };
 
   function _updateMobileFilterBadge() {
     const badge = document.getElementById('mobileActiveFiltersCount');
     if (!badge) return;
     let count = 0;
-    const activeCat = document.querySelector('#catChips .cat-chip.active');
-    if (activeCat && activeCat.dataset.cat !== 'all') count++;
-    const activeSort = document.querySelector('#sortChips .sort-chip.active');
-    if (activeSort && !activeSort.textContent.includes('Featured')) count++;
-    const activeGender = document.querySelector('.gender-bar-reseller .sort-chip.active');
-    if (activeGender && activeGender.textContent.includes('All') === false) count++;
-    const activeBrand = document.querySelector('#brandChips .brand-dd-item.active');
-    if (activeBrand && !activeBrand.textContent.includes('All Brands')) count++;
-    if (count > 0) {
-      badge.textContent = count;
-      badge.style.display = 'inline-flex';
-    } else {
-      badge.style.display = 'none';
-    }
+    if (currentCat && currentCat !== 'all') count++;
+    if (activeSort && activeSort !== 'default') count++;
+    if (activeGender && activeGender !== 'all') count++;
+    if (activeBrand && activeBrand !== 'all') count++;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-flex' : 'none';
   }
 
-  // Patch applyView to also update the badge
-  const _origApplyView = typeof applyView === 'function' ? applyView : null;
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof applyView === 'function') {
-      const _orig = applyView;
-      window.applyView = function() { _orig.apply(this, arguments); _updateMobileFilterBadge(); };
-    }
-  });
+  // Hook applyView to keep badge updated
+  const _origApplyView = applyView;
+  applyView = function() { _origApplyView.apply(this, arguments); _updateMobileFilterBadge(); };
+
 
 </script>
 </body>
