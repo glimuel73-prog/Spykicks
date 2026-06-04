@@ -2874,11 +2874,14 @@
     // Wipe ALL inline styles so nothing fights our positioning
     menu.removeAttribute('style');
     const rect = btn.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom - 12;
-    const spaceAbove = rect.top - 12;
-    const top = (spaceBelow >= 120 || spaceBelow >= spaceAbove)
-      ? (rect.bottom + 8)
-      : null;
+    // Clamp top so dropdown never overlaps the sticky header
+    const headerEl = document.querySelector('.header');
+    const headerBottom = headerEl ? headerEl.getBoundingClientRect().bottom : 0;
+    const rawTop = rect.bottom + 8;
+    const clampedTop = Math.max(rawTop, headerBottom + 4);
+    const spaceBelow = window.innerHeight - clampedTop - 12;
+    const spaceAbove = rect.top - headerBottom - 12;
+    const top = (spaceBelow >= 120 || spaceBelow >= spaceAbove) ? clampedTop : null;
     const bottom = top === null ? (window.innerHeight - rect.top + 8) : null;
     Object.assign(menu.style, {
       display: 'block',
