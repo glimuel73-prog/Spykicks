@@ -111,11 +111,11 @@
   .product-group-scroll .fav-btn:hover { background: none !important; border-color: transparent !important; color: #888; }
   .product-group-scroll .fav-btn.active { background: none !important; border-color: transparent !important; color: #e11d48; }
   .product-group-scroll .fav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.5; fill: currentColor; }
-  .product-group-scroll .product-img-placeholder, .product-group-scroll .img-card-wrap.product-img-placeholder { height: 170px; width: 100%; border-radius: 0; margin-bottom: 0; background: #fff; position: relative; flex-shrink: 0; overflow: hidden; }
+  .product-group-scroll .product-img-placeholder, .product-group-scroll .img-card-wrap.product-img-placeholder { height: 170px; width: 100%; border-radius: 0; margin-bottom: 0; background: transparent; position: relative; flex-shrink: 0; overflow: hidden; }
   .product-group-scroll .product-img-placeholder img, .product-group-scroll .img-card-wrap.product-img-placeholder img { object-fit: contain; padding: 0 12px; width: 100%; height: 100%; }
-  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel { width: 100%; height: 100%; }
-  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-track { height: 100%; }
-  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-slide { height: 100%; }
+  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel { width: 100%; height: 100%; overflow: hidden; position: relative; }
+  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-track { height: 100%; display: flex; flex-wrap: nowrap; }
+  .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-slide { height: 100%; min-width: 100%; width: 100%; flex-shrink: 0; position: relative; }
   .product-group-scroll .img-card-wrap.product-img-placeholder .card-carousel-slide img { object-fit: contain; padding: 0 12px; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
   .product-group-scroll .product-card > .product-brand { font-size: 13px; font-weight: 700; color: #111; letter-spacing: 0; text-transform: none; margin: 16px 8px 2px; font-family: Arial, sans-serif; }
   .product-group-scroll .product-card > .product-name { font-size: 13px; font-weight: 400; color: #111; margin: 0 8px 10px; letter-spacing: 0; line-height: 1.35; flex-grow: 0; }
@@ -567,7 +567,7 @@
   .card-carousel { position: relative; width: 100%; height: 100%; overflow: hidden; touch-action: pan-y; }
   .card-carousel-track { display: flex; height: 100%; transition: transform .28s cubic-bezier(.4,0,.2,1); will-change: transform; }
   .card-carousel-track.no-transition { transition: none; }
-  .card-carousel-slide { min-width: 100%; height: 100%; flex-shrink: 0; }
+  .card-carousel-slide { min-width: 100%; width: 100%; height: 100%; flex-shrink: 0; position: relative; }
   .card-carousel-slide img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
   /* Ensure contain+padding rules for naResellerGrid and flat grid are not overridden by the base rule above */
   #naResellerGrid .card-carousel-slide img,
@@ -1143,7 +1143,11 @@
     idx = Math.max(0, Math.min(imgs.length - 1, idx));
     wrap.dataset.idx = idx;
     const track = wrap.querySelector('.card-carousel-track');
-    if (track) track.style.transform = `translateX(-${idx * 100}%)`;
+    if (track) {
+      const carousel = track.parentElement;
+      const slideW = carousel ? carousel.offsetWidth : (track.firstElementChild ? track.firstElementChild.offsetWidth : 0);
+      track.style.transform = `translateX(-${idx * slideW}px)`;
+    }
     wrap.querySelectorAll('.card-carousel-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
     const prev = wrap.querySelector('.card-carousel-arrow.prev');
     const next = wrap.querySelector('.card-carousel-arrow.next');
@@ -1155,8 +1159,32 @@
     (root || document).querySelectorAll('.img-card-wrap[data-imgs-b64]').forEach(wrap => {
       const imgs = _carouselImgs(wrap);
       if (!imgs || imgs.length <= 1) return;
+
+      function setSlideSizes() {
+        const carousel = wrap.querySelector('.card-carousel');
+        if (!carousel) return;
+        const w = carousel.offsetWidth;
+        if (!w) return;
+        wrap.querySelectorAll('.card-carousel-slide').forEach(s => {
+          s.style.minWidth = w + 'px';
+          s.style.width = w + 'px';
+        });
+        // Re-snap to current index after resize
+        const idx = Number(wrap.dataset.idx) || 0;
+        const track = wrap.querySelector('.card-carousel-track');
+        if (track) track.style.transform = `translateX(-${idx * w}px)`;
+      }
+
+      setSlideSizes();
+      // Re-measure after fonts/images settle
+      requestAnimationFrame(() => { setSlideSizes(); });
+
       if (wrap._carouselInited) return;
       wrap._carouselInited = true;
+
+      const ro = new ResizeObserver(() => setSlideSizes());
+      ro.observe(wrap);
+
       let startX = 0, startY = 0, isDragging = false;
       wrap.addEventListener('touchstart', e => {
         startX = e.touches[0].clientX;
@@ -1400,8 +1428,8 @@
         : '';
       const imgHTML = hasImg
         ? `<div class="img-card-wrap product-img-placeholder" style="overflow:hidden;position:relative;" data-imgs-b64="${imgsAttrG}" data-idx="0">
-            <div class="card-carousel" style="width:100%;height:100%;">
-              <div class="card-carousel-track" style="height:100%;display:flex;">${slidesG}</div>
+            <div class="card-carousel" style="width:100%;height:100%;overflow:hidden;position:relative;">
+              <div class="card-carousel-track" style="height:100%;display:flex;flex-wrap:nowrap;">${slidesG}</div>
               ${dotsG}
             </div>
             ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
