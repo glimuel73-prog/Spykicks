@@ -3120,6 +3120,16 @@ function _positionDropdownMenu(menuId, btnId) {
   const menu = document.getElementById(menuId);
   const btn = document.getElementById(btnId);
   if (!menu || !btn) return;
+  // Move to body to escape stacking contexts from product cards
+  if (menu.parentNode !== document.body) {
+    menu._originalParent = menu.parentNode;
+    document.body.appendChild(menu);
+  }
+  menu.style.position = 'fixed';
+  menu.style.left = '12px';
+  menu.style.right = '12px';
+  menu.style.width = 'auto';
+  menu.style.zIndex = '999999';
   const rect = btn.getBoundingClientRect();
   const spaceBelow = window.innerHeight - rect.bottom - 12;
   const spaceAbove = rect.top - 12;
