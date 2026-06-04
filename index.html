@@ -441,7 +441,7 @@
       width: calc(100vw - 24px) !important;
       max-height: 55vh;
       overflow-y: auto;
-      z-index: 500 !important;
+      z-index: 9999 !important;
       border-radius: 16px !important;
       box-shadow: 0 8px 40px rgba(0,0,0,0.18) !important;
     }
@@ -851,7 +851,7 @@
     </div>
   </div>
 
-  <div id="brandBar" style="display:none;background:#fff;padding:10px 40px;align-items:center;gap:12px;flex-wrap:wrap;">
+  <div id="brandBar" style="display:none;background:#fff;padding:10px 40px;align-items:center;gap:12px;flex-wrap:wrap;position:relative;z-index:10;">
     <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
 
     <!-- Brand dropdown -->
@@ -2941,26 +2941,46 @@ function _positionDropdownMenu(menuId, btnId) {
   }
 }
 
+// ── Dropdown backdrop (mobile only) ──────────────────────────────────────────
+(function() {
+  const bd = document.createElement('div');
+  bd.id = 'filterDropdownBackdrop';
+  bd.style.cssText = 'display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.25);-webkit-tap-highlight-color:transparent;';
+  bd.addEventListener('click', function() { closeAllBrandDropdowns(); });
+  document.body.appendChild(bd);
+})();
+
+function _showFilterBackdrop() {
+  if (window.innerWidth <= 768) {
+    const bd = document.getElementById('filterDropdownBackdrop');
+    if (bd) bd.style.display = 'block';
+  }
+}
+function _hideFilterBackdrop() {
+  const bd = document.getElementById('filterDropdownBackdrop');
+  if (bd) bd.style.display = 'none';
+}
+
 function toggleBrandDropdown() {
   const menu = document.getElementById('brandDropdownMenu');
   const arrow = document.getElementById('brandDropdownArrow');
   const isOpen = menu.style.display !== 'none';
   closeAllBrandDropdowns();
-  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('brandDropdownMenu','brandDropdownBtn'); }
+  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('brandDropdownMenu','brandDropdownBtn'); _showFilterBackdrop(); }
 }
 function toggleLineDropdown() {
   const menu = document.getElementById('lineDropdownMenu');
   const arrow = document.getElementById('lineDropdownArrow');
   const isOpen = menu.style.display !== 'none';
   closeAllBrandDropdowns();
-  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('lineDropdownMenu','lineDropdownBtn'); }
+  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('lineDropdownMenu','lineDropdownBtn'); _showFilterBackdrop(); }
 }
 function toggleModelDropdown() {
   const menu = document.getElementById('modelDropdownMenu');
   const arrow = document.getElementById('modelDropdownArrow');
   const isOpen = menu.style.display !== 'none';
   closeAllBrandDropdowns();
-  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('modelDropdownMenu','modelDropdownBtn'); }
+  if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('modelDropdownMenu','modelDropdownBtn'); _showFilterBackdrop(); }
 }
 function closeAllBrandDropdowns() {
   ['brandDropdownMenu','lineDropdownMenu','modelDropdownMenu'].forEach(id => {
@@ -2971,6 +2991,7 @@ function closeAllBrandDropdowns() {
     const el = document.getElementById(id);
     if (el) el.style.transform = '';
   });
+  _hideFilterBackdrop();
 }
 document.addEventListener('click', e => {
   const wrap = document.getElementById('brandDropdownWrap');
