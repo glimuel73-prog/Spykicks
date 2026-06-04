@@ -323,9 +323,7 @@
   }
   .brand-dd-item:hover { background: #f0f0f0; color: #000; }
   .brand-dd-item.active { background: #000; color: #fff; }
-  #brandBar { display: flex !important; }
-  @media (max-width: 768px) {
-    #brandBar { padding: 8px 14px !important; }
+  #brandBar { padding: 8px 14px !important; }
     #brandDropdownMenu, #lineDropdownMenu, #modelDropdownMenu { position: fixed; left: 14px; right: 14px; width: auto; top: auto; }
   }
 
@@ -1156,7 +1154,7 @@
       if (mainSectionHeader) mainSectionHeader.style.display = "";
       if (sortBar) sortBar.style.display = "";
       if (genderBar) genderBar.style.display = "";
-      if (brandBar) brandBar.style.display = document.getElementById('brandChips')?.querySelectorAll('.brand-dd-item:not(#brandChipAll)').length > 0 ? 'block' : 'none';
+      if (brandBar) brandBar.style.display = document.getElementById('brandChips')?.querySelectorAll('.brand-dd-item:not(#brandChipAll)').length > 0 ? 'flex' : 'none';
 
       document.querySelectorAll("#catChips .cat-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
       document.querySelectorAll(".sort-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
@@ -2623,100 +2621,6 @@
       closeAllBrandDropdowns();
     }
   });
-
-  // Patch filterBrand to update dropdown label
-  const _origFilterBrand = filterBrand;
-  filterBrand = function(brand, btn) {
-    _origFilterBrand(brand, btn);
-    const label = document.getElementById('brandDropdownLabel');
-    if (label) label.textContent = brand === 'all' ? 'All Brands' : (btn ? btn.textContent : brand);
-    closeAllBrandDropdowns();
-    document.querySelectorAll('#brandChips .brand-dd-item').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-  };
-  const _origFilterLine = filterLine;
-  filterLine = function(line, btn) {
-    _origFilterLine(line, btn);
-    const label = document.getElementById('lineDropdownLabel');
-    if (label) label.textContent = line === 'all' ? 'All Lines' : (btn ? btn.textContent : line);
-    closeAllBrandDropdowns();
-    document.querySelectorAll('#lineChips .brand-dd-item').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-  };
-  const _origFilterModel = filterModel;
-  filterModel = function(model, btn) {
-    _origFilterModel(model, btn);
-    const label = document.getElementById('modelDropdownLabel');
-    if (label) label.textContent = model === 'all' ? 'All Models' : (btn ? btn.textContent : model);
-    closeAllBrandDropdowns();
-    document.querySelectorAll('#modelChips .brand-dd-item').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-  };
-
-  // Patch updateLineChips to use dropdown items
-  const _origUpdateLineChips = updateLineChips;
-  updateLineChips = function() {
-    const lineWrap = document.getElementById('lineDropdownWrap');
-    const lineChips = document.getElementById('lineChips');
-    const modelWrap = document.getElementById('modelDropdownWrap');
-    const modelChips = document.getElementById('modelChips');
-    if (modelChips) modelChips.innerHTML = '';
-    if (modelWrap) modelWrap.style.display = 'none';
-    const lbl = document.getElementById('lineDropdownLabel');
-    if (lbl) lbl.textContent = 'All Lines';
-    const mlbl = document.getElementById('modelDropdownLabel');
-    if (mlbl) mlbl.textContent = 'All Models';
-    if (activeBrand === 'all' || !lineWrap) { if (lineWrap) lineWrap.style.display = 'none'; return; }
-    const prods = window._allProducts || [];
-    const lines = [...new Set(prods.filter(p => (p.brand||'').toLowerCase() === activeBrand).map(p => (p.brandLine||'').trim()).filter(Boolean))].sort();
-    if (!lines.length) { lineWrap.style.display = 'none'; return; }
-    const brandDisplay = prods.find(p => (p.brand||'').toLowerCase() === activeBrand)?.brand || activeBrand;
-    lineChips.innerHTML = '';
-    const allBtn = document.createElement('button');
-    allBtn.className = 'brand-dd-item active'; allBtn.textContent = 'All ' + brandDisplay;
-    allBtn.onclick = function() { filterLine('all', this); };
-    lineChips.appendChild(allBtn);
-    lines.forEach(l => {
-      const btn = document.createElement('button');
-      btn.className = 'brand-dd-item'; btn.textContent = l;
-      btn.onclick = function() { filterLine(l, this); };
-      lineChips.appendChild(btn);
-    });
-    lineWrap.style.display = 'inline-block';
-  };
-
-  // Patch updateModelChips to use dropdown items
-  const _origUpdateModelChips = updateModelChips;
-  updateModelChips = function() {
-    const modelWrap = document.getElementById('modelDropdownWrap');
-    const modelChips = document.getElementById('modelChips');
-    const lbl = document.getElementById('modelDropdownLabel');
-    if (lbl) lbl.textContent = 'All Models';
-    if (activeLine === 'all' || !modelWrap) { if (modelWrap) modelWrap.style.display = 'none'; return; }
-    const prods = window._allProducts || [];
-    const models = [...new Set(prods.filter(p => (p.brand||'').toLowerCase() === activeBrand && (p.brandLine||'').toLowerCase() === activeLine.toLowerCase()).map(p => (p.brandModel||'').trim()).filter(Boolean))].sort();
-    if (!models.length) { modelWrap.style.display = 'none'; return; }
-    modelChips.innerHTML = '';
-    const allBtn = document.createElement('button');
-    allBtn.className = 'brand-dd-item active'; allBtn.textContent = 'All ' + activeLine;
-    allBtn.onclick = function() { filterModel('all', this); };
-    modelChips.appendChild(allBtn);
-    models.forEach(m => {
-      const btn = document.createElement('button');
-      btn.className = 'brand-dd-item'; btn.textContent = m;
-      btn.onclick = function() { filterModel(m, this); };
-      modelChips.appendChild(btn);
-    });
-    modelWrap.style.display = 'inline-block';
-  };
-
-  // Patch brand chip classes added dynamically to use brand-dd-item
-  function _patchBrandChipClasses() {
-    document.querySelectorAll("#brandChips .brand-dd-item").forEach(btn => {
-      btn.className = btn.className.replace('sort-chip', 'brand-dd-item').trim();
-    });
-  }
-  const _origInit = typeof initResellerProducts !== 'undefined' ? initResellerProducts : null;
 
   (function initResellerSSE() {
     let es;
