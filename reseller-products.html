@@ -323,7 +323,8 @@
   }
   .brand-dd-item:hover { background: #f0f0f0; color: #000; }
   .brand-dd-item.active { background: #000; color: #fff; }
-  #brandBar { padding: 8px 14px !important; }
+  @media (max-width: 768px) {
+    #brandBar { padding: 8px 14px !important; }
     #brandDropdownMenu, #lineDropdownMenu, #modelDropdownMenu { position: fixed; left: 14px; right: 14px; width: auto; top: auto; }
   }
 
@@ -1572,7 +1573,7 @@
 
   window.onload = async () => {
     try {
-      const res = await fetch(`/reseller?email=${email}`);
+      const res = await fetch(`/reseller-products?email=${email}`);
       const data = await res.json();
 
       document.getElementById("loading").style.display = "none";
