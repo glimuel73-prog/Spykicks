@@ -323,9 +323,59 @@
   }
   .brand-dd-item:hover { background: #f0f0f0; color: #000; }
   .brand-dd-item.active { background: #000; color: #fff; }
+  /* ── Mobile: Brand / Line / Model filter bar ── */
   @media (max-width: 768px) {
-    #brandBar { padding: 8px 14px !important; }
-    #brandDropdownMenu, #lineDropdownMenu, #modelDropdownMenu { position: fixed; left: 14px; right: 14px; width: auto; top: auto; }
+    #brandBar {
+      padding: 8px 12px !important;
+      gap: 8px !important;
+      overflow-x: auto;
+      flex-wrap: nowrap !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #brandBar::-webkit-scrollbar { display: none; }
+    #brandBar > span { display: none; }
+    #brandDropdownWrap,
+    #lineDropdownWrap,
+    #modelDropdownWrap { flex-shrink: 0; }
+    #brandDropdownBtn,
+    #lineDropdownBtn,
+    #modelDropdownBtn {
+      min-width: 0 !important;
+      white-space: nowrap;
+      font-size: 10px !important;
+      padding: 6px 10px !important;
+      gap: 5px !important;
+    }
+    #brandDropdownMenu,
+    #lineDropdownMenu,
+    #modelDropdownMenu {
+      position: fixed !important;
+      top: auto !important;
+      left: 12px !important;
+      right: 12px !important;
+      bottom: auto !important;
+      min-width: 0 !important;
+      width: calc(100vw - 24px) !important;
+      max-height: 55vh;
+      overflow-y: auto;
+      z-index: 500 !important;
+      border-radius: 16px !important;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18) !important;
+    }
+    #brandChips,
+    #lineChips,
+    #modelChips {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 4px !important;
+      padding: 8px !important;
+    }
+    .brand-dd-item {
+      text-align: center !important;
+      padding: 9px 8px !important;
+      font-size: 10px !important;
+    }
   }
 
   #loading, #unauthorized, #mainContent { display: none; }
@@ -692,8 +742,11 @@
     <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
 
     <div style="position:relative;display:inline-block;" id="brandDropdownWrap">
-      <button id="brandDropdownBtn" onclick="toggleBrandDropdown()" style="display:flex;align-items:center;gap:8px;padding:7px 14px;border:1px solid #ccc;background:#fff;color:#333;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s;min-width:120px;justify-content:space-between;">
-        <span id="brandDropdownLabel">All Brands</span>
+      <button id="brandDropdownBtn" onclick="toggleBrandDropdown()" style="display:flex;align-items:center;gap:8px;padding:5px 14px 6px;border:1px solid #ccc;background:#fff;color:#333;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s;min-width:120px;justify-content:space-between;">
+        <span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;">
+          <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#aaa;font-family:Arial,sans-serif;line-height:1;">Brand</span>
+          <span id="brandDropdownLabel" style="font-size:11px;letter-spacing:1.5px;color:#111;font-weight:700;line-height:1.2;">All Brands</span>
+        </span>
         <svg id="brandDropdownArrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="brandDropdownMenu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:180px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.12);z-index:200;overflow:hidden;">
@@ -704,8 +757,11 @@
     </div>
 
     <div style="position:relative;display:none;" id="lineDropdownWrap">
-      <button id="lineDropdownBtn" onclick="toggleLineDropdown()" style="display:flex;align-items:center;gap:8px;padding:7px 14px;border:1px solid #ccc;background:#fff;color:#333;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s;min-width:100px;justify-content:space-between;">
-        <span id="lineDropdownLabel">All Lines</span>
+      <button id="lineDropdownBtn" onclick="toggleLineDropdown()" style="display:flex;align-items:center;gap:8px;padding:5px 14px 6px;border:1px solid #ccc;background:#fff;color:#333;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s;min-width:100px;justify-content:space-between;">
+        <span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;">
+          <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#aaa;font-family:Arial,sans-serif;line-height:1;">Line</span>
+          <span id="lineDropdownLabel" style="font-size:11px;letter-spacing:1.5px;color:#111;font-weight:700;line-height:1.2;">All Lines</span>
+        </span>
         <svg id="lineDropdownArrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="lineDropdownMenu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:160px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.12);z-index:200;overflow:hidden;">
@@ -714,8 +770,11 @@
     </div>
 
     <div style="position:relative;display:none;" id="modelDropdownWrap">
-      <button id="modelDropdownBtn" onclick="toggleModelDropdown()" style="display:flex;align-items:center;gap:8px;padding:7px 14px;border:1px solid #ccc;background:#fff;color:#333;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s;min-width:100px;justify-content:space-between;">
-        <span id="modelDropdownLabel">All Models</span>
+      <button id="modelDropdownBtn" onclick="toggleModelDropdown()" style="display:flex;align-items:center;gap:8px;padding:5px 14px 6px;border:1px solid #ccc;background:#fff;color:#333;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:all .2s;min-width:100px;justify-content:space-between;">
+        <span style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;">
+          <span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#aaa;font-family:Arial,sans-serif;line-height:1;">Model</span>
+          <span id="modelDropdownLabel" style="font-size:11px;letter-spacing:1.5px;color:#111;font-weight:700;line-height:1.2;">All Models</span>
+        </span>
         <svg id="modelDropdownArrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div id="modelDropdownMenu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:160px;background:#fff;border:1px solid #e0e0e0;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.12);z-index:200;overflow:hidden;">
@@ -2588,26 +2647,43 @@
   renderCartItems();
 
   // ── Brand Dropdown helpers ──────────────────────────────────────────────────
+  function _positionDropdownMenu(menuId, btnId) {
+    if (window.innerWidth > 768) return;
+    const menu = document.getElementById(menuId);
+    const btn = document.getElementById(btnId);
+    if (!menu || !btn) return;
+    const rect = btn.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom - 12;
+    const spaceAbove = rect.top - 12;
+    if (spaceBelow >= 120 || spaceBelow >= spaceAbove) {
+      menu.style.top = (rect.bottom + 8) + 'px';
+      menu.style.bottom = 'auto';
+    } else {
+      menu.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+      menu.style.top = 'auto';
+    }
+  }
+
   function toggleBrandDropdown() {
     const menu = document.getElementById('brandDropdownMenu');
     const arrow = document.getElementById('brandDropdownArrow');
     const isOpen = menu.style.display !== 'none';
     closeAllBrandDropdowns();
-    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; }
+    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('brandDropdownMenu','brandDropdownBtn'); }
   }
   function toggleLineDropdown() {
     const menu = document.getElementById('lineDropdownMenu');
     const arrow = document.getElementById('lineDropdownArrow');
     const isOpen = menu.style.display !== 'none';
     closeAllBrandDropdowns();
-    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; }
+    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('lineDropdownMenu','lineDropdownBtn'); }
   }
   function toggleModelDropdown() {
     const menu = document.getElementById('modelDropdownMenu');
     const arrow = document.getElementById('modelDropdownArrow');
     const isOpen = menu.style.display !== 'none';
     closeAllBrandDropdowns();
-    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; }
+    if (!isOpen) { menu.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; _positionDropdownMenu('modelDropdownMenu','modelDropdownBtn'); }
   }
   function closeAllBrandDropdowns() {
     ['brandDropdownMenu','lineDropdownMenu','modelDropdownMenu'].forEach(id => {
