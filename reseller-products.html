@@ -3032,6 +3032,24 @@
       es.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
+
+          // Lightweight ping: re-fetch reseller products via HTTP
+          if (msg.type === 'products_updated') {
+            if (!email) return;
+            fetch(`/reseller-products?email=${encodeURIComponent(email)}`)
+              .then(r => r.json())
+              .then(d => {
+                if (!d.authorized || !d.products) return;
+                window._resellerProducts = d.products.filter(p => {
+                  const active = !p.status || p.status === 'active';
+                  const pt = p.publishTo || 'both';
+                  return active && (pt === 'reseller' || pt === 'both');
+                });
+                applyView();
+              }).catch(() => {});
+            return;
+          }
+
           if (msg.type !== 'products') return;
 
           const incoming = (msg.products || []).filter(p => {
