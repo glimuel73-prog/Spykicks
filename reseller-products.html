@@ -467,18 +467,109 @@
 
   @media (max-width: 768px) {
 
-    /* Hide all desktop filter bars — replaced by mobile filter panel */
-    #mainSectionHeader,
-    .sort-bar,
-    .gender-bar-reseller,
-    #brandBar { display: none !important; }
+    /* Show filters inline on mobile — no hidden panel */
+    #mobileFilterBar { display: none !important; }
 
-    /* Show mobile filter trigger bar */
-    #mobileFilterBar { display: flex !important; }
+    /* Section header: title + category chips */
+    #mainSectionHeader {
+      display: flex !important;
+      flex-direction: column !important;
+      padding: 10px 0 0 !important;
+      gap: 0 !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee;
+    }
+    #mainSectionHeader .section-title { padding: 0 14px 8px !important; font-size: 10px !important; }
+    .filter-chips {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 6px !important;
+      padding: 0 14px 10px !important;
+    }
+    .filter-chips::-webkit-scrollbar { display: none; }
+    .cat-chip { white-space: nowrap; flex-shrink: 0; padding: 5px 12px !important; font-size: 10px !important; letter-spacing: 1px !important; }
 
-    /* Mobile filter panel chip style */
-    .mfp-chip { padding: 7px 14px; border: 1px solid #ccc; background: none; color: #666; font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 20px; white-space: nowrap; transition: all .15s; }
-    .mfp-chip.active, .mfp-chip:hover { border-color: #000; color: #fff; background: #000; }
+    /* Sort bar */
+    .sort-bar {
+      display: flex !important;
+      padding: 8px 0 !important;
+      gap: 0 !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee !important;
+      overflow: hidden !important;
+    }
+    .sort-label { display: none !important; }
+    .sort-chips {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 6px !important;
+      padding: 0 14px !important;
+      flex: 1 !important;
+    }
+    .sort-chips::-webkit-scrollbar { display: none; }
+    .sort-chip { white-space: nowrap !important; flex-shrink: 0 !important; padding: 5px 12px !important; font-size: 10px !important; letter-spacing: 1px !important; }
+    .visible-count-label { display: none !important; }
+    .search-wrap { display: none !important; }
+
+    /* Gender bar */
+    .gender-bar-reseller {
+      display: flex !important;
+      padding: 8px 0 !important;
+      gap: 0 !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee !important;
+      overflow: hidden !important;
+    }
+    .gender-bar-reseller > span { display: none !important; }
+    .gender-chips-inner {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 6px !important;
+      padding: 0 14px !important;
+      width: 100% !important;
+    }
+    .gender-chips-inner::-webkit-scrollbar { display: none; }
+
+    /* Brand bar */
+    #brandBar {
+      display: flex !important;
+      padding: 8px 14px !important;
+      gap: 8px !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      align-items: center !important;
+    }
+    #brandBar::-webkit-scrollbar { display: none; }
+    #brandBar > span { display: none !important; }
+    #brandDropdownWrap, #lineDropdownWrap, #modelDropdownWrap { flex-shrink: 0; }
+    #brandDropdownBtn, #lineDropdownBtn, #modelDropdownBtn {
+      min-width: 0 !important; white-space: nowrap;
+      font-size: 10px !important; padding: 5px 10px 6px !important; gap: 5px !important;
+    }
+    #brandDropdownMenu, #lineDropdownMenu, #modelDropdownMenu {
+      position: fixed !important; top: auto !important; left: 12px !important; right: 12px !important;
+      bottom: auto !important; min-width: 0 !important; width: calc(100vw - 24px) !important;
+      max-height: 55vh; overflow-y: auto; z-index: 500 !important;
+      border-radius: 16px !important; box-shadow: 0 8px 40px rgba(0,0,0,0.18) !important;
+    }
+    #brandChips, #lineChips, #modelChips {
+      display: grid !important; grid-template-columns: repeat(2, 1fr) !important;
+      gap: 4px !important; padding: 8px !important; flex-wrap: unset !important; overflow-x: unset !important;
+    }
+    .brand-dd-item { text-align: center !important; padding: 9px 8px !important; font-size: 10px !important; }
 
     .header-top { padding: 0 12px; height: auto; flex-wrap: wrap; gap: 0; align-items: center; }
     .logo {
@@ -508,29 +599,10 @@
     .filter-chips::-webkit-scrollbar { display: none; }
     .cat-chip { padding: 5px 12px; font-size: 10px; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
 
-    .sort-bar { padding: 8px 14px; gap: 6px; flex-wrap: wrap; }
-    .sort-chips { gap: 4px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
-    .sort-chips::-webkit-scrollbar { display: none; }
-    .sort-chip { padding: 4px 10px; font-size: 10px; letter-spacing: 1px; white-space: nowrap; flex-shrink: 0; }
-    .visible-count-label { display: none; }
-    .search-wrap { width: 100%; order: 10; }
     .search-input { width: 100% !important; font-size: 12px; }
     .search-input:focus { width: 100% !important; }
 
-    .gender-bar-reseller { padding: 8px 14px !important; gap: 6px !important; }
-    .gender-bar-reseller .cat-chips,
-    .gender-bar-reseller > div { overflow-x: auto; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
-
-    .brand-bar { padding: 8px 14px !important; }
-    #brandLevel1,
-    #brandLevel2,
-    #brandLevel3 { padding: 8px 14px !important; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    #brandChips,
-    #lineChips,
-    #modelChips { flex-wrap: nowrap !important; overflow-x: auto; gap: 5px; padding-bottom: 2px; }
-    #brandChips::-webkit-scrollbar,
-    #lineChips::-webkit-scrollbar,
-    #modelChips::-webkit-scrollbar { display: none; }
+    #mobileSearchRow { display: block !important; }
 
     .product-group-header { padding: 0 14px 12px; }
     .product-group-scroll { padding: 0 10px 10px; }
@@ -800,6 +872,14 @@
     <div class="search-wrap">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="applyView()">
+    </div>
+  </div>
+
+  <!-- Mobile inline search row (only visible on mobile) -->
+  <div id="mobileSearchRow" style="display:none;padding:8px 14px;background:#fff;border-bottom:1px solid #eee;">
+    <div class="search-wrap" style="width:100%;display:flex;">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" type="text" placeholder="Search products…" oninput="document.getElementById('searchInput').value=this.value;applyView();" style="width:100%">
     </div>
   </div>
 
