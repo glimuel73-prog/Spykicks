@@ -401,26 +401,117 @@
   .trust-item-text span { font-size: 12px; color: #555; letter-spacing: .5px; }
 
   @media (max-width: 768px) {
-    /* Hide all desktop filter bars — replaced by mobile filter panel */
-    .section-header, .sort-bar, .gender-bar, #brandBar { display: none !important; }
-    #mobileFilterBar { display: flex !important; }
-    .mfp-chip { padding: 7px 14px; border: 1px solid #ccc; background: none; color: #666; font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; border-radius: 20px; white-space: nowrap; transition: all .15s; }
-    .mfp-chip.active, .mfp-chip:hover { border-color: #000; color: #fff; background: #000; }
-    .gender-bar { padding: 10px 16px !important; }
-  }
+    /* Show filters inline on mobile — no hidden panel */
+    #mobileFilterBar { display: none !important; }
 
-  /* ── Mobile: Brand / Line / Model filter bar ── */
-  @media (max-width: 768px) {
-    #brandBar {
-      padding: 8px 12px !important;
-      gap: 8px !important;
-      overflow-x: auto;
+    /* Section header: title + category chips, scrollable */
+    .section-header {
+      display: flex !important;
+      flex-direction: column !important;
+      padding: 10px 0 0 !important;
+      gap: 0 !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee;
+    }
+    .section-title {
+      padding: 0 14px 8px !important;
+      font-size: 10px !important;
+    }
+    .filter-chips {
+      display: flex !important;
       flex-wrap: nowrap !important;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 6px !important;
+      padding: 0 14px 10px !important;
+    }
+    .filter-chips::-webkit-scrollbar { display: none; }
+    .chip { white-space: nowrap; flex-shrink: 0; padding: 5px 12px; font-size: 10px; }
+
+    /* Sort bar: horizontal scroll, no label */
+    .sort-bar {
+      display: flex !important;
+      padding: 8px 0 !important;
+      gap: 0 !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee !important;
+      overflow: hidden !important;
+    }
+    .sort-label { display: none !important; }
+    .sort-chips {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 6px !important;
+      padding: 0 14px !important;
+      flex: 1 !important;
+    }
+    .sort-chips::-webkit-scrollbar { display: none; }
+    .sort-chip { white-space: nowrap; flex-shrink: 0; padding: 5px 12px; font-size: 10px; letter-spacing: 1px; }
+    .search-wrap { display: none !important; }
+    .product-count { display: none !important; }
+
+    /* Gender bar: horizontal scroll */
+    .gender-bar {
+      display: flex !important;
+      padding: 8px 0 !important;
+      gap: 0 !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee !important;
+      overflow: hidden !important;
+    }
+    .gender-bar > span { display: none !important; }
+    .gender-bar > div {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      gap: 6px !important;
+      padding: 0 14px !important;
+      width: 100% !important;
+    }
+    .gender-bar > div::-webkit-scrollbar { display: none; }
+    .gender-bar .sort-chip { white-space: nowrap; flex-shrink: 0; padding: 5px 12px; font-size: 10px; letter-spacing: 1px; }
+
+    /* Brand bar: horizontal scroll of dropdown buttons */
+    #brandBar {
+      display: flex !important;
+      padding: 8px 14px !important;
+      gap: 8px !important;
+      background: #fff !important;
+      border-bottom: 1px solid #eee !important;
+      overflow-x: auto !important;
+      flex-wrap: nowrap !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      align-items: center !important;
     }
     #brandBar::-webkit-scrollbar { display: none; }
-    #brandBar > span { display: none; } /* hide "Brand" label to save space */
+    #brandBar > span { display: none !important; }
+
+    /* Search — show as its own full-width row below all filters */
+    .sort-bar + .gender-bar { margin-top: 0; }
+  }
+
+  /* Mobile inline search row */
+  #mobileSearchRow {
+    display: none;
+    padding: 8px 14px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+  }
+  @media (max-width: 768px) {
+    #mobileSearchRow { display: block; }
+    #mobileSearchRow .search-wrap { display: flex !important; width: 100%; }
+    #mobileSearchRow .search-input { width: 100% !important; font-size: 12px; }
+  }
+
+  /* Mobile brand/line/model dropdowns — keep menus full-width */
+  @media (max-width: 768px) {
     #brandDropdownWrap,
     #lineDropdownWrap,
     #modelDropdownWrap { flex-shrink: 0; }
@@ -430,7 +521,7 @@
       min-width: 0 !important;
       white-space: nowrap;
       font-size: 10px !important;
-      padding: 6px 10px !important;
+      padding: 5px 10px 6px !important;
       gap: 5px !important;
     }
     /* Keep dropdown menus visible within viewport */
@@ -898,6 +989,14 @@
     <div class="search-wrap">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="applyFiltersAndSort()">
+    </div>
+  </div>
+
+  <!-- Mobile inline search row (only visible on mobile) -->
+  <div id="mobileSearchRow">
+    <div class="search-wrap" style="width:100%">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" type="text" placeholder="Search products…" oninput="document.getElementById('searchInput').value=this.value;applyFiltersAndSort();">
     </div>
   </div>
 
