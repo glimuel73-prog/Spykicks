@@ -77,6 +77,9 @@
   .na-title { font-family: Arial, sans-serif; font-weight: 900; font-size: 24px; color: #111; letter-spacing: -.3px; display: flex; align-items: center; gap: 10px; }
   .na-title-badge { background: #111; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; vertical-align: middle; }
   #newArrivalsScroll.product-grid { padding: 0 40px; }
+  #newArrivalsScroll .img-card-wrap { border-radius: 4px; overflow: hidden; margin-bottom: 0; }
+  #newArrivalsScroll .card-carousel-slide { position: relative; min-width: 100%; width: 100%; height: 100%; flex-shrink: 0; }
+  #newArrivalsScroll .card-carousel-slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 8px; display: block; }
   @media (max-width: 768px) {
     #newArrivalsScroll.product-grid { padding: 0 12px; grid-template-columns: repeat(2, 1fr) !important; }
     .na-header { padding: 20px 16px 12px; }
@@ -2959,7 +2962,11 @@ function cardCarouselGoTo(wrap, idx) {
   idx = Math.max(0, Math.min(imgs.length - 1, idx));
   wrap.dataset.idx = idx;
   const track = wrap.querySelector('.card-carousel-track');
-  if (track) track.style.transform = `translateX(-${idx * 100}%)`;
+  if (track) {
+    const carousel = track.parentElement;
+    const slideW = carousel ? carousel.offsetWidth : (track.firstElementChild ? track.firstElementChild.offsetWidth : 0);
+    track.style.transform = `translateX(-${idx * slideW}px)`;
+  }
   wrap.querySelectorAll('.card-carousel-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
   const prev = wrap.querySelector('.card-carousel-arrow.prev');
   const next = wrap.querySelector('.card-carousel-arrow.next');
@@ -2971,8 +2978,30 @@ function initCardCarousels(root) {
   (root || document).querySelectorAll('.img-card-wrap[data-imgs-b64]').forEach(wrap => {
     const imgs = _carouselImgs(wrap);
     if (!imgs || imgs.length <= 1) return;
+
+    function setSlideSizes() {
+      const carousel = wrap.querySelector('.card-carousel');
+      if (!carousel) return;
+      const w = carousel.offsetWidth;
+      if (!w) return;
+      wrap.querySelectorAll('.card-carousel-slide').forEach(s => {
+        s.style.minWidth = w + 'px';
+        s.style.width = w + 'px';
+      });
+      const idx = Number(wrap.dataset.idx) || 0;
+      const track = wrap.querySelector('.card-carousel-track');
+      if (track) track.style.transform = `translateX(-${idx * w}px)`;
+    }
+
+    setSlideSizes();
+    requestAnimationFrame(() => { setSlideSizes(); });
+
     if (wrap._carouselInited) return;
     wrap._carouselInited = true;
+
+    const ro = new ResizeObserver(() => setSlideSizes());
+    ro.observe(wrap);
+
     let startX = 0, startY = 0, isDragging = false;
     wrap.addEventListener('touchstart', e => {
       startX = e.touches[0].clientX;
@@ -3042,15 +3071,29 @@ function renderNewArrivals(products) {
     scroll.innerHTML = '';
     const visible = window._naProducts.slice(0, window._naShown);
     visible.forEach(p => {
-      const img = (p.images && p.images[0])
-        ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">`
-        : `<svg viewBox="0 0 80 40" fill="none" style="opacity:.15;width:80px;height:80px;"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#999"/></svg>`;
+      const hasImg = p.images && p.images.length > 0;
+      const imgsAttr = hasImg ? btoa(unescape(encodeURIComponent(JSON.stringify(p.images)))) : '';
+      const slides = hasImg ? p.images.map(function(src){ return '<div class="card-carousel-slide"><img src="' + src + '" alt="' + (p.name||'product').replace(/"/g,'&quot;') + '"></div>'; }).join('') : '';
+      const dots = hasImg && p.images.length > 1 ? '<div class="card-carousel-dots">' + p.images.map(function(_,di){ return '<div class="card-carousel-dot' + (di===0?' active':'') + '"></div>'; }).join('') + '</div>' : '';
+      const arrows = hasImg && p.images.length > 1
+        ? `<button class="card-carousel-arrow prev hidden" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+           <button class="card-carousel-arrow next" onclick="event.stopPropagation();cardCarouselNav(this.closest('[data-imgs-b64]'),1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`
+        : '';
+      const imgHTML = hasImg
+        ? `<div class="img-card-wrap" style="width:100%;padding-top:100%;position:relative;overflow:hidden;" data-imgs-b64="${imgsAttr}" data-idx="0">
+            <div class="card-carousel" style="position:absolute;inset:0;width:100%;height:100%;overflow:hidden;">
+              <div class="card-carousel-track" style="height:100%;display:flex;flex-wrap:nowrap;">${slides}</div>
+              ${dots}
+            </div>
+            ${arrows}
+          </div>`
+        : `<div class="product-img-placeholder"><svg viewBox="0 0 80 40" fill="none" style="opacity:.15;width:80px;height:80px;"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#999"/></svg></div>`;
       const price = p.price ? '₱' + Number(p.price).toLocaleString() : '';
       const card = document.createElement('div');
       card.className = 'product-card';
       card.onclick = () => openPD(p.id);
       card.innerHTML = `
-        <div class="product-img-placeholder">${img}</div>
+        ${imgHTML}
         <div class="product-brand">${p.brand || ''}</div>
         <div class="product-name">${p.name || ''}</div>
         <div class="product-price" style="margin-top:auto;padding-top:10px;">${price}</div>
