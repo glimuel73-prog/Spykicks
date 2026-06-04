@@ -537,7 +537,7 @@
       width: calc(100vw - 24px) !important;
       max-height: 55vh;
       overflow-y: auto;
-      z-index: 500 !important;
+      z-index: 9999 !important;
       border-radius: 16px !important;
       box-shadow: 0 8px 40px rgba(0,0,0,0.18) !important;
     }
@@ -841,7 +841,7 @@
   .brand-dd-item.active { background: #000; color: #fff; }
   @media (max-width: 768px) {
     #brandBar { padding: 8px 14px !important; }
-    #brandDropdownMenu, #lineDropdownMenu, #modelDropdownMenu { position: fixed; left: 14px; right: 14px; width: auto; top: auto; }
+    #brandDropdownMenu, #lineDropdownMenu, #modelDropdownMenu { position: fixed !important; left: 14px !important; right: 14px !important; width: auto !important; top: auto !important; z-index: 9999 !important; }
   }
 
   /* ── Card Image Carousel ── */
