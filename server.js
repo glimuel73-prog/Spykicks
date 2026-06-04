@@ -127,14 +127,12 @@ function broadcastOrdersToContact(contact) {
 
 function broadcastProducts() {
     if (sseClients.size === 0) return;
-    try {
-        const rows = db.prepare("SELECT data FROM products").all();
-        const products = rows.map(r => JSON.parse(r.data));
-        const payload = JSON.stringify({ type: "products", products });
-        for (const res of sseClients) {
-            try { res.write(`data: ${payload}\n\n`); } catch (e) { sseClients.delete(res); }
-        }
-    } catch (e) {}
+    // Send a lightweight ping so clients re-fetch via GET /products themselves.
+    // This avoids pushing the full product list over SSE on slow connections.
+    const payload = JSON.stringify({ type: "products_updated" });
+    for (const res of sseClients) {
+        try { res.write(`data: ${payload}\n\n`); } catch (e) { sseClients.delete(res); }
+    }
 }
 
 const DATA_DIR = "/data";
