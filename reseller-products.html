@@ -1895,6 +1895,7 @@
   window.onload = async () => {
     try {
       const res = await fetch(`/reseller-products?email=${email}`);
+      if (res.ok) window._resellerEtag = res.headers.get('ETag') || '';
       const data = await res.json();
 
       document.getElementById("loading").style.display = "none";
@@ -3036,10 +3037,15 @@
           // Lightweight ping: re-fetch reseller products via HTTP
           if (msg.type === 'products_updated') {
             if (!email) return;
-            fetch(`/reseller-products?email=${encodeURIComponent(email)}`)
-              .then(r => r.json())
+            const _rHeaders = window._resellerEtag ? { 'If-None-Match': window._resellerEtag } : {};
+            fetch(`/reseller-products?email=${encodeURIComponent(email)}`, { headers: _rHeaders })
+              .then(r => {
+                if (r.status === 304) return null;
+                if (r.ok) window._resellerEtag = r.headers.get('ETag') || window._resellerEtag;
+                return r.json();
+              })
               .then(d => {
-                if (!d.authorized || !d.products) return;
+                if (!d || !d.authorized || !d.products) return;
                 window._resellerProducts = d.products.filter(p => {
                   const active = !p.status || p.status === 'active';
                   const pt = p.publishTo || 'both';
