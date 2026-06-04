@@ -1405,7 +1405,7 @@ async function loadAdminProducts() {
 
     const brandBar = document.getElementById('brandBar');
     const brandChips = document.getElementById('brandChips');
-    [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
+    [...brandChips.querySelectorAll('.brand-dd-item:not(#brandChipAll)')].forEach(el => el.remove());
 
 
     const allBrands = [...new Set(products.map(p => (p.brand || '').trim()).filter(Boolean))].sort();
@@ -1413,12 +1413,12 @@ async function loadAdminProducts() {
     if (allBrands.length > 0) {
       allBrands.forEach(brand => {
         const btn = document.createElement('button');
-        btn.className = 'sort-chip';
+        btn.className = 'brand-dd-item';
         btn.textContent = brand;
         btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
         brandChips.appendChild(btn);
       });
-      brandBar.style.display = 'block';
+      brandBar.style.display = 'flex';
     } else {
       brandBar.style.display = 'none';
     }
@@ -2112,8 +2112,11 @@ function filterBrand(brand, btn) {
   activeBrand = brand;
   activeLine = "all";
   activeModel = "all";
-  document.querySelectorAll("#brandChips .sort-chip").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll("#brandChips .brand-dd-item").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  const lbl = document.getElementById("brandDropdownLabel");
+  if (lbl) lbl.textContent = brand === 'all' ? 'All Brands' : (btn ? btn.textContent : brand);
+  if (typeof closeAllBrandDropdowns === 'function') closeAllBrandDropdowns();
   updateLineChips();
   applyFiltersAndSort();
 }
@@ -2121,82 +2124,91 @@ function filterBrand(brand, btn) {
 function filterLine(line, btn) {
   activeLine = line;
   activeModel = "all";
-  document.querySelectorAll("#lineChips .sort-chip").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll("#lineChips .brand-dd-item").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  const lbl = document.getElementById("lineDropdownLabel");
+  if (lbl) lbl.textContent = line === 'all' ? 'All Lines' : (btn ? btn.textContent : line);
+  const modLbl = document.getElementById("modelDropdownLabel");
+  if (modLbl) modLbl.textContent = 'All Models';
+  if (typeof closeAllBrandDropdowns === 'function') closeAllBrandDropdowns();
   updateModelChips();
   applyFiltersAndSort();
 }
 
 function filterModel(model, btn) {
   activeModel = model;
-  document.querySelectorAll("#modelChips .sort-chip").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll("#modelChips .brand-dd-item").forEach(c => c.classList.remove("active"));
   if (btn) btn.classList.add("active");
+  const lbl = document.getElementById("modelDropdownLabel");
+  if (lbl) lbl.textContent = model === 'all' ? 'All Models' : (btn ? btn.textContent : model);
+  if (typeof closeAllBrandDropdowns === 'function') closeAllBrandDropdowns();
   applyFiltersAndSort();
 }
 
 function updateLineChips() {
-  const level2 = document.getElementById("brandLevel2");
+  const lineWrap = document.getElementById("lineDropdownWrap");
   const lineChips = document.getElementById("lineChips");
-  const level3 = document.getElementById("brandLevel3");
-  level3.style.display = "none";
-  document.getElementById("modelChips").innerHTML = "";
+  const modelWrap = document.getElementById("modelDropdownWrap");
+  const modelChips = document.getElementById("modelChips");
+  if (modelChips) modelChips.innerHTML = "";
+  if (modelWrap) modelWrap.style.display = "none";
+  const lineLbl = document.getElementById("lineDropdownLabel");
+  if (lineLbl) lineLbl.textContent = "All Lines";
+  const modLbl = document.getElementById("modelDropdownLabel");
+  if (modLbl) modLbl.textContent = "All Models";
 
-  if (activeBrand === "all") {
-    level2.style.display = "none";
-    return;
-  }
+  if (activeBrand === "all") { if (lineWrap) lineWrap.style.display = "none"; return; }
 
-  const prods = (window._allProducts || []);
+  const prods = window._allProducts || [];
   const lines = [...new Set(prods.filter(p => (p.brand||'').toLowerCase() === activeBrand).map(p => (p.brandLine||'').trim()).filter(Boolean))].sort();
-
-  if (!lines.length) {
-    level2.style.display = "none";
-    return;
-  }
+  if (!lines.length) { if (lineWrap) lineWrap.style.display = "none"; return; }
 
   const brandDisplay = prods.find(p => (p.brand||'').toLowerCase() === activeBrand)?.brand || activeBrand;
-  const isAllLine = activeLine === 'all';
-  lineChips.innerHTML = `<button class="sort-chip${isAllLine ? ' active' : ''}" onclick="filterLine('all',this)">All ${brandDisplay}</button>`;
+  lineChips.innerHTML = "";
+  const allBtn = document.createElement("button");
+  allBtn.className = "brand-dd-item" + (activeLine === 'all' ? " active" : "");
+  allBtn.textContent = "All " + brandDisplay;
+  allBtn.onclick = function() { filterLine('all', this); };
+  lineChips.appendChild(allBtn);
   lines.forEach(l => {
     const btn = document.createElement("button");
-    btn.className = "sort-chip" + (l.toLowerCase() === activeLine.toLowerCase() ? " active" : "");
+    btn.className = "brand-dd-item" + (l.toLowerCase() === activeLine.toLowerCase() ? " active" : "");
     btn.textContent = l;
     btn.onclick = function() { filterLine(l, this); };
     lineChips.appendChild(btn);
   });
-  level2.style.display = "flex";
+  if (lineWrap) lineWrap.style.display = "inline-block";
 }
 
 function updateModelChips() {
-  const level3 = document.getElementById("brandLevel3");
+  const modelWrap = document.getElementById("modelDropdownWrap");
   const modelChips = document.getElementById("modelChips");
+  const modLbl = document.getElementById("modelDropdownLabel");
+  if (modLbl) modLbl.textContent = "All Models";
 
-  if (activeLine === "all") {
-    level3.style.display = "none";
-    return;
-  }
+  if (activeLine === "all") { if (modelWrap) modelWrap.style.display = "none"; return; }
 
-  const prods = (window._allProducts || []);
+  const prods = window._allProducts || [];
   const models = [...new Set(
     prods.filter(p => (p.brand||'').toLowerCase() === activeBrand && (p.brandLine||'').toLowerCase() === activeLine.toLowerCase())
          .map(p => (p.brandModel||'').trim()).filter(Boolean)
   )].sort();
+  if (!models.length) { if (modelWrap) modelWrap.style.display = "none"; return; }
 
-  if (!models.length) {
-    level3.style.display = "none";
-    return;
-  }
-
-  const isAllModel = activeModel === 'all';
-  modelChips.innerHTML = `<button class="sort-chip${isAllModel ? ' active' : ''}" onclick="filterModel('all',this)">All ${activeLine}</button>`;
+  modelChips.innerHTML = "";
+  const allBtn = document.createElement("button");
+  allBtn.className = "brand-dd-item" + (activeModel === 'all' ? " active" : "");
+  allBtn.textContent = "All " + activeLine;
+  allBtn.onclick = function() { filterModel('all', this); };
+  modelChips.appendChild(allBtn);
   models.forEach(m => {
     const btn = document.createElement("button");
-    btn.className = "sort-chip" + (m.toLowerCase() === activeModel.toLowerCase() ? " active" : "");
+    btn.className = "brand-dd-item" + (m.toLowerCase() === activeModel.toLowerCase() ? " active" : "");
     btn.textContent = m;
     btn.onclick = function() { filterModel(m, this); };
     modelChips.appendChild(btn);
   });
-  level3.style.display = "flex";
+  if (modelWrap) modelWrap.style.display = "inline-block";
 }
 
 function sortProducts(sort, btn) {
@@ -3062,12 +3074,12 @@ function applyLiveProducts(products) {
 
   const brandBar = document.getElementById('brandBar');
   const brandChips = document.getElementById('brandChips');
-  [...brandChips.querySelectorAll('.sort-chip:not(#brandChipAll)')].forEach(el => el.remove());
+  [...brandChips.querySelectorAll('.brand-dd-item:not(#brandChipAll)')].forEach(el => el.remove());
   const allBrands = [...new Set(activeProducts.map(p => (p.brand||'').trim()).filter(Boolean))].sort();
   if (allBrands.length > 0) {
     allBrands.forEach(brand => {
       const btn = document.createElement('button');
-      btn.className = 'sort-chip';
+      btn.className = 'brand-dd-item';
       if (brand.toLowerCase() === activeBrand) btn.classList.add('active');
       btn.textContent = brand;
       btn.onclick = function() { filterBrand(brand.toLowerCase(), this); };
@@ -3075,7 +3087,7 @@ function applyLiveProducts(products) {
     });
     const allBrandChip = document.getElementById('brandChipAll');
     if (allBrandChip) allBrandChip.classList.toggle('active', activeBrand === 'all');
-    brandBar.style.display = 'block';
+    brandBar.style.display = 'flex';
     updateLineChips();
     updateModelChips();
   } else { brandBar.style.display = 'none'; }
