@@ -1558,16 +1558,21 @@
     activeBrand = (sample.brand || '').toLowerCase();
     activeLine = sample.brandLine || 'all';
     activeModel = 'all';
-    const bc = document.querySelector(`#brandChips .brand-dd-item:not(#brandChipAll)`);
     document.querySelectorAll("#brandChips .brand-dd-item").forEach(c => c.classList.remove('active'));
-    const allBrandBtns = document.querySelectorAll("#brandChips .brand-dd-item");
-    allBrandBtns.forEach(c => { if (c.textContent.trim().toLowerCase() === activeBrand) c.classList.add('active'); });
+    document.querySelectorAll("#brandChips .brand-dd-item").forEach(c => {
+      if (c.textContent.trim().toLowerCase() === activeBrand) c.classList.add('active');
+    });
+    const lbl = document.getElementById("brandDropdownLabel");
+    if (lbl) lbl.textContent = sample.brand || activeBrand;
     updateLineChips();
     if (activeLine !== 'all') {
-      document.querySelectorAll('#lineChips .sort-chip').forEach(c => {
+      document.querySelectorAll('#lineChips .brand-dd-item').forEach(c => {
         if (c.textContent.trim().toLowerCase() === activeLine.toLowerCase()) c.classList.add('active');
       });
+      const lineLbl = document.getElementById("lineDropdownLabel");
+      if (lineLbl) lineLbl.textContent = sample.brandLine || activeLine;
     }
+    updateModelChips();
     applyView();
   }
 
