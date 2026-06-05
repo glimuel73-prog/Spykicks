@@ -393,8 +393,7 @@
   .trust-item-text span { font-size: 12px; color: #555; letter-spacing: .5px; }
 
   @media (max-width: 768px) {
-    .gender-bar { padding: 10px 16px !important; }
-  }
+}
 
   @media (max-width: 768px) {
     .header { position: sticky; top: 0; z-index: 100; }
@@ -686,6 +685,45 @@
   .groups-pg-btn:disabled { opacity: .3; cursor: not-allowed; }
   .groups-pg-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; cursor: pointer; border: none; padding: 0; transition: background .15s, transform .15s; flex-shrink: 0; }
   .groups-pg-dot.active { background: #111; transform: scale(1.3); }
+
+  /* ── Brand dropdowns on mobile ── */
+  @media (max-width: 768px) {
+    .brand-chips-row { display: none !important; }
+    .brand-select-row { display: flex !important; }
+  }
+  @media (min-width: 769px) {
+    .brand-select-row { display: none !important; }
+  }
+  .brand-select-row {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #fff;
+    flex-wrap: wrap;
+  }
+  .brand-select-row + .brand-select-row { background: #fafafa; }
+  .brand-select-row + .brand-select-row + .brand-select-row { background: #f5f5f5; }
+  .brand-select {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #111;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .brand-select:focus { border-color: #000; }
 </style>
 <body>
 
@@ -759,36 +797,46 @@
       <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="applyFiltersAndSort()">
     </div>
   </div>
-
-  <div style="display:flex;align-items:center;gap:8px;padding:10px 40px;max-width:100%;margin:0 auto;background:#fff;flex-wrap:wrap;" class="gender-bar">
-    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Gender</span>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="sort-chip active" id="genderChipAll" onclick="filterGender('all',this)">All</button>
-      <button class="sort-chip" id="genderChipMale" onclick="filterGender('male',this)">♂ Men's</button>
-      <button class="sort-chip" id="genderChipFemale" onclick="filterGender('female',this)">♀ Women's</button>
-      <button class="sort-chip" id="genderChipUnisex" onclick="filterGender('unisex',this)">⚥ Unisex</button>
-    </div>
-  </div>
+</div>
 
   <div id="brandBar" style="display:none;background:#fff;">
 
-    <div id="brandLevel1" style="display:flex;align-items:center;gap:8px;padding:10px 40px;flex-wrap:wrap;">
+    <div id="brandLevel1" class="brand-chips-row" style="display:flex;align-items:center;gap:8px;padding:10px 40px;flex-wrap:wrap;">
       <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
       <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
       </div>
     </div>
+    <div class="brand-select-row" id="brandSelectRow1">
+      <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
+      <select class="brand-select" id="brandSelectMobile" onchange="onBrandSelectChange(this)">
+        <option value="all">All Brands</option>
+      </select>
+    </div>
 
-    <div id="brandLevel2" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 56px;flex-wrap:wrap;background:#fafafa;">
+    <div id="brandLevel2" class="brand-chips-row" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 56px;flex-wrap:wrap;background:#fafafa;">
       <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#bbb;flex-shrink:0;">Line</span>
       <div id="lineChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
+    <div class="brand-select-row" id="brandSelectRow2" style="display:none;background:#fafafa;">
+      <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#bbb;flex-shrink:0;">Line</span>
+      <select class="brand-select" id="lineSelectMobile" onchange="onLineSelectChange(this)">
+        <option value="all">All Lines</option>
+      </select>
+    </div>
 
-    <div id="brandLevel3" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 72px;flex-wrap:wrap;background:#f5f5f5;">
+    <div id="brandLevel3" class="brand-chips-row" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 72px;flex-wrap:wrap;background:#f5f5f5;">
       <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#ccc;flex-shrink:0;">Model</span>
       <div id="modelChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
+    <div class="brand-select-row" id="brandSelectRow3" style="display:none;background:#f5f5f5;">
+      <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#ccc;flex-shrink:0;">Model</span>
+      <select class="brand-select" id="modelSelectMobile" onchange="onModelSelectChange(this)">
+        <option value="all">All Models</option>
+      </select>
+    </div>
   </div>
+
 
   <!-- ── New Arrivals Feature Section ── -->
   <div id="newArrivalsSection">
@@ -1864,7 +1912,7 @@ function showTab(tabId, btn) {
   if (btn) btn.classList.add("active");
 }
 
-let activeCategory = "all", activeSort = "default", activeGender = "all", activeBrand = "all", activeLine = "all", activeModel = "all";
+let activeCategory = "all", activeSort = "default", activeBrand = "all", activeLine = "all", activeModel = "all";
 const ITEMS_PER_PAGE = 24;
 let currentPage = 1;
 let _filteredProducts = [];
@@ -1885,13 +1933,12 @@ function _applyFiltersAndRender() {
   _filteredProducts = allProds.filter(p => {
     const cat = (p.category || 'other').toLowerCase();
     const catMatch = activeCategory === "all" || (activeCategory === "new-arrivals" ? !!p.newArrival : cat === activeCategory);
-    const genderMatch = activeGender === "all" || !p.gender || p.gender.toLowerCase() === activeGender;
     const brandMatch = activeBrand === "all" || (p.brand || "").toLowerCase() === activeBrand;
     const lineMatch = activeLine === "all" || (p.brandLine || "").toLowerCase() === activeLine.toLowerCase();
     const modelMatch = activeModel === "all" || (p.brandModel || "").toLowerCase() === activeModel.toLowerCase();
     const nameMatch = !query || (p.name || "").toLowerCase().includes(query) || (p.brand || "").toLowerCase().includes(query);
     const statusMatch = !p.status || p.status === 'active';
-    return catMatch && genderMatch && brandMatch && lineMatch && modelMatch && nameMatch && statusMatch;
+    return catMatch && brandMatch && lineMatch && modelMatch && nameMatch && statusMatch;
   });
 
   _filteredProducts.sort((a, b) => {
@@ -1907,7 +1954,7 @@ function _applyFiltersAndRender() {
   document.getElementById("productCount").textContent = count + " item" + (count !== 1 ? "s" : "");
   noResults.style.display = count === 0 ? "block" : "none";
 
-  const useGrouped = activeCategory === "all" && activeGender === "all" && activeBrand === "all" && activeLine === "all" && activeModel === "all" && !query && activeSort === "default";
+  const useGrouped = activeCategory === "all" && activeBrand === "all" && activeLine === "all" && activeModel === "all" && !query && activeSort === "default";
 
   const naSection = document.getElementById('newArrivalsSection');
   if (naSection) {
@@ -2184,7 +2231,6 @@ function viewAllGroup(groupName) {
   if (shopBtn) shopBtn.classList.add('active');
 
   activeCategory = 'all';
-  activeGender = 'all';
   activeSort = 'default';
 
 
@@ -2195,10 +2241,6 @@ function viewAllGroup(groupName) {
   document.querySelectorAll('#categoryChips .chip').forEach(c => c.classList.remove('active'));
   const allCatChip = document.querySelector('#categoryChips .chip');
   if (allCatChip) allCatChip.classList.add('active');
-
-  document.querySelectorAll('#genderChipAll, #genderChipMale, #genderChipFemale, #genderChipUnisex').forEach(c => c.classList.remove('active'));
-  const genderAll = document.getElementById('genderChipAll');
-  if (genderAll) genderAll.classList.add('active');
 
   document.querySelectorAll('.sort-chips .sort-chip').forEach(c => c.classList.remove('active'));
   const defaultSortBtn = document.querySelector('.sort-chips .sort-chip');
@@ -2228,12 +2270,6 @@ function filterProducts(cat, btn) {
   applyFiltersAndSort();
 }
 
-function filterGender(gender, btn) {
-  activeGender = gender;
-  document.querySelectorAll("#genderChipAll, #genderChipMale, #genderChipFemale, #genderChipUnisex").forEach(c => c.classList.remove("active"));
-  if (btn) btn.classList.add("active");
-  applyFiltersAndSort();
-}
 
 function filterBrand(brand, btn) {
   activeBrand = brand;
@@ -2262,6 +2298,7 @@ function filterModel(model, btn) {
 }
 
 function updateLineChips() {
+  setTimeout(syncBrandSelects, 0);
   const level2 = document.getElementById("brandLevel2");
   const lineChips = document.getElementById("lineChips");
   const level3 = document.getElementById("brandLevel3");
@@ -2295,6 +2332,7 @@ function updateLineChips() {
 }
 
 function updateModelChips() {
+  setTimeout(syncBrandSelects, 0);
   const level3 = document.getElementById("brandLevel3");
   const modelChips = document.getElementById("modelChips");
 
@@ -3182,6 +3220,87 @@ async function loadNewArrivals() {
 loadNewArrivals();
 
 startLiveUpdates();
+
+function onBrandSelectChange(sel) {
+  const val = sel.value;
+  const btn = val === 'all'
+    ? document.getElementById('brandChipAll')
+    : [...document.querySelectorAll('#brandChips .sort-chip')].find(b => b.textContent.trim().toLowerCase() === val);
+  filterBrand(val, btn || sel);
+}
+function onLineSelectChange(sel) {
+  const val = sel.value;
+  const btn = val === 'all'
+    ? document.querySelector('#lineChips .sort-chip')
+    : [...document.querySelectorAll('#lineChips .sort-chip')].find(b => b.textContent.trim().toLowerCase() === val.toLowerCase());
+  filterLine(val, btn || sel);
+}
+function onModelSelectChange(sel) {
+  const val = sel.value;
+  const btn = val === 'all'
+    ? document.querySelector('#modelChips .sort-chip')
+    : [...document.querySelectorAll('#modelChips .sort-chip')].find(b => b.textContent.trim().toLowerCase() === val.toLowerCase());
+  filterModel(val, btn || sel);
+}
+function syncBrandSelects() {
+  const brandSel = document.getElementById('brandSelectMobile');
+  if (!brandSel) return;
+  // Rebuild brand options
+  const chips = [...document.querySelectorAll('#brandChips .sort-chip')];
+  brandSel.innerHTML = '<option value="all">All Brands</option>';
+  chips.filter(c => c.id !== 'brandChipAll').forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.textContent.trim().toLowerCase();
+    opt.textContent = c.textContent.trim();
+    brandSel.appendChild(opt);
+  });
+  brandSel.value = activeBrand === 'all' ? 'all' : activeBrand;
+
+  // Sync line select
+  const lineSel = document.getElementById('lineSelectMobile');
+  const lineRow = document.getElementById('brandSelectRow2');
+  const lineChipsEl = document.getElementById('lineChips');
+  if (lineSel && lineRow) {
+    const lineChips = [...(lineChipsEl ? lineChipsEl.querySelectorAll('.sort-chip') : [])];
+    if (lineChips.length > 0 && activeBrand !== 'all') {
+      lineSel.innerHTML = '';
+      lineChips.forEach(c => {
+        const opt = document.createElement('option');
+        const val = c.textContent.trim();
+        opt.value = val.toLowerCase().startsWith('all ') ? 'all' : val.toLowerCase();
+        opt.textContent = val;
+        lineSel.appendChild(opt);
+      });
+      lineSel.value = activeLine === 'all' ? lineSel.options[0]?.value : activeLine.toLowerCase();
+      lineRow.style.display = '';
+    } else {
+      lineRow.style.display = 'none';
+    }
+  }
+
+  // Sync model select
+  const modelSel = document.getElementById('modelSelectMobile');
+  const modelRow = document.getElementById('brandSelectRow3');
+  const modelChipsEl = document.getElementById('modelChips');
+  if (modelSel && modelRow) {
+    const modelChips = [...(modelChipsEl ? modelChipsEl.querySelectorAll('.sort-chip') : [])];
+    if (modelChips.length > 0 && activeLine !== 'all') {
+      modelSel.innerHTML = '';
+      modelChips.forEach(c => {
+        const opt = document.createElement('option');
+        const val = c.textContent.trim();
+        opt.value = val.toLowerCase().startsWith('all ') ? 'all' : val.toLowerCase();
+        opt.textContent = val;
+        modelSel.appendChild(opt);
+      });
+      modelSel.value = activeModel === 'all' ? modelSel.options[0]?.value : activeModel.toLowerCase();
+      modelRow.style.display = '';
+    } else {
+      modelRow.style.display = 'none';
+    }
+  }
+}
+
 </script>
 </body>
 </html>
