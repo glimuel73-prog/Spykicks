@@ -1068,6 +1068,8 @@
       if (brandBar) brandBar.style.display = "none";
       const pgBar = document.getElementById("groupsPagePagination");
       if (pgBar) pgBar.style.display = "none";
+      const naSection = document.getElementById("newArrivalsSection");
+      if (naSection) naSection.classList.remove("visible");
       document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     } else {
       currentCat = 'all';
@@ -1084,6 +1086,10 @@
       if (brandBar) brandBar.style.display = document.getElementById('brandChips')?.querySelectorAll('.sort-chip:not(#brandChipAll)').length > 0 ? 'block' : 'none';
       const pgBar = document.getElementById("groupsPagePagination");
       if (pgBar) pgBar.style.display = "";
+      if (window._naRProducts && window._naRProducts.length > 0) {
+        const naSection = document.getElementById("newArrivalsSection");
+        if (naSection) naSection.classList.add("visible");
+      }
 
       document.querySelectorAll("#catChips .cat-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
       document.querySelectorAll(".sort-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
@@ -2737,7 +2743,7 @@
       if (resellerProds.length === 0) { section.classList.remove('visible'); return; }
       window._naRProducts = resellerProds;
       window._naRShown = 12;
-      section.classList.add('visible');
+      if (!showingFavs) section.classList.add('visible');
       window.naRRenderCards();
     } catch(e) {}
   }
