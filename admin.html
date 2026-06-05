@@ -3761,8 +3761,7 @@ async function saveProduct() {
 
     await saveOneProduct(product);
     closeModal();
-    renderProductsTable();
-    renderDashboard();
+    await loadProductsFromBackend();
     showToast(editingId ? 'Product updated!' : 'Product added!');
   } catch(err) {
     console.error('saveProduct error:', err);
