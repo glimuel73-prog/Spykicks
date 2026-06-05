@@ -363,10 +363,11 @@
     .pd-size.selected { transform: scale(1.06); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
 
     /* Swipe carousel replaces main img + thumbs on mobile */
+    .pd-left { display: block; }
     .pd-main-img { display: none !important; }
     .pd-thumbs { display: none !important; }
     .pd-img-actions { display: none !important; }
-    .pd-swipe-wrap { position: relative; width: 100%; background: #e8e8e8; flex-shrink: 0; }
+    .pd-swipe-wrap { display: block; position: relative; width: 100%; background: #e8e8e8; }
     .pd-swipe-track { display: flex; overflow-x: scroll; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; width: 100%; }
     .pd-swipe-track::-webkit-scrollbar { display: none; }
     .pd-swipe-slide { flex: 0 0 100%; width: 100%; aspect-ratio: 1/1; overflow: hidden; scroll-snap-align: start; }
@@ -378,6 +379,7 @@
     .pd-swipe-btn { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.12); color: #444; font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; padding: 7px 14px; border-radius: 6px; cursor: pointer; }
     .pd-swipe-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
   }
+  .pd-swipe-wrap { display: none; }
   .pd-swipe-track { display: none; }
 
   .footer { background: #111; border-top: 1px solid #222; padding: 40px; display: flex; align-items: center; justify-content: space-between; max-width: 100%; margin-left: auto; margin-right: auto; }
