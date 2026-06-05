@@ -2304,10 +2304,8 @@
   (function initResellerSSE() {
     let es;
     let reconnectDelay = 3000;
-    let _firstMessageConsumed = false;
 
     function connect() {
-      _firstMessageConsumed = false;
       es = new EventSource('/events/products');
 
       es.onmessage = (event) => {
@@ -2321,15 +2319,7 @@
             return pt === 'reseller' || pt === 'both';
           });
           const incomingIds = new Set(incoming.map(p => String(p.id)));
-
-          if (!_firstMessageConsumed) {
-            _firstMessageConsumed = true;
-            incoming.forEach(p => {
-              const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
-              if (idx !== -1) window._resellerProducts[idx] = p;
-            });
-            return;
-          }
+          const currentIds = new Set((window._resellerProducts || []).map(p => String(p.id)));
 
           incoming.forEach(p => {
             const card = document.querySelector(`.product-card[data-id="${CSS.escape(String(p.id))}"]`);
