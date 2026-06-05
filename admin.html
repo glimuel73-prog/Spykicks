@@ -2913,6 +2913,7 @@ function adminLogout() {
 
 
 let products = [];
+let invProducts = []; // independent inventory data
 let editingId = null;
 let deleteId = null;
 let imageDataURLs = [];
@@ -2954,7 +2955,7 @@ function showPage(page, el) {
   if (page === 'resellers') loadResellers();
   if (page === 'settings') { loadSocialLinks(); }
   if (page === 'orders') loadOrders();
-  if (page === 'inventory') renderInventoryTable();
+  if (page === 'inventory') loadInventoryProducts();
   if (page === 'new-arrivals') loadNewArrivalsPage();
 }
 
@@ -4934,7 +4935,7 @@ async function deleteBuyerOrder(orderId) {
 
 
 function openInvEdit(productId) {
-  const p = products.find(x => x.id === productId);
+  const p = invProducts.find(x => x.id === productId);
   if (!p) return;
 
   const hasSizeObjects = p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null);
@@ -4997,7 +4998,7 @@ async function saveInvEdit() {
   const productId = document.getElementById('invEditProductId').value;
   const inputs = document.querySelectorAll('#invEditSizesBody input[data-size]');
   const supplier = document.getElementById('invEditSupplier').value.trim();
-  const p = products.find(x => x.id === productId);
+  const p = invProducts.find(x => x.id === productId);
   const wholesalePrice = p ? (p.wholesalePrice || 0) : 0;
 
   const sizes = [...inputs].map(inp => ({
@@ -5065,6 +5066,11 @@ renderSizeGrid();
               if (existing && existing.newArrival !== undefined) p.newArrival = existing.newArrival;
             });
             products = incoming;
+            // Sync invProducts from SSE only when inventory tab is not open
+            // (when open, it has its own fresh fetch via loadInventoryProducts)
+            if (!document.getElementById('page-inventory')?.classList.contains('active')) {
+              invProducts = incoming.map(p => ({ ...p }));
+            }
             renderProductsTable();
             renderDashboard();
             if (document.getElementById('page-inventory')?.classList.contains('active')) {
@@ -5184,12 +5190,26 @@ function invSort(key) {
   renderInventoryTable();
 }
 
+async function loadInventoryProducts() {
+  try {
+    const res = await fetch('/admin/products', { credentials: 'include' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    invProducts = data.products || [];
+  } catch (err) {
+    console.warn('Inventory fetch failed:', err.message);
+    showToast('Could not load inventory data. Please try again.', true);
+    invProducts = [];
+  }
+  renderInventoryTable();
+}
+
 function renderInventoryTable() {
   const q       = (document.getElementById('invSearch')?.value || '').toLowerCase().trim();
   const fStatus  = document.getElementById('invFilterStatus')?.value || '';
   const fPublish = document.getElementById('invFilterPublish')?.value || '';
 
-  let rows = products.map(p => ({ ...p, totalStock: invEffectiveStock(p) }));
+  let rows = invProducts.map(p => ({ ...p, totalStock: invEffectiveStock(p) }));
 
   if (q) {
     rows = rows.filter(p =>
@@ -5294,7 +5314,7 @@ function renderInventoryTable() {
 async function saveWholesaleInline(input) {
   const productId = input.dataset.pid;
   const newPrice = Number(input.value) || 0;
-  const p = products.find(x => x.id === productId);
+  const p = invProducts.find(x => x.id === productId);
   if (!p) return;
   if ((p.wholesalePrice || 0) === newPrice) return;
   try {
@@ -5321,7 +5341,7 @@ async function saveWholesaleInline(input) {
 async function saveSupplierInline(input) {
   const productId = input.dataset.pid;
   const newSupplier = input.value.trim();
-  const p = products.find(x => x.id === productId);
+  const p = invProducts.find(x => x.id === productId);
   if (!p) return;
   if ((p.supplier || '') === newSupplier) return;
   try {
@@ -5346,7 +5366,7 @@ async function saveSupplierInline(input) {
 }
 
 function exportInventoryCSV() {
-  const rows = products.map(p => {
+  const rows = invProducts.map(p => {
     const total = invEffectiveStock(p);
     const sizeStr = (p.sizes||[]).map(s => typeof s === 'object' ? `${s.size}:${s.stock}` : s).join(' | ');
     return [
