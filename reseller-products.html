@@ -1168,7 +1168,12 @@
 
     grid.innerHTML = '';
 
-    if (count === 0) { paginationEl.style.display = 'none'; return; }
+    if (count === 0) {
+      paginationEl.style.display = 'none';
+      const existingPg = document.getElementById('groupsPagePagination');
+      if (existingPg) existingPg.remove();
+      return;
+    }
 
     if (useGrouped) {
       paginationEl.style.display = 'none';
@@ -1188,6 +1193,8 @@
       renderGroupsPage(grid, [...groups.entries()], null);
     } else {
       grid.classList.remove('grouped-mode');
+      const existingPg = document.getElementById('groupsPagePagination');
+      if (existingPg) existingPg.remove();
       renderPagedFlatGrid(grid, _filteredProducts);
     }
   }
