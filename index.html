@@ -2615,7 +2615,7 @@ let cart = JSON.parse(localStorage.getItem('buyerCart') || '[]');
 function saveCart() {
   localStorage.setItem('buyerCart', JSON.stringify(cart));
   updateCartBadge();
-  renderCartItems();
+  try { renderCartItems(); } catch(e) { console.error('Cart render error:', e); }
 }
 
 function updateCartBadge() {
