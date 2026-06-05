@@ -329,7 +329,7 @@
   .pd-btn-select:hover { background: #333; }
   .pd-instant { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; margin-bottom: 20px; }
   .pd-instant::before { content: '⚡'; font-size: 13px; }
-  .pd-close { position: absolute; top: 16px; right: 16px; background: none; border: 1px solid #ddd; color: #888; font-size: 18px; width: 36px; height: 36px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; font-family: Arial, sans-serif; border-radius: 50%; }
+  .pd-close { background: none; border: 1px solid #ddd; color: #888; font-size: 18px; width: 36px; height: 36px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; font-family: Arial, sans-serif; border-radius: 50%; flex-shrink: 0; }
   .pd-close:hover { border-color: #000; color: #000; }
   .pd-top-bar { background: #fff; border-bottom: 1px solid #eee; padding: 14px 32px 14px 40px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .pd-breadcrumb { font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #aaa; display: flex; align-items: center; gap: 8px; }
@@ -349,13 +349,12 @@
     }
     .pd-drawer.open { transform: translateY(0); }
     .pd-inner { flex-direction: column; overflow-y: auto; }
-    .pd-left { min-height: unset; padding: 0; flex-shrink: 0; border-radius: 0; position: relative; }
+    .pd-left { min-height: unset; padding: 0; flex-shrink: 0; border-radius: 0; }
     .pd-main-img { max-width: 100%; width: 100%; aspect-ratio: 1/1; border-radius: 0; }
     .pd-main-img img { border-radius: 0; }
     .pd-thumbs { gap: 8px; padding: 10px 12px; }
     .pd-right { width: 100%; padding: 20px 20px 32px; flex-shrink: 0; overflow-y: visible; }
-    .pd-top-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 10; background: rgba(255,255,255,0.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: none; border-radius: 24px 24px 0 0; padding: 12px 16px; }
-    .pd-close { top: 10px; right: 12px; }
+    .pd-top-bar { border-radius: 24px 24px 0 0; padding: 12px 16px; border-bottom: 1px solid #eee; }
     .pd-name { font-size: 22px; }
     .pd-price { font-size: 26px; }
     .pd-specs { grid-template-columns: 1fr; }
