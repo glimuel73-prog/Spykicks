@@ -3285,29 +3285,15 @@ function applyLiveProducts(products) {
     return;
   }
 
-  const prevIds = new Set((window._allProducts || []).map(p => String(p.id)));
-  const newIds = new Set(activeProducts.map(p => String(p.id)));
-  let changed = !_liveInitialized;
-
-  if (!changed) {
-    for (const p of activeProducts) {
-      const prev = (window._allProducts || []).find(x => String(x.id) === String(p.id));
-      if (!prev) { changed = true; break; }
-      const prevStock = prev.sizes?.some(s => typeof s === 'object' && s.stock != null)
-        ? prev.sizes.reduce((s, x) => s + (Number(x.stock)||0), 0) : Number(prev.stock)||0;
-      const newStock = p.sizes?.some(s => typeof s === 'object' && s.stock != null)
-        ? p.sizes.reduce((s, x) => s + (Number(x.stock)||0), 0) : Number(p.stock)||0;
-      if (prevStock !== newStock) { changed = true; break; }
-      if ((p.category||'').toLowerCase() !== (prev.category||'').toLowerCase()) { changed = true; break; }
-      if ((p.brand||'') !== (prev.brand||'')) { changed = true; break; }
-      if ((p.brandLine||'') !== (prev.brandLine||'')) { changed = true; break; }
-      if ((p.brandModel||'') !== (prev.brandModel||'')) { changed = true; break; }
-      if ((p.name||'') !== (prev.name||'')) { changed = true; break; }
-      if (String(p.price||0) !== String(prev.price||0)) { changed = true; break; }    }
-    for (const id of prevIds) { if (!newIds.has(id)) { changed = true; break; } }
-  }
-
-  if (!changed) return;
+  // Compare a fingerprint of all visible fields — catches any edit, not just stock/name
+  const _fp = arr => JSON.stringify(
+    [...arr].sort((a,b) => String(a.id).localeCompare(String(b.id)))
+      .map(p => [p.id, p.name, p.price, p.resellerPrice, p.stock, p.status,
+                 p.publishTo, p.category, p.brand, p.brandLine, p.brandModel,
+                 p.badge, p.colorway, (p.images||[]).join(','),
+                 JSON.stringify(p.sizes||[])])
+  );
+  if (_liveInitialized && _fp(window._allProducts || []) === _fp(activeProducts)) return;
 
   window._allProducts = activeProducts;
   _liveInitialized = true;
