@@ -2578,6 +2578,14 @@ async function submitBuyerOrder() {
         document.getElementById('coSuccessOrderId').textContent = '';
       }
       document.getElementById('checkoutSuccessView').classList.add('show');
+      // Auto-populate contact and refresh orders immediately
+      const contactVal = customer.contact;
+      const lookupInput = document.getElementById('orderLookupContact');
+      if (lookupInput && contactVal) {
+        lookupInput.value = contactVal;
+        if (_ordersSSE) { _ordersSSE.close(); _ordersSSE = null; _ordersSSEContact = null; }
+        setTimeout(() => { lookupOrders(); }, 400);
+      }
     } else {
       const failed = results.filter(d => !d.success);
       throw new Error(failed[0]?.error || 'Unknown error');
@@ -2953,26 +2961,17 @@ function lookupOrders() {
   emptyEl.style.display = '';
   listEl.innerHTML = '';
 
-  const sectionTitle = document.querySelector('#orders .section-title');
-  if (sectionTitle && !document.getElementById('ordersLiveIndicator')) {
-    const ind = document.createElement('span');
-    ind.id = 'ordersLiveIndicator';
-    ind.style.cssText = 'font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-left:12px;vertical-align:middle;display:inline-flex;align-items:center;';
-    sectionTitle.appendChild(ind);
-  }
-
   function connect() {
     const es = new EventSource('/events/orders?contact=' + encodeURIComponent(contact));
     _ordersSSE = es;
     _ordersSSEContact = contact;
 
-    es.onopen = () => _setOrdersLiveIndicator('connected');
+    es.onopen = () => {};
 
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
         if (msg.type === 'orders') {
-          _setOrdersLiveIndicator('connected');
           renderOrdersList(msg.orders, contact);
           document.querySelectorAll('.order-history-card').forEach(card => {
             card.style.transition = 'box-shadow 0.4s';
@@ -2984,7 +2983,6 @@ function lookupOrders() {
     };
 
     es.onerror = () => {
-      _setOrdersLiveIndicator('reconnecting');
       es.close();
       _ordersSSE = null;
       setTimeout(() => {
