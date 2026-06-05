@@ -2701,12 +2701,12 @@ function addToCart() {
       image: (p.images && p.images[0]) || ''
     });
   }
-  saveCart();
-
   const btn = document.getElementById('pdAddToCartBtn');
   btn.textContent = '✓ Added to Cart!';
   btn.classList.add('pd-btn-added');
   setTimeout(() => { btn.textContent = '🛒 Add to Cart'; btn.classList.remove('pd-btn-added'); }, 1800);
+
+  saveCart();
 }
 
 let cartSelectedIndices = new Set();
@@ -2745,7 +2745,7 @@ function renderCartItems() {
       ? `<span style="font-size:10px;color:${atMax ? 'var(--red)' : '#999'};font-family:Arial,sans-serif;letter-spacing:1px;margin-left:4px;">${atMax ? '(max)' : item.maxStock + ' avail'}</span>`
       : '';
     const imgHTML = item.image
-      ? `<img src="${item.image}" alt="${item.name}">`
+      ? `<img src="${item.image}" alt="${(item.name || '').replace(/"/g, '&quot;')}">`
       : `<div style="width:100%;height:100%;background:#eee;display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div>`;
     const checked = cartSelectedIndices.has(idx) ? 'checked' : '';
     return `
