@@ -1143,6 +1143,7 @@ app.get("/events/products", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no"); // disable nginx/Railway proxy buffering
     res.flushHeaders();
 
     try {
@@ -1152,7 +1153,13 @@ app.get("/events/products", (req, res) => {
     } catch (e) {}
 
     sseClients.add(res);
-    req.on("close", () => sseClients.delete(res));
+
+    // Heartbeat every 25s to keep Railway proxy from closing idle connections
+    const heartbeat = setInterval(() => {
+        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
+    }, 25000);
+
+    req.on("close", () => { sseClients.delete(res); clearInterval(heartbeat); });
 });
 
 app.get("/events/orders", (req, res) => {
@@ -1162,6 +1169,7 @@ app.get("/events/orders", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
 
     try {
@@ -1173,9 +1181,14 @@ app.get("/events/orders", (req, res) => {
     if (!sseOrderClients.has(contact)) sseOrderClients.set(contact, new Set());
     sseOrderClients.get(contact).add(res);
 
+    const heartbeat = setInterval(() => {
+        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
+    }, 25000);
+
     req.on("close", () => {
         const clients = sseOrderClients.get(contact);
         if (clients) { clients.delete(res); if (clients.size === 0) sseOrderClients.delete(contact); }
+        clearInterval(heartbeat);
     });
 });
 
@@ -1186,6 +1199,7 @@ app.get("/events/reseller-orders", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
 
     try {
@@ -1197,9 +1211,14 @@ app.get("/events/reseller-orders", (req, res) => {
     if (!sseResellerOrderClients.has(email)) sseResellerOrderClients.set(email, new Set());
     sseResellerOrderClients.get(email).add(res);
 
+    const heartbeat = setInterval(() => {
+        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
+    }, 25000);
+
     req.on("close", () => {
         const clients = sseResellerOrderClients.get(email);
         if (clients) { clients.delete(res); if (clients.size === 0) sseResellerOrderClients.delete(email); }
+        clearInterval(heartbeat);
     });
 });
 
@@ -1207,6 +1226,7 @@ app.get("/events/admin-orders", requireAdmin, (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
 
     try {
@@ -1220,7 +1240,12 @@ app.get("/events/admin-orders", requireAdmin, (req, res) => {
     } catch (e) {}
 
     sseAdminClients.add(res);
-    req.on("close", () => sseAdminClients.delete(res));
+
+    const heartbeat = setInterval(() => {
+        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
+    }, 25000);
+
+    req.on("close", () => { sseAdminClients.delete(res); clearInterval(heartbeat); });
 });
 
 db.exec(`
