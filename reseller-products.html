@@ -560,10 +560,6 @@
   .groups-pg-btn:disabled { opacity: .3; cursor: not-allowed; }
   .groups-pg-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; cursor: pointer; border: none; padding: 0; transition: background .15s, transform .15s; flex-shrink: 0; }
   .groups-pg-dot.active { background: #111; transform: scale(1.3); }
-  .copy-id-btn { background: none; border: none; cursor: pointer; padding: 2px 5px; color: #aaa; transition: color .2s; display: inline-flex; align-items: center; vertical-align: middle; border-radius: 4px; }
-  .copy-id-btn:hover { color: #111; background: #f0f0f0; }
-  .copy-id-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
-  .copy-id-btn.copied { color: #27ae60; }
 
   /* ── Brand dropdowns on mobile ── */
   /* Brand level2/3 hidden by default on desktop, shown by JS */
@@ -859,6 +855,9 @@
     </div>
     <textarea class="cart-note-field" id="cartNote" placeholder="Optional note for admin (e.g. delivery instructions)…"></textarea>
     <button class="cart-checkout-btn" id="checkoutBtn" onclick="submitCheckout()">Submit Checkout Request</button>
+    <button class="cart-checkout-btn" id="emailSaveBtn" onclick="emailCartAndFavs()" style="margin-top:10px;background:#fff;color:#111;border:1.5px solid #111;letter-spacing:2px;">
+      ✉ Email My Cart &amp; Favorites
+    </button>
   </div>
 </div>
 
@@ -957,7 +956,7 @@
   }
 
   const FAV_KEY = `catalog_favs_${email}`;
-  let favorites = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
+  let favorites = [];
   let currentCat = "all";
   let showingFavs = false;
   let activeSort = "default";
@@ -970,7 +969,35 @@
 
   document.getElementById("loading").style.display = "block";
 
-  function saveFavs() { localStorage.setItem(FAV_KEY, JSON.stringify(favorites)); }
+  // ── Server-side persistence helpers ─────────────────────────────────────────
+  let _savePending = false;
+  let _saveTimer = null;
+
+  async function loadResellerData() {
+    try {
+      const r = await fetch(`/reseller/data?email=${encodeURIComponent(email)}`);
+      const d = await r.json();
+      if (Array.isArray(d.favs))  favorites = d.favs;
+      if (Array.isArray(d.cart))  cart = d.cart;
+    } catch (e) {}
+  }
+
+  function scheduleSave() {
+    if (_saveTimer) clearTimeout(_saveTimer);
+    _saveTimer = setTimeout(persistResellerData, 1200);
+  }
+
+  async function persistResellerData() {
+    try {
+      await fetch("/reseller/data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, cart, favs: favorites }),
+      });
+    } catch (e) {}
+  }
+
+  function saveFavs() { updateFavCount(); scheduleSave(); }
 
   function updateFavCount() {
     const count = favorites.length;
@@ -2064,8 +2091,8 @@
 
   document.addEventListener("keydown", e => { if (e.key === "Escape") closePD(); });
 
-  function logout() {
-    localStorage.removeItem("resellerEmail");
+  async function logout() {
+    await persistResellerData();
     window.location.href = "https://brochure-availablestocks.up.railway.app/buyer";
   }
 
@@ -2125,12 +2152,12 @@
   }
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModalDirect(); closeCart(); } });
 
-  let cart = JSON.parse(localStorage.getItem("resellerCart_" + email) || "[]");
+  let cart = [];  // populated by loadResellerData() below
 
   function saveCart() {
-    localStorage.setItem("resellerCart_" + email, JSON.stringify(cart));
     updateCartBadge();
     renderCartItems();
+    scheduleSave();
   }
 
   function updateCartBadge() {
@@ -2449,7 +2476,7 @@
         <div class="order-card">
           <div class="order-card-header">
             <div>
-              <div class="order-id">#${order.id.replace("ORD_","")} <button class="copy-id-btn" title="Copy order ID" onclick="event.stopPropagation();copyOrderId('${order.id.replace("ORD_","")}', this)"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
+              <div class="order-id">#${order.id.replace("ORD_","")}</div>
               <div class="order-date">${dateStr}</div>
             </div>
             <span class="order-status-pill ${meta.cls}">${meta.label}</span>
@@ -2463,19 +2490,6 @@
           ${cancelRow}
         </div>`;
     }).join("");
-  }
-
-  function copyOrderId(id, btn) {
-    navigator.clipboard.writeText(id).then(() => {
-      btn.classList.add('copied');
-      btn.title = 'Copied!';
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
-      setTimeout(() => {
-        btn.classList.remove('copied');
-        btn.title = 'Copy order ID';
-        btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
-      }, 2000);
-    }).catch(() => {});
   }
 
   async function loadOrderHistory() {
@@ -2877,6 +2891,51 @@
       }
     }
   }
+
+  // ── Email cart & favorites ────────────────────────────────────────────────────
+  async function emailCartAndFavs() {
+    const btn = document.getElementById("emailSaveBtn");
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    try {
+      await persistResellerData(); // make sure server has latest data first
+      const r = await fetch("/reseller/save-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        btn.textContent = "✓ Email Sent!";
+        btn.style.background = "#22c55e";
+        btn.style.color = "#fff";
+        btn.style.border = "none";
+        setTimeout(() => {
+          btn.textContent = "✉ Email My Cart & Favorites";
+          btn.style.background = "";
+          btn.style.color = "";
+          btn.style.border = "";
+          btn.disabled = false;
+        }, 3000);
+      } else {
+        alert("Failed to send email: " + (d.error || "Unknown error"));
+        btn.textContent = "✉ Email My Cart & Favorites";
+        btn.disabled = false;
+      }
+    } catch (e) {
+      alert("Connection error. Please try again.");
+      btn.textContent = "✉ Email My Cart & Favorites";
+      btn.disabled = false;
+    }
+  }
+
+  // ── Boot: load server-side cart & favorites, then init the page ───────────
+  (async function boot() {
+    await loadResellerData();
+    updateCartBadge();
+    updateFavCount();
+  })();
 
 </script>
 </body>
