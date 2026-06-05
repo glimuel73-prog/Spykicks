@@ -2997,6 +2997,11 @@
           });
           const incomingIds = new Set(incoming.map(p => String(p.id)));
 
+          // Capture current rendered IDs before any mutation
+          const currentIds = new Set(
+            [...document.querySelectorAll('.product-card[data-id]')].map(c => c.dataset.id)
+          );
+
           if (!_firstMessageConsumed) {
             _firstMessageConsumed = true;
             if (!window._resellerProducts || window._resellerProducts.length === 0) {
@@ -3004,49 +3009,17 @@
               window._resellerProducts = incoming;
               applyView();
             } else {
-              // onload already populated — just patch any updated products
-              incoming.forEach(p => {
-                const idx = window._resellerProducts.findIndex(x => x.id === p.id);
-                if (idx !== -1) window._resellerProducts[idx] = p;
-              });
+              // onload already populated — do a full sync and re-render
+              window._resellerProducts = incoming;
+              applyView();
             }
+            loadResellerNewArrivals();
             return;
           }
 
-          incoming.forEach(p => {
-            const card = document.querySelector(`.product-card[data-id="${CSS.escape(String(p.id))}"]`);
-            if (!card) return;
-
-            let stockNum = Number(p.stock) || 0;
-            if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
-              stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
-            }
-            const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
-
-            const stockEl = card.querySelector('.product-stock');
-            if (stockEl) stockEl.textContent = `Stock: ${stockNum} units`;
-
-            const tagEl = card.querySelector('.product-tag');
-            if (tagEl) {
-              tagEl.textContent = stockLabel;
-              tagEl.style.color = stockNum === 0 ? 'var(--red)' : '';
-              tagEl.style.borderColor = stockNum === 0 ? 'var(--red)' : '';
-            }
-
-            card.style.outline = '2px solid rgba(46,204,113,0.6)';
-            setTimeout(() => { card.style.outline = ''; }, 1200);
-
-            const idx = (window._resellerProducts || []).findIndex(x => x.id === p.id);
-            if (idx !== -1) window._resellerProducts[idx] = p;
-          });
-
-          document.querySelectorAll('.product-card[data-id]').forEach(card => {
-            if (!incomingIds.has(card.dataset.id)) {
-              card.remove();
-            }
-          });
-          window._resellerProducts = (window._resellerProducts || []).filter(p => incomingIds.has(String(p.id)));
-          const _pc1 = document.getElementById('productCount'); if (_pc1) _pc1.textContent = (window._resellerProducts.length || incoming.length) + '+';
+          // Full re-render on every subsequent broadcast so name/price/image
+          // changes appear immediately, not just stock labels.
+          window._resellerProducts = incoming;
 
           (function rebuildCatChips(products) {
             const STATIC = ['all', 'new-arrivals'];
@@ -3065,144 +3038,14 @@
             });
           })(incoming);
 
+          const _pc1 = document.getElementById('productCount'); if (_pc1) _pc1.textContent = incoming.length + '+';
+
           applyView();
           loadResellerNewArrivals();
+
+          // Show a toast for newly added products
           const newProducts = incoming.filter(p => !currentIds.has(String(p.id)));
-
           if (newProducts.length > 0) {
-            window._resellerProducts = [...(window._resellerProducts || []), ...newProducts];
-            const _pc2 = document.getElementById('productCount'); if (_pc2) _pc2.textContent = window._resellerProducts.length + '+';
-
-            newProducts.forEach((p, offset) => {
-              const i = (window._resellerProducts.length - newProducts.length) + offset;
-              const badge    = p.badge || '';
-              const category = (p.category || 'sneakers').toLowerCase();
-              const productId = p.id || `product_sse_${i}`;
-              const isFav = favorites.includes(String(productId));
-              const hasImg = p.images && p.images.length > 0;
-
-              let stockNum = Number(p.stock) || 0;
-              if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
-                stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
-              }
-              const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
-
-              let displayPrice = p.resellerPrice || p.price;
-              if (p.sizes && p.sizes.length > 0 && typeof p.sizes[0] === 'object') {
-                displayPrice = p.sizes[0].resellerPrice || p.resellerPrice || p.price;
-              }
-
-              const imgHTML = hasImg
-                ? `<div class="img-card-wrap product-img-placeholder" style="overflow:hidden;position:relative;">
-                    <img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;" alt="${p.name}">
-                    ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
-                    <button class="img-zoom-btn" data-imgs='${JSON.stringify(p.images).replace(/'/g,"&#39;")}' data-idx="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></button>
-                    <button class="img-dl-btn" data-src="${p.images[0]}" data-name="${(p.name||'product').replace(/"/g,'')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
-                  </div>`
-                : `<div class="product-img-placeholder" style="position:relative;">
-                    ${p.newArrival ? `<div class="product-new-arrival-badge">✦ New Arrival</div>` : ''}
-                    <svg viewBox="0 0 80 40" fill="none"><path d="M4 28c6-6 14-12 24-12 6 0 12 3 18 8l10 4H4z" fill="#fff"/><rect x="4" y="28" width="52" height="5" rx="2" fill="#fff"/></svg>
-                  </div>`;
-
-              const card = document.createElement('div');
-              card.className = 'product-card';
-              card.dataset.id = String(productId);
-              card.dataset.cat = category;
-              card.dataset.gender = (p.gender || '').toLowerCase();
-              card.dataset.newArrival = p.newArrival ? '1' : '0';
-              card.dataset.brand = (p.brand || '').toLowerCase();
-              card.dataset.brandLine = (p.brandLine || '').toLowerCase();
-              card.dataset.brandModel = (p.brandModel || '').toLowerCase();
-              card.dataset.name = (p.name || '').toLowerCase();
-              card.dataset.priceRaw = String(Number(displayPrice) || 0);
-              card.dataset.sortIdx = String(i);
-
-              card.innerHTML = `
-                ${badge ? `<div class="product-corner-badge">${badge}</div>` : ''}
-                ${imgHTML}
-                <div class="product-brand">${p.brand || 'Reseller Collection'}</div>
-                <div class="product-name">${p.name}</div>
-                <div class="product-footer">
-                  <div class="product-price">₱${Number(displayPrice).toLocaleString()}</div>
-                  <div class="product-tag">In Stock</div>
-                </div>
-                ${p.wholesalePrice ? `<div class="product-wholesale">Wholesale: ₱${Number(p.wholesalePrice).toLocaleString()}</div>` : ''}
-                <button class="product-view-btn js-view-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  View Details
-                </button>
-                <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
-                  <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                </button>`;
-
-              card.querySelector('.js-view-btn').addEventListener('click', function(e) {
-                e.stopPropagation();
-                openPD(p, String(productId), category, badge, displayPrice);
-              });
-              card.querySelector('.img-zoom-btn')?.addEventListener('click', function(e) {
-                e.stopPropagation();
-                try { openLightbox(JSON.parse(this.dataset.imgs), 0); } catch(err) {}
-              });
-              card.querySelector('.img-dl-btn')?.addEventListener('click', function(e) {
-                e.stopPropagation();
-                downloadImage(this.dataset.src, this.dataset.name + '.jpg');
-              });
-              card.addEventListener('click', function() {
-                openPD(p, String(productId), category, badge, displayPrice);
-              });
-              card.querySelector('.fav-btn').addEventListener('click', function(e) {
-                e.stopPropagation();
-                toggleFav(String(productId), this);
-              });
-
-              card.style.outline = '2px solid rgba(46,204,113,0.7)';
-              setTimeout(() => { card.style.outline = ''; }, 2500);
-
-              const brand = (p.brand || 'Other').trim();
-              const line = (p.brandLine || '').trim();
-              const groupKey = line ? `${brand} ${line}` : brand;
-              const scrollId = 'scroll_' + groupKey.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-              let scrollEl = document.getElementById(scrollId);
-              if (!scrollEl) {
-                const grid = document.getElementById('productGrid');
-                const group = document.createElement('div');
-                group.className = 'product-group';
-                group.dataset.groupKey = groupKey.toLowerCase();
-                group.innerHTML = `
-                  <div class="product-group-header">
-                    <div class="product-group-title">${groupKey}</div>
-                    <button class="product-group-viewall" onclick="viewAllGroup('${groupKey}')">VIEW ALL →</button>
-                  </div>
-                  <div class="product-group-scroll-wrap">
-                    <button class="scroll-arrow left" onclick="scrollGroup('${scrollId}',-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-                    <div class="product-group-scroll" id="${scrollId}"></div>
-                    <button class="scroll-arrow right" onclick="scrollGroup('${scrollId}',1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-                  </div>`;
-                grid.appendChild(group);
-                scrollEl = group.querySelector('.product-group-scroll');
-              }
-              scrollEl.appendChild(card);
-            });
-
-
-            (function rebuildCatChips(products) {
-              const STATIC = ['all', 'new-arrivals'];
-              const cats = [...new Set(products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC.includes(c)))].sort();
-              const container = document.getElementById('catChips');
-              if (!container) return;
-              const activeCat = (container.querySelector('.cat-chip.active') || container.querySelector('.cat-chip'))?.dataset?.cat || 'all';
-              container.querySelectorAll('.cat-chip[data-custom]').forEach(el => el.remove());
-              cats.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'cat-chip'; btn.dataset.custom = '1'; btn.dataset.cat = cat;
-                btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
-                btn.onclick = function() { filterCat(cat, this); };
-                if (cat === activeCat) btn.classList.add('active');
-                container.appendChild(btn);
-              });
-            })(window._resellerProducts || []);
-
-            applyView();
             showSSEToast(`${newProducts.length} new product${newProducts.length > 1 ? 's' : ''} added!`);
           }
 
