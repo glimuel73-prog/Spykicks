@@ -3056,6 +3056,7 @@ function applyLiveProducts(products) {
   window._allProducts = activeProducts;
   _liveInitialized = true;
   buildProductsIndex(activeProducts);
+  document.getElementById("searchBarWrap").style.display = "block";
 
   const STATIC_CATS = ['all','new-arrivals'];
   const customCats = [...new Set(activeProducts.map(p => (p.category||'').toLowerCase()).filter(c => c && !STATIC_CATS.includes(c)))].sort();
