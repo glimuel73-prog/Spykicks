@@ -3147,6 +3147,12 @@ function startLiveUpdates() {
     grid.insertBefore(loadingEl, noResults);
   }
 
+  // Initial fast fetch so products appear immediately without waiting for SSE
+  fetch('/products')
+    .then(r => r.json())
+    .then(products => { applyLiveProducts(products); loadNewArrivals(); })
+    .catch(() => {});
+
   let es;
   function connect() {
     es = new EventSource('/events/products');
