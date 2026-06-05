@@ -127,12 +127,14 @@ function broadcastOrdersToContact(contact) {
 
 function broadcastProducts() {
     if (sseClients.size === 0) return;
-    // Send a lightweight ping so clients re-fetch via GET /products themselves.
-    // This avoids pushing the full product list over SSE on slow connections.
-    const payload = JSON.stringify({ type: "products_updated" });
-    for (const res of sseClients) {
-        try { res.write(`data: ${payload}\n\n`); } catch (e) { sseClients.delete(res); }
-    }
+    try {
+        const rows = db.prepare("SELECT data FROM products").all();
+        const products = rows.map(r => JSON.parse(r.data));
+        const payload = JSON.stringify({ type: "products", products });
+        for (const res of sseClients) {
+            try { res.write(`data: ${payload}\n\n`); } catch (e) { sseClients.delete(res); }
+        }
+    } catch (e) {}
 }
 
 const DATA_DIR = "/data";
@@ -381,16 +383,10 @@ app.get("/products", (req, res) => {
             .map(r => JSON.parse(r.data))
             .filter(p => {
                 const active = !p.status || p.status === "active";
-                const pt = p.publishTo || "both";
+                const pt = p.publishTo || "both"; 
                 return active && (pt === "buyer" || pt === "both");
             });
-        const body = JSON.stringify({ products });
-        const etag = `"${crypto.createHash("sha1").update(body).digest("hex").slice(0, 16)}"`;
-        res.setHeader("Cache-Control", "no-cache");
-        res.setHeader("ETag", etag);
-        if (req.headers["if-none-match"] === etag) return res.status(304).end();
-        res.setHeader("Content-Type", "application/json");
-        res.end(body);
+        res.json({ products });
     } catch (err) {
         res.json({ products: [] });
     }
@@ -476,13 +472,7 @@ app.get("/reseller-products", (req, res) => {
                 const pt = p.publishTo || "both";
                 return active && (pt === "reseller" || pt === "both");
             });
-        const body = JSON.stringify({ authorized: true, products });
-        const etag = `"${crypto.createHash("sha1").update(body).digest("hex").slice(0, 16)}"`;
-        res.setHeader("Cache-Control", "no-cache");
-        res.setHeader("ETag", etag);
-        if (req.headers["if-none-match"] === etag) return res.status(304).end();
-        res.setHeader("Content-Type", "application/json");
-        res.end(body);
+        res.json({ authorized: true, products });
     } catch (err) {
         res.json({ authorized: false });
     }
