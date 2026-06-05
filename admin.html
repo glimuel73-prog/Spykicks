@@ -1685,6 +1685,10 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Product
       </button>
+      <button class="btn-add" id="addInvItemBtn" onclick="openInvItemModal()" style="display:none;background:var(--blue);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Item
+      </button>
 
     </div>
   </div>
@@ -2947,6 +2951,8 @@ function showPage(page, el) {
   if (titleEl) titleEl.textContent = label;
   if (subtitleEl) subtitleEl.textContent = page === 'dashboard' ? 'Welcome back, Admin!' : 'Admin Panel';
   document.getElementById('addProductBtn').style.display = page === 'products' ? '' : 'none';
+  const addInvBtn = document.getElementById('addInvItemBtn');
+  if (addInvBtn) addInvBtn.style.display = page === 'inventory' ? '' : 'none';
   const fab = document.getElementById('fabAddBtn');
   if (fab) fab.style.display = page === 'products' ? 'flex' : 'none';
 
@@ -5068,10 +5074,7 @@ renderSizeGrid();
             products = incoming;
             renderProductsTable();
             renderDashboard();
-            // Inventory tab fetches its own data independently — never fed from SSE
-            if (document.getElementById('page-inventory')?.classList.contains('active')) {
-              loadInventoryProducts();
-            }
+            // Inventory tab is independent — never fed from SSE
           }
 
 
@@ -5188,10 +5191,35 @@ function invSort(key) {
 
 async function loadInventoryProducts() {
   try {
-    const res = await fetch('/admin/products', { credentials: 'include' });
+    const res = await fetch('/admin/inventory', { credentials: 'include' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    invProducts = data.products || [];
+    // Parse extra JSON from notes field
+    invProducts = (data.items || []).map(item => {
+      let extra = {};
+      try { extra = JSON.parse(item.notes || '{}'); } catch(e) {}
+      return {
+        id: item.id,
+        name: item.name || '',
+        sku: item.sku || '',
+        supplier: item.supplier || '',
+        stock: item.qty || 0,
+        // extra fields stored in notes JSON
+        brand: extra.brand || '',
+        brandLine: extra.brandLine || '',
+        brandModel: extra.brandModel || '',
+        category: extra.category || '',
+        status: extra.status || 'active',
+        publishTo: extra.publishTo || 'both',
+        price: extra.price || 0,
+        resellerPrice: extra.resellerPrice || 0,
+        wholesalePrice: extra.wholesalePrice || 0,
+        colorway: extra.colorway || '',
+        sizes: extra.sizes || [],
+        invStock: extra.invStock || {},
+        _raw: item
+      };
+    });
   } catch (err) {
     console.warn('Inventory fetch failed:', err.message);
     showToast('Could not load inventory data. Please try again.', true);
@@ -5267,7 +5295,10 @@ function renderInventoryTable() {
 
     return `<tr>
       <td class="inv-td">
-        <button class="inv-act-btn" onclick="openInvEdit('${p.id}')">Edit</button>
+        <div style="display:flex;gap:4px;">
+          <button class="inv-act-btn" onclick="openInvItemModal('${p.id}')">Edit</button>
+          <button class="inv-act-btn" style="color:var(--red);border-color:rgba(255,59,48,.3);" onclick="deleteInvItem('${p.id}')">Del</button>
+        </div>
       </td>
       <td class="inv-td" style="color:var(--text-dim);font-size:12px;text-align:center;">${i + 1}</td>
       <td class="inv-td">${p.brand || '—'}</td>
@@ -5378,7 +5409,157 @@ function exportInventoryCSV() {
   a.click();
 }
 
-// ── New Arrivals — per-product inline toggle ──────────────────────────────────
+// ── Independent Inventory Item Modal ─────────────────────────────────────────
+let editingInvId = null;
+
+function openInvItemModal(id = null) {
+  editingInvId = id;
+  const modal = document.getElementById('invItemModal');
+  const title = document.getElementById('invItemModalTitle');
+
+  if (id) {
+    const p = invProducts.find(x => x.id === id);
+    if (!p) return;
+    title.textContent = 'Edit Inventory Item';
+    document.getElementById('invf_name').value = p.name || '';
+    document.getElementById('invf_brand').value = p.brand || '';
+    document.getElementById('invf_sku').value = p.sku || '';
+    document.getElementById('invf_colorway').value = p.colorway || '';
+    document.getElementById('invf_category').value = p.category || '';
+    document.getElementById('invf_status').value = p.status || 'active';
+    document.getElementById('invf_publishTo').value = p.publishTo || 'both';
+    document.getElementById('invf_price').value = p.price || '';
+    document.getElementById('invf_resellerPrice').value = p.resellerPrice || '';
+    document.getElementById('invf_wholesalePrice').value = p.wholesalePrice || '';
+    document.getElementById('invf_supplier').value = p.supplier || '';
+    // Build sizes JSON into the textarea
+    document.getElementById('invf_sizes').value = p.sizes && p.sizes.length
+      ? p.sizes.map(s => {
+          if (typeof s === 'object') return `${s.size}:${s.stock ?? 0}`;
+          return s;
+        }).join(', ')
+      : '';
+  } else {
+    title.textContent = 'Add Inventory Item';
+    ['invf_name','invf_brand','invf_sku','invf_colorway','invf_supplier','invf_sizes',
+     'invf_price','invf_resellerPrice','invf_wholesalePrice'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('invf_category').value = '';
+    document.getElementById('invf_status').value = 'active';
+    document.getElementById('invf_publishTo').value = 'both';
+  }
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('invf_name').focus(), 100);
+}
+
+function closeInvItemModal() {
+  document.getElementById('invItemModal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingInvId = null;
+}
+
+function parseSizesFromText(txt) {
+  if (!txt || !txt.trim()) return [];
+  return txt.split(',').map(s => s.trim()).filter(Boolean).map(s => {
+    const colonIdx = s.lastIndexOf(':');
+    if (colonIdx > 0) {
+      const size = s.slice(0, colonIdx).trim();
+      const stock = Math.max(0, Number(s.slice(colonIdx + 1).trim()) || 0);
+      return { size, stock, retailPrice: 0, resellerPrice: 0 };
+    }
+    return { size: s, stock: 0, retailPrice: 0, resellerPrice: 0 };
+  });
+}
+
+async function saveInvItem() {
+  const name = document.getElementById('invf_name').value.trim();
+  if (!name) { showToast('Product name is required.', true); return; }
+
+  const sizes = parseSizesFromText(document.getElementById('invf_sizes').value);
+  const totalQty = sizes.length
+    ? sizes.reduce((sum, s) => sum + (s.stock || 0), 0)
+    : 0;
+
+  const extra = {
+    brand:         document.getElementById('invf_brand').value.trim(),
+    category:      document.getElementById('invf_category').value,
+    status:        document.getElementById('invf_status').value,
+    publishTo:     document.getElementById('invf_publishTo').value,
+    price:         Number(document.getElementById('invf_price').value) || 0,
+    resellerPrice: Number(document.getElementById('invf_resellerPrice').value) || 0,
+    wholesalePrice:Number(document.getElementById('invf_wholesalePrice').value) || 0,
+    colorway:      document.getElementById('invf_colorway').value.trim(),
+    sizes
+  };
+
+  const payload = {
+    name,
+    sku:          document.getElementById('invf_sku').value.trim(),
+    supplier:     document.getElementById('invf_supplier').value.trim(),
+    qty:          totalQty,
+    notes:        JSON.stringify(extra),
+    location:     'Inventory',
+    reorderPoint: 5
+  };
+
+  const btn = document.getElementById('invItemSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    let res;
+    if (editingInvId) {
+      res = await fetch('/admin/inventory/' + editingInvId, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch('/admin/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+    }
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(editingInvId ? 'Item updated!' : 'Item added!');
+      closeInvItemModal();
+      await loadInventoryProducts();
+    } else {
+      showToast('Error: ' + (data.error || 'Unknown error'), true);
+    }
+  } catch(e) {
+    showToast('Connection error. Please try again.', true);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Item';
+  }
+}
+
+async function deleteInvItem(id) {
+  if (!confirm('Delete this inventory item? This cannot be undone.')) return;
+  try {
+    const res = await fetch('/admin/inventory/' + id, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Item deleted.');
+      await loadInventoryProducts();
+    } else {
+      showToast('Failed to delete: ' + (data.error || 'Unknown'), true);
+    }
+  } catch(e) {
+    showToast('Connection error.', true);
+  }
+}
+
+
 async function naToggleSingle(id) {
   const token = getToken();
   const sid = String(id);
@@ -5592,6 +5773,135 @@ async function naSaveList() {
 #invEditOverlay { display: none; }
 #invEditOverlay.open { display: flex; }
 </style>
+
+<!-- ── Inventory Item Modal ──────────────────────────────────────────────── -->
+<div class="modal-overlay" id="invItemModal">
+  <div class="modal-drawer" id="invItemModalDrawer">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h2 id="invItemModalTitle">Add Inventory Item</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn-save" id="invItemSaveBtn" onclick="saveInvItem()" style="padding:9px 24px;font-size:12px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;vertical-align:-2px;"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Item
+        </button>
+        <button class="modal-close" onclick="closeInvItemModal()" title="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-body" style="display:block;overflow-y:auto;">
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:0;height:100%;">
+
+        <!-- Left column -->
+        <div style="padding:28px 36px;border-right:1px solid var(--border);overflow-y:auto;">
+
+          <div class="modal-section">
+            <div class="modal-section-label">Basic Info</div>
+            <div class="field-group">
+              <label>Product Name *</label>
+              <input type="text" id="invf_name" placeholder="e.g. Air Max 90 OG">
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label>Brand</label>
+                <input type="text" id="invf_brand" placeholder="e.g. Nike">
+              </div>
+              <div class="field-group">
+                <label>SKU / Model No.</label>
+                <input type="text" id="invf_sku" placeholder="e.g. NK-AM90-001">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label>Category</label>
+                <select id="invf_category">
+                  <option value="">Select category</option>
+                  <option value="sneakers">Sneakers</option>
+                  <option value="apparel">Apparel</option>
+                  <option value="accessories">Accessories</option>
+                  <option value="bags">Bags</option>
+                  <option value="caps">Caps</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label>Colorway</label>
+                <input type="text" id="invf_colorway" placeholder="e.g. White/Black">
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <div class="modal-section-label">Sizes & Stock</div>
+            <div class="field-group">
+              <label>Sizes &amp; Stock (format: <code style="font-size:11px;background:var(--surface3);padding:1px 5px;border-radius:3px;">39:5, 40:3, 41:2</code>)</label>
+              <textarea id="invf_sizes" placeholder="39:5, 40:3, 41:2, 42:0&#10;or just: S, M, L, XL for apparel" style="min-height:80px;font-family:monospace;font-size:13px;"></textarea>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Size:qty pairs separated by commas. Omitting qty defaults to 0.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right column -->
+        <div style="padding:28px 24px;background:var(--surface2);overflow-y:auto;display:flex;flex-direction:column;gap:20px;">
+
+          <div class="modal-section" style="margin-bottom:0;">
+            <div class="modal-section-label">Pricing</div>
+            <div class="field-group">
+              <label style="color:#3b82f6;">🛍 Retail Price (₱)</label>
+              <input type="number" id="invf_price" placeholder="0" style="border-color:rgba(59,130,246,0.35);">
+            </div>
+            <div class="field-group">
+              <label style="color:#2ecc71;">🤝 Reseller Price (₱)</label>
+              <input type="number" id="invf_resellerPrice" placeholder="0" style="border-color:rgba(46,204,113,0.35);">
+            </div>
+            <div class="field-group">
+              <label>📦 Wholesale Price (₱)</label>
+              <input type="number" id="invf_wholesalePrice" placeholder="0">
+            </div>
+          </div>
+
+          <div class="modal-section" style="margin-bottom:0;">
+            <div class="modal-section-label">Visibility</div>
+            <div class="field-group">
+              <label>Status</label>
+              <select id="invf_status">
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label>Channel</label>
+              <select id="invf_publishTo">
+                <option value="both">Both</option>
+                <option value="buyer">Buyer only</option>
+                <option value="reseller">Reseller only</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-section" style="margin-bottom:0;">
+            <div class="modal-section-label">Supply</div>
+            <div class="field-group">
+              <label>Supplier</label>
+              <input type="text" id="invf_supplier" placeholder="e.g. ABC Trading Co.">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeInvItemModal()">Cancel</button>
+      <button class="btn-save" onclick="saveInvItem()">Save Item</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
