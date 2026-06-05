@@ -1281,9 +1281,9 @@
         <button class="fav-btn ${isFav ? 'active' : ''}" title="${isFav ? 'Remove from favorites' : 'Add to favorites'}">
           <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </button>`;
-      card.querySelector('.js-view-btn').addEventListener('click', e => { e.stopPropagation(); openPD(p, String(productId), category, badge, displayPrice); });
+      card.querySelector('.js-view-btn').addEventListener('click', e => { e.stopPropagation(); const fresh = (window._resellerProducts||[]).find(x=>String(x.id)===String(productId))||p; openPD(fresh, String(productId), category, badge, getDisplayPrice(fresh)); });
       card.querySelector('.fav-btn').addEventListener('click', e => { e.stopPropagation(); toggleFav(String(productId), card.querySelector('.fav-btn')); });
-      card.addEventListener('click', () => openPD(p, String(productId), category, badge, displayPrice));
+      card.addEventListener('click', () => { const fresh = (window._resellerProducts||[]).find(x=>String(x.id)===String(productId))||p; openPD(fresh, String(productId), category, badge, getDisplayPrice(fresh)); });
       card.querySelector('.img-zoom-btn')?.addEventListener('click', e => { e.stopPropagation(); try { openLightbox(JSON.parse(e.currentTarget.dataset.imgs), 0); } catch(err) {} });
       card.querySelector('.img-dl-btn')?.addEventListener('click', e => { e.stopPropagation(); downloadImage(e.currentTarget.dataset.src, e.currentTarget.dataset.name + '.jpg'); });
       scrollEl.appendChild(card);
@@ -2326,6 +2326,12 @@
             const idx = (window._resellerProducts || []).findIndex(x => String(x.id) === String(p.id));
             if (idx !== -1) window._resellerProducts[idx] = p;
           });
+
+          // If the product detail modal is open for a product that just got updated, refresh it live
+          if (pdCurrentProduct && document.getElementById('pdOverlay')?.classList.contains('open')) {
+            const refreshed = incoming.find(p => String(p.id) === String(pdCurrentProduct.id));
+            if (refreshed) openPD(refreshed, String(refreshed.id), (refreshed.category||'sneakers').toLowerCase(), refreshed.badge||'', getDisplayPrice(refreshed));
+          }
 
           document.querySelectorAll('.product-card[data-id]').forEach(card => {
             if (!incomingIds.has(card.dataset.id)) {
