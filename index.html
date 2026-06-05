@@ -678,9 +678,9 @@
   .group-pg-dot.active { background: #000; transform: scale(1.2); }
 
   /* ── Groups-level pagination bar ── */
-  .groups-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 28px 24px 36px; background: #f9f9f9; border-top: 1px solid #efefef; flex-wrap: wrap; }
+  .groups-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 16px 28px; background: #f9f9f9; border-top: 1px solid #efefef; flex-wrap: nowrap; overflow: hidden; }
   .groups-pg-label { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #999; }
-  .groups-pg-btn { min-width: 40px; height: 40px; padding: 0 12px; border: 1px solid #ddd; background: #fff; color: #666; font-family: Arial,sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 8px; transition: all .18s; display: flex; align-items: center; justify-content: center; gap: 6px; letter-spacing: 1px; }
+  .groups-pg-btn { min-width: 36px; height: 36px; padding: 0 10px; border: 1px solid #ddd; background: #fff; color: #666; font-family: Arial,sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 8px; transition: all .18s; display: flex; align-items: center; justify-content: center; gap: 4px; letter-spacing: 0; white-space: nowrap; flex-shrink: 0; }
   .groups-pg-btn:hover:not(:disabled) { border-color: #000; color: #000; background: #f5f5f5; }
   .groups-pg-btn.active { background: #000; color: #fff; border-color: #000; }
   .groups-pg-btn:disabled { opacity: .3; cursor: not-allowed; }
@@ -1983,11 +1983,7 @@ function _renderGroupsPageContent(grid, noResults) {
       `<button class="groups-pg-dot${i === groupsCurrentPage ? ' active' : ''}" onclick="goGroupsPage(${i})" title="Page ${i+1}"></button>`
     ).join('');
 
-    pgBar.innerHTML = `
-      ${prevBtn}
-      <div style="display:flex;gap:6px;align-items:center;">${dots}</div>
-      <span class="groups-pg-label">Page ${groupsCurrentPage + 1} of ${totalPages}</span>
-      ${nextBtn}`;
+    pgBar.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;">${prevBtn}<div style="display:flex;gap:5px;align-items:center;">${dots}</div><span class="groups-pg-label" style="font-size:11px;white-space:nowrap;">Page ${groupsCurrentPage + 1} of ${totalPages}</span>${nextBtn}</div>`;
 
     grid.parentNode.insertBefore(pgBar, grid.nextSibling);
   }
