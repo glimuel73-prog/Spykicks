@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const compression = require("compression");
 const Database = require("better-sqlite3");
 const path = require("path");
 const fs = require("fs");
@@ -8,18 +7,14 @@ const crypto = require("crypto");
 
 const app = express();
 
-// ── Gzip compression for all responses ───────────────────────────────────────
-app.use(compression());
-
 // CORS: restrict to same origin in production
 app.use(cors({
     origin: process.env.ALLOWED_ORIGIN || false,
     credentials: true
 }));
 
-// Reduce JSON body limit — 50mb is excessive; images should use /uploads endpoint
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // ── In-memory session store ───────────────────────────────────────────────────
 const sessions = new Map(); // token → { expires: timestamp }
@@ -142,7 +137,7 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const uploadsDir = path.join(DATA_DIR, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-app.use("/uploads", express.static(uploadsDir, { maxAge: "7d", immutable: true }));
+app.use("/uploads", express.static(uploadsDir));
 
 app.post("/admin/upload-image", requireAdmin, (req, res) => {
     const { base64, mimeType } = req.body;
@@ -159,7 +154,7 @@ app.post("/admin/upload-image", requireAdmin, (req, res) => {
     }
 });
 
-app.use(express.static(path.join(__dirname), { maxAge: "1h", etag: true }));
+app.use(express.static(path.join(__dirname)));
 
 const db = new Database(path.join(DATA_DIR, "users.db"));
 
@@ -1143,7 +1138,6 @@ app.get("/events/products", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Accel-Buffering", "no"); // disable nginx/Railway proxy buffering
     res.flushHeaders();
 
     try {
@@ -1153,13 +1147,7 @@ app.get("/events/products", (req, res) => {
     } catch (e) {}
 
     sseClients.add(res);
-
-    // Heartbeat every 25s to keep Railway proxy from closing idle connections
-    const heartbeat = setInterval(() => {
-        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
-    }, 25000);
-
-    req.on("close", () => { sseClients.delete(res); clearInterval(heartbeat); });
+    req.on("close", () => sseClients.delete(res));
 });
 
 app.get("/events/orders", (req, res) => {
@@ -1169,7 +1157,6 @@ app.get("/events/orders", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
 
     try {
@@ -1181,14 +1168,9 @@ app.get("/events/orders", (req, res) => {
     if (!sseOrderClients.has(contact)) sseOrderClients.set(contact, new Set());
     sseOrderClients.get(contact).add(res);
 
-    const heartbeat = setInterval(() => {
-        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
-    }, 25000);
-
     req.on("close", () => {
         const clients = sseOrderClients.get(contact);
         if (clients) { clients.delete(res); if (clients.size === 0) sseOrderClients.delete(contact); }
-        clearInterval(heartbeat);
     });
 });
 
@@ -1199,7 +1181,6 @@ app.get("/events/reseller-orders", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
 
     try {
@@ -1211,14 +1192,9 @@ app.get("/events/reseller-orders", (req, res) => {
     if (!sseResellerOrderClients.has(email)) sseResellerOrderClients.set(email, new Set());
     sseResellerOrderClients.get(email).add(res);
 
-    const heartbeat = setInterval(() => {
-        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
-    }, 25000);
-
     req.on("close", () => {
         const clients = sseResellerOrderClients.get(email);
         if (clients) { clients.delete(res); if (clients.size === 0) sseResellerOrderClients.delete(email); }
-        clearInterval(heartbeat);
     });
 });
 
@@ -1226,7 +1202,6 @@ app.get("/events/admin-orders", requireAdmin, (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
 
     try {
@@ -1240,72 +1215,46 @@ app.get("/events/admin-orders", requireAdmin, (req, res) => {
     } catch (e) {}
 
     sseAdminClients.add(res);
-
-    const heartbeat = setInterval(() => {
-        try { res.write(": ping\n\n"); } catch (e) { clearInterval(heartbeat); }
-    }, 25000);
-
-    req.on("close", () => { sseAdminClients.delete(res); clearInterval(heartbeat); });
+    req.on("close", () => sseAdminClients.delete(res));
 });
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS inventory_items (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        brand TEXT DEFAULT '',
-        colorway TEXT DEFAULT '',
-        sku TEXT DEFAULT '',
-        category TEXT DEFAULT '',
-        status TEXT DEFAULT 'active',
-        publishTo TEXT DEFAULT 'both',
-        price REAL DEFAULT 0,
-        resellerPrice REAL DEFAULT 0,
-        wholesalePrice REAL DEFAULT 0,
-        supplier TEXT DEFAULT '',
-        sizes TEXT DEFAULT '[]',
-        location TEXT DEFAULT 'Warehouse A',
+        sku TEXT,
+        location TEXT,
+        supplier TEXT,
+        qty INTEGER DEFAULT 0,
         reorderPoint INTEGER DEFAULT 5,
-        lastReceived TEXT DEFAULT '',
-        notes TEXT DEFAULT '',
+        lastReceived TEXT,
+        notes TEXT,
         createdAt TEXT,
         updatedAt TEXT
     )
 `);
-// Add missing columns to existing tables (ALTER TABLE IF NOT EXISTS column is not supported in older SQLite)
-['brand','colorway','sku','category','status','publishTo','price','resellerPrice','wholesalePrice','sizes','location','reorderPoint','lastReceived','notes'].forEach(col => {
-    try { db.exec(`ALTER TABLE inventory_items ADD COLUMN ${col} TEXT DEFAULT ''`); } catch(e) {}
-});
 
 app.get("/admin/inventory", requireAdmin, (req, res) => {
     try {
         const rows = db.prepare("SELECT * FROM inventory_items ORDER BY name ASC").all();
-        const items = rows.map(r => ({
-            ...r,
-            sizes: (() => { try { return JSON.parse(r.sizes || '[]'); } catch(e) { return []; } })(),
-            price: Number(r.price) || 0,
-            resellerPrice: Number(r.resellerPrice) || 0,
-            wholesalePrice: Number(r.wholesalePrice) || 0,
-        }));
-        res.json({ items });
+        res.json({ items: rows });
     } catch (err) {
         res.json({ items: [], error: err.message });
     }
 });
 
 app.post("/admin/inventory", requireAdmin, (req, res) => {
-    const { name, brand, colorway, sku, category, status, publishTo, price, resellerPrice, wholesalePrice, supplier, sizes, location, reorderPoint, lastReceived, notes } = req.body;
+    const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
     if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
     const id = "si" + Date.now() + Math.random().toString(36).slice(2, 6);
     const now = new Date().toISOString();
     try {
-        db.prepare(`INSERT INTO inventory_items (id, name, brand, colorway, sku, category, status, publishTo, price, resellerPrice, wholesalePrice, supplier, sizes, location, reorderPoint, lastReceived, notes, createdAt, updatedAt)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-          .run(id, name.trim(), brand || "", colorway || "", sku || "", category || "", status || "active", publishTo || "both",
-               Number(price) || 0, Number(resellerPrice) || 0, Number(wholesalePrice) || 0,
-               supplier || "", JSON.stringify(sizes || []), location || "Warehouse A",
-               Number(reorderPoint) || 5, lastReceived || now.slice(0, 10), notes || "", now, now);
-        const row = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
-        const item = { ...row, sizes: (() => { try { return JSON.parse(row.sizes || '[]'); } catch(e) { return []; } })(), price: Number(row.price)||0, resellerPrice: Number(row.resellerPrice)||0, wholesalePrice: Number(row.wholesalePrice)||0 };
+        db.prepare(`INSERT INTO inventory_items (id, name, sku, location, supplier, qty, reorderPoint, lastReceived, notes, createdAt, updatedAt)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+          .run(id, name.trim(), sku || "", location || "Warehouse A", supplier || "",
+               Number(qty) || 0, Number(reorderPoint) || 5,
+               lastReceived || new Date().toISOString().slice(0, 10), notes || "", now, now);
+        const item = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
         res.json({ success: true, item });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -1314,18 +1263,16 @@ app.post("/admin/inventory", requireAdmin, (req, res) => {
 
 app.put("/admin/inventory/:id", requireAdmin, (req, res) => {
     const { id } = req.params;
-    const { name, brand, colorway, sku, category, status, publishTo, price, resellerPrice, wholesalePrice, supplier, sizes, location, reorderPoint, lastReceived, notes } = req.body;
+    const { name, sku, location, supplier, qty, reorderPoint, lastReceived, notes } = req.body;
     if (!name || !name.trim()) return res.json({ success: false, error: "Item name is required." });
     const now = new Date().toISOString();
     try {
-        const result = db.prepare(`UPDATE inventory_items SET name=?, brand=?, colorway=?, sku=?, category=?, status=?, publishTo=?, price=?, resellerPrice=?, wholesalePrice=?, supplier=?, sizes=?, location=?, reorderPoint=?, lastReceived=?, notes=?, updatedAt=? WHERE id=?`)
-          .run(name.trim(), brand || "", colorway || "", sku || "", category || "", status || "active", publishTo || "both",
-               Number(price) || 0, Number(resellerPrice) || 0, Number(wholesalePrice) || 0,
-               supplier || "", JSON.stringify(sizes || []), location || "Warehouse A",
-               Number(reorderPoint) || 5, lastReceived || "", notes || "", now, id);
+        const result = db.prepare(`UPDATE inventory_items SET name=?, sku=?, location=?, supplier=?, qty=?, reorderPoint=?, lastReceived=?, notes=?, updatedAt=? WHERE id=?`)
+          .run(name.trim(), sku || "", location || "Warehouse A", supplier || "",
+               Number(qty) || 0, Number(reorderPoint) || 5,
+               lastReceived || "", notes || "", now, id);
         if (result.changes === 0) return res.json({ success: false, error: "Item not found." });
-        const row = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
-        const item = { ...row, sizes: (() => { try { return JSON.parse(row.sizes || '[]'); } catch(e) { return []; } })(), price: Number(row.price)||0, resellerPrice: Number(row.resellerPrice)||0, wholesalePrice: Number(row.wholesalePrice)||0 };
+        const item = db.prepare("SELECT * FROM inventory_items WHERE id = ?").get(id);
         res.json({ success: true, item });
     } catch (err) {
         res.json({ success: false, error: err.message });
