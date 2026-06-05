@@ -3285,15 +3285,7 @@ function applyLiveProducts(products) {
     return;
   }
 
-  // Compare a fingerprint of all visible fields — catches any edit, not just stock/name
-  const _fp = arr => JSON.stringify(
-    [...arr].sort((a,b) => String(a.id).localeCompare(String(b.id)))
-      .map(p => [p.id, p.name, p.price, p.resellerPrice, p.stock, p.status,
-                 p.publishTo, p.category, p.brand, p.brandLine, p.brandModel,
-                 p.badge, p.colorway, (p.images||[]).join(','),
-                 JSON.stringify(p.sizes||[])])
-  );
-  if (_liveInitialized && _fp(window._allProducts || []) === _fp(activeProducts)) return;
+  // Always re-render when SSE sends new data (pings are comment lines, never reach onmessage)
 
   window._allProducts = activeProducts;
   _liveInitialized = true;
