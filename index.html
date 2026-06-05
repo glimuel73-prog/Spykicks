@@ -1490,7 +1490,11 @@ let pdCurrentId = null, pdSelectedSize = null, pdSelectedPrice = null, pdSelecte
 
 function openPD(id) {
   const p = PRODUCTS_INDEX[String(id)];
-  if (!p) return;
+  if (!p) {
+    // Product may not be in index yet — show a toast and bail
+    if (typeof showToast === 'function') showToast('Loading product… please try again in a moment.');
+    return;
+  }
   pdCurrentId = String(id);
   pdSelectedSize = null;
   _pdCurrentImgIdx = 0;
@@ -2638,7 +2642,10 @@ function addToCart() {
   const id = pdCurrentId;
   if (!id) return;
   const p = PRODUCTS_INDEX[String(id)];
-  if (!p) return;
+  if (!p) {
+    showToast('Product data not loaded yet. Please try again.');
+    return;
+  }
 
   if (!pdSelectedSize) {
     const btn = document.getElementById('pdAddToCartBtn');
@@ -2814,6 +2821,14 @@ function changeQty(idx, delta) {
 
 function removeCartItem(idx) {
   cart.splice(idx, 1);
+  // Rebuild selected indices: shift down indices above the removed one
+  const newSelected = new Set();
+  cartSelectedIndices.forEach(i => {
+    if (i < idx) newSelected.add(i);
+    else if (i > idx) newSelected.add(i - 1);
+    // i === idx is removed, skip it
+  });
+  cartSelectedIndices = newSelected;
   saveCart();
 }
 
@@ -3185,6 +3200,19 @@ function renderNewArrivals(products) {
     return;
   }
   section.classList.add('visible');
+
+  // Ensure all new arrival products are in PRODUCTS_INDEX so openPD/addToCart work
+  if (typeof buildProductsIndex === 'function' && typeof PRODUCTS_INDEX !== 'undefined') {
+    const missing = products.filter(p => !PRODUCTS_INDEX[String(p.id)]);
+    if (missing.length > 0) {
+      const combined = [...(window._allProducts || [])];
+      missing.forEach(p => {
+        if (!combined.find(x => String(x.id) === String(p.id))) combined.push(p);
+      });
+      buildProductsIndex(combined);
+    }
+  }
+
   window._naProducts = products;
   window._naShown = 12;
   window.naRenderCards = function() {
@@ -3205,7 +3233,7 @@ function renderNewArrivals(products) {
         <div class="product-price" style="margin-top:auto;padding-top:10px;">${price}</div>
         <button class="product-view-btn" onclick="event.stopPropagation();openPD('${p.id}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          View Details
+          View &amp; Add to Cart
         </button>
       `;
       scroll.appendChild(card);
