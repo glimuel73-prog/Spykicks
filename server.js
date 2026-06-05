@@ -4,6 +4,21 @@ const Database = require("better-sqlite3");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+
+// ── Gmail SMTP transporter ────────────────────────────────────────────────────
+// Set GMAIL_USER and GMAIL_APP_PASSWORD in your environment variables.
+// Use a Gmail App Password (not your real password):
+//   https://myaccount.google.com/apppasswords
+const mailer = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+    },
+});
 
 const app = express();
 
@@ -1316,6 +1331,174 @@ app.get("/reseller", (req, res) => {
         }
     }
     res.sendFile(path.join(__dirname, "reseller-products.html"));
+});
+
+// ── Reseller cart & favorites persistence (server-side, keyed by email) ───────
+db.exec(`
+    CREATE TABLE IF NOT EXISTS reseller_data (
+        email TEXT PRIMARY KEY,
+        cart  TEXT DEFAULT '[]',
+        favs  TEXT DEFAULT '[]',
+        updatedAt TEXT
+    )
+`);
+
+// GET  /reseller/data?email=xxx  → load saved cart + favs
+app.get("/reseller/data", (req, res) => {
+    const { email } = req.query;
+    if (!email) return res.json({ cart: [], favs: [] });
+    try {
+        const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
+        if (!row) return res.status(403).json({ error: "Not an approved reseller" });
+        const data = db.prepare("SELECT cart, favs FROM reseller_data WHERE email = ?").get(email);
+        res.json({
+            cart: data ? JSON.parse(data.cart) : [],
+            favs: data ? JSON.parse(data.favs) : [],
+        });
+    } catch (err) {
+        res.json({ cart: [], favs: [] });
+    }
+});
+
+// POST /reseller/data  { email, cart, favs }  → persist
+app.post("/reseller/data", (req, res) => {
+    const { email, cart, favs } = req.body;
+    if (!email) return res.status(400).json({ success: false, error: "Missing email" });
+    try {
+        const row = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
+        if (!row) return res.status(403).json({ success: false, error: "Not an approved reseller" });
+        const now = new Date().toISOString();
+        db.prepare(`
+            INSERT INTO reseller_data (email, cart, favs, updatedAt)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(email) DO UPDATE SET cart=excluded.cart, favs=excluded.favs, updatedAt=excluded.updatedAt
+        `).run(email, JSON.stringify(cart || []), JSON.stringify(favs || []), now);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// POST /reseller/save-email  { email }
+// Sends a formatted HTML email of the reseller's current cart + favorites.
+app.post("/reseller/save-email", async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, error: "Missing email" });
+
+    try {
+        const reseller = db.prepare("SELECT * FROM resellers WHERE email = ? AND approved = 1").get(email);
+        if (!reseller) return res.status(403).json({ success: false, error: "Not an approved reseller" });
+
+        const data = db.prepare("SELECT cart, favs FROM reseller_data WHERE email = ?").get(email);
+        const cart = data ? JSON.parse(data.cart) : [];
+        const favs = data ? JSON.parse(data.favs) : [];
+
+        // Enrich favorites with product data
+        const allProducts = db.prepare("SELECT data FROM products").all().map(r => JSON.parse(r.data));
+        const favProducts = favs
+            .map(id => allProducts.find(p => String(p.id) === String(id)))
+            .filter(Boolean);
+
+        const cartTotal = cart.reduce((sum, i) => sum + (i.price || 0) * (i.qty || 1), 0);
+
+        const cartRows = cart.length
+            ? cart.map(i => `
+                <tr>
+                  <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;">
+                    <strong>${i.name || "—"}</strong><br>
+                    <span style="font-size:12px;color:#888;">Size: ${i.size || "—"}${i.color ? " · Color: " + i.color : ""}</span>
+                  </td>
+                  <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;">${i.qty || 1}</td>
+                  <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:right;">
+                    ₱${((i.price || 0) * (i.qty || 1)).toLocaleString("en-PH")}
+                  </td>
+                </tr>`).join("")
+            : `<tr><td colspan="3" style="padding:14px;text-align:center;color:#aaa;">Cart is empty</td></tr>`;
+
+        const favRows = favProducts.length
+            ? favProducts.map(p => `
+                <tr>
+                  <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;">
+                    <strong>${p.name || "—"}</strong><br>
+                    <span style="font-size:12px;color:#888;">${p.brand || ""}</span>
+                  </td>
+                  <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:right;">
+                    ₱${(p.resellerPrice || p.price || 0).toLocaleString("en-PH")}
+                  </td>
+                </tr>`).join("")
+            : `<tr><td colspan="2" style="padding:14px;text-align:center;color:#aaa;">No favorites saved</td></tr>`;
+
+        const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+  <div style="max-width:600px;margin:40px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.1);">
+    <div style="background:#111;color:#fff;padding:28px 32px;">
+      <div style="font-size:11px;letter-spacing:4px;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Reseller Portal</div>
+      <div style="font-size:22px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Your Saved Cart &amp; Favorites</div>
+    </div>
+
+    <div style="padding:28px 32px;">
+      <p style="margin:0 0 4px;font-size:13px;color:#555;">Account</p>
+      <p style="margin:0 0 24px;font-size:16px;font-weight:700;color:#111;">${email}</p>
+      <p style="margin:0 0 24px;font-size:12px;color:#999;">Saved on ${new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila" })}</p>
+
+      <h2 style="font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#111;border-bottom:2px solid #111;padding-bottom:8px;margin:0 0 0;">
+        🛒 Cart (${cart.length} item${cart.length !== 1 ? "s" : ""})
+      </h2>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+        <thead>
+          <tr style="background:#f8f8f8;">
+            <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;">Product</th>
+            <th style="padding:10px 14px;text-align:center;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;">Qty</th>
+            <th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>${cartRows}</tbody>
+        ${cart.length ? `<tfoot>
+          <tr>
+            <td colspan="2" style="padding:12px 14px;font-weight:700;font-size:13px;letter-spacing:1px;text-align:right;text-transform:uppercase;">Total</td>
+            <td style="padding:12px 14px;font-weight:900;font-size:18px;text-align:right;color:#111;">₱${cartTotal.toLocaleString("en-PH")}</td>
+          </tr>
+        </tfoot>` : ""}
+      </table>
+
+      <h2 style="font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#111;border-bottom:2px solid #111;padding-bottom:8px;margin:0 0 0;">
+        ♡ Favorites (${favProducts.length})
+      </h2>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+        <thead>
+          <tr style="background:#f8f8f8;">
+            <th style="padding:10px 14px;text-align:left;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;">Product</th>
+            <th style="padding:10px 14px;text-align:right;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#888;">Price</th>
+          </tr>
+        </thead>
+        <tbody>${favRows}</tbody>
+      </table>
+    </div>
+
+    <div style="background:#f8f8f8;padding:20px 32px;text-align:center;">
+      <p style="margin:0;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#aaa;">
+        CATALOG &amp; AVAILABLE STOCKS · This email was sent to ${email}
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+        await mailer.sendMail({
+            from: `"Catalog & Available Stocks" <${process.env.GMAIL_USER}>`,
+            to: email,
+            subject: `Your Reseller Cart & Favorites — ${new Date().toLocaleDateString("en-PH")}`,
+            html,
+        });
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Email send error:", err.message);
+        res.status(500).json({ success: false, error: "Failed to send email: " + err.message });
+    }
 });
 
 app.listen(process.env.PORT || 3000, () => {
