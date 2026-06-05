@@ -219,7 +219,11 @@
 
   .order-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
   .order-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
-  .order-id { font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+  .order-id { font-family: Arial,sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text); display: flex; align-items: center; gap: 4px; }
+  .copy-id-btn { background: none; border: none; cursor: pointer; padding: 3px 6px; color: #aaa; transition: color .2s; display: inline-flex; align-items: center; vertical-align: middle; border-radius: 4px; }
+  .copy-id-btn:hover { color: #111; background: #e8e8e8; }
+  .copy-id-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .copy-id-btn.copied { color: #27ae60; }
   .order-date { font-size: 11px; color: var(--text-muted); font-family: Arial,sans-serif; }
   .order-status-pill { font-family: Arial,sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; border: 1px solid; }
   .order-status-pill.pending  { color: #b45309; border-color: #fbbf24; background: #fffbeb; }
@@ -2476,7 +2480,7 @@
         <div class="order-card">
           <div class="order-card-header">
             <div>
-              <div class="order-id">#${order.id.replace("ORD_","")}</div>
+              <div class="order-id">#${order.id.replace("ORD_","")} <button class="copy-id-btn" title="Copy order ID" onclick="event.stopPropagation();copyOrderId('#${order.id.replace("ORD_","")}', this)"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
               <div class="order-date">${dateStr}</div>
             </div>
             <span class="order-status-pill ${meta.cls}">${meta.label}</span>
@@ -2928,6 +2932,21 @@
       btn.textContent = "✉ Email My Cart & Favorites";
       btn.disabled = false;
     }
+  }
+
+  // ── Copy order ID ─────────────────────────────────────────────────────────
+  function copyOrderId(id, btn) {
+    const text = id.startsWith('#') ? id.slice(1) : id;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.classList.add('copied');
+      btn.title = 'Copied!';
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.title = 'Copy order ID';
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+      }, 2000);
+    }).catch(() => {});
   }
 
   // ── Boot: load server-side cart & favorites, then init the page ───────────
