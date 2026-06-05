@@ -5066,15 +5066,11 @@ renderSizeGrid();
               if (existing && existing.newArrival !== undefined) p.newArrival = existing.newArrival;
             });
             products = incoming;
-            // Sync invProducts from SSE only when inventory tab is not open
-            // (when open, it has its own fresh fetch via loadInventoryProducts)
-            if (!document.getElementById('page-inventory')?.classList.contains('active')) {
-              invProducts = incoming.map(p => ({ ...p }));
-            }
             renderProductsTable();
             renderDashboard();
+            // Inventory tab fetches its own data independently — never fed from SSE
             if (document.getElementById('page-inventory')?.classList.contains('active')) {
-              renderInventoryTable();
+              loadInventoryProducts();
             }
           }
 
