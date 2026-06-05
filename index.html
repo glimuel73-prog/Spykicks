@@ -611,6 +611,10 @@
   .co-success-order-id { font-family: Arial,sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #aaa; margin-bottom: 28px; }
   .co-done-btn { background: #000; color: #fff; font-family: Arial,sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 36px; border: none; cursor: pointer; border-radius: 12px; transition: background .2s; }
   .co-done-btn:hover { background: #333; }
+  .copy-id-btn { background: none; border: none; cursor: pointer; padding: 3px 6px; color: #aaa; transition: color .2s; display: inline-flex; align-items: center; vertical-align: middle; border-radius: 4px; }
+  .copy-id-btn:hover { color: #111; background: #f0f0f0; }
+  .copy-id-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .copy-id-btn.copied { color: #27ae60; }
 
   @media (max-width: 600px) {
     .co-row { grid-template-columns: 1fr; }
@@ -2563,10 +2567,16 @@ async function submitBuyerOrder() {
       cartSelectedIndices = new Set();
       saveCart();
       document.getElementById('checkoutFormView').style.display = 'none';
-      const firstId = results[0]?.orderId ? '#' + results[0].orderId.replace('BORDER_','') : '';
-      document.getElementById('coSuccessOrderId').textContent = results.length > 1
-        ? `${results.length} orders placed successfully!`
-        : (firstId ? 'Order ID: ' + firstId : '');
+      const rawId = results[0]?.orderId || '';
+      const firstId = rawId ? '#' + rawId.replace('BORDER_','') : '';
+      if (results.length > 1) {
+        document.getElementById('coSuccessOrderId').textContent = `${results.length} orders placed successfully!`;
+      } else if (firstId) {
+        document.getElementById('coSuccessOrderId').innerHTML =
+          `Order ID: ${firstId} <button class="copy-id-btn" title="Copy order ID" onclick="copyOrderId('${firstId}', this)"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>`;
+      } else {
+        document.getElementById('coSuccessOrderId').textContent = '';
+      }
       document.getElementById('checkoutSuccessView').classList.add('show');
     } else {
       const failed = results.filter(d => !d.success);
@@ -2870,7 +2880,7 @@ function renderOrdersList(orders, contact) {
     listEl.innerHTML = orders.map(o => {
         const d = new Date(o.createdAt);
         const dateStr = d.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
-        const shortId = '#' + o.id.replace('BORDER_','').slice(0,12);
+        const fullId = '#' + o.id.replace('BORDER_','');
         const statusLabels = { pending:'⏳ Pending', processing:'🔄 Processing', shipped:'🚚 Shipped', delivered:'✓ Delivered', cancelled:'✕ Cancelled' };
         const statusLabel = statusLabels[o.status] || o.status;
         const addr = [o.barangay, o.municipality, o.province].filter(Boolean).join(', ');
@@ -2885,7 +2895,7 @@ function renderOrdersList(orders, contact) {
           <div class="order-history-card" id="ohcard-${o.id}">
             <div class="order-history-head">
               <div>
-                <div class="order-history-id">${shortId}</div>
+                <div class="order-history-id">${fullId} <button class="copy-id-btn" title="Copy order ID" onclick="event.stopPropagation();copyOrderId('${fullId}', this)"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>
                 <div class="order-history-date">${dateStr}</div>
               </div>
               <div style="display:flex;align-items:center;gap:10px;">
@@ -3227,6 +3237,20 @@ async function loadNewArrivals() {
 }
 
 loadNewArrivals();
+
+function copyOrderId(id, btn) {
+  const text = id.startsWith('#') ? id.slice(1) : id;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.title = 'Copied!';
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.title = 'Copy order ID';
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+    }, 2000);
+  }).catch(() => {});
+}
 
 startLiveUpdates();
 
