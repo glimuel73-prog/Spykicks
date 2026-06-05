@@ -543,6 +543,17 @@
   .pg-btn.pg-ellipsis { cursor: default; border-color: transparent; }
   .pg-btn.pg-ellipsis:hover { background: none; border-color: transparent; color: #666; }
   .pg-info { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; margin: 0 8px; }
+
+  /* ── Group pagination ── */
+  .group-pg-wrap { display: flex; align-items: center; justify-content: space-between; padding: 12px 32px 8px; background: #fff; border-top: 1px solid #f0f0f0; }
+  .group-pg-info { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #aaa; }
+  .group-pg-btns { display: flex; gap: 6px; }
+  .group-pg-btn { width: 32px; height: 32px; border: 1px solid #ddd; background: none; color: #666; font-family: Arial,sans-serif; font-size: 15px; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .group-pg-btn:hover:not(:disabled) { border-color: #000; color: #000; background: #f5f5f5; }
+  .group-pg-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .group-pg-dots { display: flex; gap: 5px; align-items: center; }
+  .group-pg-dot { width: 7px; height: 7px; border-radius: 50%; background: #ddd; cursor: pointer; transition: background .15s, transform .15s; border: none; padding: 0; }
+  .group-pg-dot.active { background: #000; transform: scale(1.2); }
 </style>
 </head>
 <body>
@@ -1308,36 +1319,47 @@
     </div>`;
   }
 
+  const GROUP_PAGE_SIZE = 8;
+
   function buildGroupSection(groupName, prods) {
     const section = document.createElement('div');
     section.className = 'product-group';
     section.dataset.groupKey = groupName.toLowerCase();
-    const scrollId = 'scroll_' + groupName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-    section.innerHTML = `
-      <div class="product-group-header">
-        <div class="product-group-title">${groupName}</div>
-        <button class="product-group-viewall" onclick="viewAllGroup('${groupName.replace(/'/g,"\\'")}')">VIEW ALL →</button>
-      </div>
-      <div class="product-group-scroll-wrap">
-        <button class="scroll-arrow left hidden" onclick="document.getElementById('${scrollId}').scrollBy({left:-520,behavior:'smooth'})"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div class="product-group-scroll" id="${scrollId}"></div>
-        <button class="scroll-arrow right" onclick="document.getElementById('${scrollId}').scrollBy({left:520,behavior:'smooth'})"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-      </div>`;
-    const scrollEl = section.querySelector('.product-group-scroll');
-    const leftArrow = section.querySelector('.scroll-arrow.left');
-    const rightArrow = section.querySelector('.scroll-arrow.right');
-    prods.forEach((p, i) => {
-      const productId = p.id || `product_${i}`;
-      const isFav = favorites.includes(String(productId));
-      const badge = p.badge || '';
-      const category = (p.category || 'sneakers').toLowerCase();
+    let groupPage = 0;
+    const totalGroupPages = Math.ceil(prods.length / GROUP_PAGE_SIZE);
+
+    // Header
+    const headerEl = document.createElement('div');
+    headerEl.className = 'product-group-header';
+    headerEl.innerHTML = `
+      <div class="product-group-title">${groupName}</div>
+      <button class="product-group-viewall" onclick="viewAllGroup('${groupName.replace(/'/g,"\\'")}')">VIEW ALL →</button>`;
+    section.appendChild(headerEl);
+
+    // Scroll wrap
+    const scrollWrap = document.createElement('div');
+    scrollWrap.className = 'product-group-scroll-wrap';
+    const scrollEl = document.createElement('div');
+    scrollEl.className = 'product-group-scroll';
+    const leftArrow = document.createElement('button');
+    leftArrow.className = 'scroll-arrow left hidden';
+    leftArrow.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>`;
+    const rightArrow = document.createElement('button');
+    rightArrow.className = 'scroll-arrow right hidden';
+    rightArrow.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>`;
+    scrollWrap.appendChild(scrollEl);
+    scrollWrap.appendChild(leftArrow);
+    scrollWrap.appendChild(rightArrow);
+    section.appendChild(scrollWrap);
+
+    // Pagination bar
+    const pgWrap = document.createElement('div');
+    pgWrap.className = 'group-pg-wrap';
+    pgWrap.style.display = totalGroupPages > 1 ? '' : 'none';
+    section.appendChild(pgWrap);
+
+    function buildCard(p, productId, isFav, badge, category, displayPrice) {
       const hasImg = p.images && p.images.length > 0;
-      const displayPrice = getDisplayPrice(p);
-      let stockNum = Number(p.stock) || 0;
-      if (p.sizes && p.sizes.length && p.sizes.some(s => typeof s === 'object' && s.stock != null)) {
-        stockNum = p.sizes.reduce((sum, s) => sum + (Number(s.stock) || 0), 0);
-      }
-      const stockLabel = stockNum === 0 ? 'Out of Stock' : 'In Stock';
       const imgHTML = hasImg
         ? `<div class="img-card-wrap product-img-placeholder" style="padding:0;overflow:hidden;position:relative;">
             <img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;" alt="${p.name}">
@@ -1380,15 +1402,58 @@
       card.addEventListener('click', () => { const fresh = (window._resellerProducts||[]).find(x=>String(x.id)===String(productId))||p; openPD(fresh, String(productId), category, badge, getDisplayPrice(fresh)); });
       card.querySelector('.img-zoom-btn')?.addEventListener('click', e => { e.stopPropagation(); try { openLightbox(JSON.parse(e.currentTarget.dataset.imgs), 0); } catch(err) {} });
       card.querySelector('.img-dl-btn')?.addEventListener('click', e => { e.stopPropagation(); downloadImage(e.currentTarget.dataset.src, e.currentTarget.dataset.name + '.jpg'); });
-      scrollEl.appendChild(card);
-    });
+      return card;
+    }
+
+    function renderGroupPage(pg) {
+      groupPage = pg;
+      scrollEl.innerHTML = '';
+      const start = pg * GROUP_PAGE_SIZE;
+      const pageProds = prods.slice(start, start + GROUP_PAGE_SIZE);
+      pageProds.forEach((p, i) => {
+        const productId = p.id || `product_${start + i}`;
+        const isFav = favorites.includes(String(productId));
+        const badge = p.badge || '';
+        const category = (p.category || 'sneakers').toLowerCase();
+        const displayPrice = getDisplayPrice(p);
+        scrollEl.appendChild(buildCard(p, productId, isFav, badge, category, displayPrice));
+      });
+      scrollEl.scrollLeft = 0;
+
+      requestAnimationFrame(() => {
+        leftArrow.classList.add('hidden');
+        rightArrow.classList.toggle('hidden', scrollEl.scrollWidth <= scrollEl.clientWidth + 4);
+      });
+
+      if (totalGroupPages > 1) {
+        const shown = Math.min(start + GROUP_PAGE_SIZE, prods.length);
+        let dotsHtml = '';
+        if (totalGroupPages <= 8) {
+          dotsHtml = Array.from({length: totalGroupPages}, (_, i) =>
+            `<button class="group-pg-dot${i === pg ? ' active' : ''}" onclick="this.closest('.product-group')._goPage(${i})" title="Page ${i+1}"></button>`
+          ).join('');
+        }
+        pgWrap.innerHTML = `
+          <span class="group-pg-info">${start + 1}–${shown} of ${prods.length}</span>
+          <div style="display:flex;align-items:center;gap:12px;">
+            ${dotsHtml ? `<div class="group-pg-dots">${dotsHtml}</div>` : `<span class="group-pg-info">Page ${pg+1} / ${totalGroupPages}</span>`}
+            <div class="group-pg-btns">
+              <button class="group-pg-btn" ${pg === 0 ? 'disabled' : ''} onclick="this.closest('.product-group')._goPage(${pg - 1})">‹</button>
+              <button class="group-pg-btn" ${pg === totalGroupPages - 1 ? 'disabled' : ''} onclick="this.closest('.product-group')._goPage(${pg + 1})">›</button>
+            </div>
+          </div>`;
+      }
+    }
+
+    leftArrow.onclick = () => { scrollEl.scrollBy({ left: -520, behavior: 'smooth' }); };
+    rightArrow.onclick = () => { scrollEl.scrollBy({ left: 520, behavior: 'smooth' }); };
     scrollEl.addEventListener('scroll', () => {
       leftArrow.classList.toggle('hidden', scrollEl.scrollLeft <= 0);
       rightArrow.classList.toggle('hidden', scrollEl.scrollLeft + scrollEl.clientWidth >= scrollEl.scrollWidth - 4);
     });
-    requestAnimationFrame(() => {
-      if (scrollEl.scrollWidth <= scrollEl.clientWidth + 4) rightArrow.classList.add('hidden');
-    });
+
+    section._goPage = (pg) => { if (pg >= 0 && pg < totalGroupPages) renderGroupPage(pg); };
+    renderGroupPage(0);
     return section;
   }
 
