@@ -1066,6 +1066,8 @@
       if (sortBar) sortBar.style.display = "none";
       if (genderBar) genderBar.style.display = "none";
       if (brandBar) brandBar.style.display = "none";
+      const pgBar = document.getElementById("groupsPagePagination");
+      if (pgBar) pgBar.style.display = "none";
       document.querySelectorAll("#catChips .cat-chip").forEach(c => c.classList.remove("active"));
     } else {
       currentCat = 'all';
@@ -1080,6 +1082,8 @@
       if (sortBar) sortBar.style.display = "";
       if (genderBar) genderBar.style.display = "";
       if (brandBar) brandBar.style.display = document.getElementById('brandChips')?.querySelectorAll('.sort-chip:not(#brandChipAll)').length > 0 ? 'block' : 'none';
+      const pgBar = document.getElementById("groupsPagePagination");
+      if (pgBar) pgBar.style.display = "";
 
       document.querySelectorAll("#catChips .cat-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
       document.querySelectorAll(".sort-chip").forEach((c, i) => c.classList.toggle("active", i === 0));
@@ -1217,6 +1221,7 @@
       ).join('');
 
       pgBar.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;">${prevBtn}<div style="display:flex;gap:5px;align-items:center;">${dots}</div><span class="groups-pg-label" style="font-size:11px;white-space:nowrap;">Page ${groupsCurrentPage + 1} of ${totalPages}</span>${nextBtn}</div>`;
+      if (showingFavs) pgBar.style.display = 'none';
       grid.parentNode.insertBefore(pgBar, grid.nextSibling);
     }
   }
