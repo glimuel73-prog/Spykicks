@@ -560,6 +560,45 @@
   .groups-pg-btn:disabled { opacity: .3; cursor: not-allowed; }
   .groups-pg-dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; cursor: pointer; border: none; padding: 0; transition: background .15s, transform .15s; flex-shrink: 0; }
   .groups-pg-dot.active { background: #111; transform: scale(1.3); }
+
+  /* ── Brand dropdowns on mobile ── */
+  @media (max-width: 768px) {
+    #brandLevel1.brand-chips-row,
+    #brandLevel2.brand-chips-row,
+    #brandLevel3.brand-chips-row { display: none !important; }
+    .brand-select-row { display: flex !important; }
+  }
+  @media (min-width: 769px) {
+    .brand-select-row { display: none !important; }
+  }
+  .brand-select-row {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #fff;
+    flex-wrap: wrap;
+  }
+  .brand-select {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #111;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+  .brand-select:focus { border-color: #000; }
 </style>
 </head>
 <body>
@@ -640,7 +679,7 @@
 </div>
 
   <div id="brandBar" style="display:none;background:#fff;">
-    <div id="brandLevel1" class="brand-chips-row" style="display:flex;align-items:center;gap:8px;padding:10px 40px;flex-wrap:wrap;">
+    <div id="brandLevel1" class="brand-chips-row" style="align-items:center;gap:8px;padding:10px 40px;flex-wrap:wrap;">
       <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;flex-shrink:0;">Brand</span>
       <div id="brandChips" style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="sort-chip active" id="brandChipAll" onclick="filterBrand('all',this)">All</button>
@@ -653,7 +692,7 @@
       </select>
     </div>
 
-    <div id="brandLevel2" class="brand-chips-row" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 56px;flex-wrap:wrap;background:#fafafa;">
+    <div id="brandLevel2" class="brand-chips-row" style="align-items:center;gap:8px;padding:8px 40px 8px 56px;flex-wrap:wrap;background:#fafafa;">
       <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#bbb;flex-shrink:0;">Line</span>
       <div id="lineChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
@@ -664,7 +703,7 @@
       </select>
     </div>
 
-    <div id="brandLevel3" class="brand-chips-row" style="display:none;align-items:center;gap:8px;padding:8px 40px 8px 72px;flex-wrap:wrap;background:#f5f5f5;">
+    <div id="brandLevel3" class="brand-chips-row" style="align-items:center;gap:8px;padding:8px 40px 8px 72px;flex-wrap:wrap;background:#f5f5f5;">
       <span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#ccc;flex-shrink:0;">Model</span>
       <div id="modelChips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
     </div>
