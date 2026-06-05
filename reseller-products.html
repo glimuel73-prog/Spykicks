@@ -2993,28 +2993,12 @@
             return pt === 'reseller' || pt === 'both';
           });
 
-          // Fingerprint-based change detection — catches any field edit
-          const _fp = arr => JSON.stringify(
-            [...arr].sort((a,b) => String(a.id).localeCompare(String(b.id)))
-              .map(p => [p.id, p.name, p.resellerPrice, p.price, p.stock, p.status,
-                         p.publishTo, p.category, p.brand, p.brandLine, p.brandModel,
-                         p.badge, p.colorway, (p.images||[]).join(','),
-                         JSON.stringify(p.sizes||[])])
-          );
-
-          const prev = window._resellerProducts || [];
-          const prevFP = _fp(prev);
-          const newFP = _fp(incoming);
-
-          // Always update the data store
-          window._resellerProducts = incoming;
-
-          // Only re-render if something actually changed
-          if (prevFP === newFP && prev.length > 0) return;
-
           // Track newly added products for toast
-          const prevIds = new Set(prev.map(p => String(p.id)));
+          const prevIds = new Set((window._resellerProducts || []).map(p => String(p.id)));
           const newProducts = incoming.filter(p => !prevIds.has(String(p.id)));
+
+          // Always update the data store and re-render
+          window._resellerProducts = incoming;
 
           // Rebuild category chips
           (function rebuildCatChips(products) {
