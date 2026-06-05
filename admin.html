@@ -5600,27 +5600,32 @@ async function naToggleSingle(id) {
   const token = getToken();
   const sid = String(id);
 
-  // Read state directly from local products array — no server fetch needed
   const prod = products.find(p => String(p.id) === sid);
   if (!prod) return;
 
   const isNew = !!prod.newArrival;
 
-  // Flip local state and re-render immediately (optimistic update)
+  // Flip local state and re-render immediately
   prod.newArrival = !isNew;
   renderProductsTable();
 
-  // Build updated list from local state and persist to server
   const updatedIds = products.filter(p => p.newArrival).map(p => String(p.id));
   try {
-    await fetch('/admin/new-arrivals', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
-      body: JSON.stringify({ ids: updatedIds })
-    });
+    // ✅ Save BOTH the curated list AND the flag on the product itself
+    await Promise.all([
+      fetch('/admin/new-arrivals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ ids: updatedIds })
+      }),
+      fetch('/admin/save-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+        body: JSON.stringify({ product: prod })
+      })
+    ]);
     showToast(isNew ? 'Removed from New Arrivals' : 'Marked as New Arrival ✦');
   } catch(e) {
-    // Revert on failure
     prod.newArrival = isNew;
     renderProductsTable();
     showToast('Failed to save — please try again', true);
