@@ -368,10 +368,10 @@
     .pd-main-img { display: none !important; }
     .pd-thumbs { display: none !important; }
     .pd-img-actions { display: none !important; }
-    .pd-swipe-wrap { display: block; position: relative; width: 100%; background: #e8e8e8; }
-    .pd-swipe-track { display: flex; overflow-x: scroll; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; width: 100%; }
+    .pd-swipe-wrap { display: block !important; position: relative; width: 100%; background: #e8e8e8; min-height: 260px; }
+    .pd-swipe-track { display: flex !important; overflow-x: scroll; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; width: 100%; }
     .pd-swipe-track::-webkit-scrollbar { display: none; }
-    .pd-swipe-slide { flex: 0 0 100%; width: 100%; aspect-ratio: 1/1; overflow: hidden; scroll-snap-align: start; }
+    .pd-swipe-slide { flex: 0 0 100%; width: 100%; aspect-ratio: 1/1; overflow: hidden; scroll-snap-align: start; min-height: 260px; }
     .pd-swipe-slide img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
     .pd-swipe-slide svg { width: 100%; height: 100%; }
     .pd-swipe-dots { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 10px 0 8px; background: #e8e8e8; }
