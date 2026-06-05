@@ -533,6 +533,16 @@
     #naResellerGrid .product-price { font-size: 18px; }
     #naResellerGrid .product-view-btn { margin: 6px 0 0; width: 100%; font-size: 10px; padding: 8px; flex-shrink: 0; }
   }
+
+  /* ── Pagination ── */
+  .pagination-wrap { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 32px 24px; background: #fff; flex-wrap: wrap; }
+  .pg-btn { min-width: 38px; height: 38px; padding: 0 10px; border: 1px solid #ddd; background: none; color: #666; font-family: Arial,sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all .18s; display: flex; align-items: center; justify-content: center; }
+  .pg-btn:hover:not(:disabled) { border-color: #000; color: #000; background: #f5f5f5; }
+  .pg-btn.active { background: #000; color: #fff; border-color: #000; }
+  .pg-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .pg-btn.pg-ellipsis { cursor: default; border-color: transparent; }
+  .pg-btn.pg-ellipsis:hover { background: none; border-color: transparent; color: #666; }
+  .pg-info { font-family: Arial,sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #999; margin: 0 8px; }
 </style>
 </head>
 <body>
@@ -649,6 +659,7 @@
   </div>
 
   <div class="product-grid" id="productGrid"></div>
+  <div id="productPagination" class="pagination-wrap" style="display:none;"></div>
   <div class="fav-empty" id="favEmpty">
     <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
     <p>No favorites yet — heart a product to save it here.</p>
@@ -1064,14 +1075,24 @@
     applyView();
   }
 
+  const ITEMS_PER_PAGE = 24;
+  let currentPage = 1;
+  let _filteredProducts = [];
+
   function applyView() {
+    currentPage = 1;
+    _applyViewRender();
+  }
+
+  function _applyViewRender() {
     const grid = document.getElementById("productGrid");
     const favEmpty = document.getElementById("favEmpty");
     const noResults = document.getElementById("noResults");
+    const paginationEl = document.getElementById("productPagination");
     const query = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
     const allProds = window._resellerProducts || [];
 
-    const filtered = allProds.filter(p => {
+    _filteredProducts = allProds.filter(p => {
       const cat = (p.category || 'sneakers').toLowerCase();
       const gender = (p.gender || '').toLowerCase();
       const brand = (p.brand || '').toLowerCase();
@@ -1092,7 +1113,7 @@
       return show;
     });
 
-    filtered.sort((a, b) => {
+    _filteredProducts.sort((a, b) => {
       const pa = getDisplayPrice(a);
       const pb = getDisplayPrice(b);
       if (activeSort === 'price-asc') return pa - pb;
@@ -1101,14 +1122,13 @@
       return 0;
     });
 
-    const count = filtered.length;
+    const count = _filteredProducts.length;
     document.getElementById("visibleCount").textContent = count + " item" + (count !== 1 ? "s" : "");
     noResults.style.display = (!showingFavs && count === 0) ? "block" : "none";
     if (showingFavs && count === 0) { favEmpty.classList.add("visible"); } else { favEmpty.classList.remove("visible"); }
 
     const useGrouped = !showingFavs && currentCat === 'all' && activeGender === 'all' && activeBrand === 'all' && activeLine === 'all' && activeModel === 'all' && !query && activeSort === 'default';
 
-    // Hide New Arrivals section when any filter is active
     const naSection = document.getElementById('newArrivalsSection');
     if (naSection) {
       if (useGrouped) naSection.classList.add('visible');
@@ -1117,20 +1137,21 @@
 
     grid.innerHTML = '';
 
-    if (count === 0) return;
+    if (count === 0) { paginationEl.style.display = 'none'; return; }
 
     if (useGrouped) {
+      paginationEl.style.display = 'none';
       grid.classList.add('grouped-mode');
       const groups = new Map();
-      filtered.forEach(p => {
+      _filteredProducts.forEach(p => {
         const key = [p.brand, p.brandLine].filter(Boolean).join(' ') || (p.brand || 'Other');
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(p);
       });
       const multipleGroups = groups.size > 1 || (groups.size === 1 && [...groups.values()][0].length > 1);
       if (!multipleGroups) {
-        renderFlatGrid(grid, filtered);
         grid.classList.remove('grouped-mode');
+        renderPagedFlatGrid(grid, _filteredProducts);
         return;
       }
       groups.forEach((prods, groupName) => {
@@ -1139,8 +1160,55 @@
       });
     } else {
       grid.classList.remove('grouped-mode');
-      renderFlatGrid(grid, filtered);
+      renderPagedFlatGrid(grid, _filteredProducts);
     }
+  }
+
+  function renderPagedFlatGrid(grid, products) {
+    const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+    if (currentPage > totalPages) currentPage = totalPages || 1;
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const pageProds = products.slice(start, start + ITEMS_PER_PAGE);
+    renderFlatGrid(grid, pageProds);
+    renderPagination(products.length, totalPages);
+    if (totalPages > 1) {
+      setTimeout(() => grid.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+    }
+  }
+
+  function renderPagination(total, totalPages) {
+    const el = document.getElementById('productPagination');
+    if (totalPages <= 1) { el.style.display = 'none'; return; }
+    el.style.display = 'flex';
+    const pages = buildPageNumbers(currentPage, totalPages);
+    let html = `<button class="pg-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+    pages.forEach(p => {
+      if (p === '…') html += `<button class="pg-btn pg-ellipsis">…</button>`;
+      else html += `<button class="pg-btn${p===currentPage?' active':''}" onclick="goToPage(${p})">${p}</button>`;
+    });
+    html += `<button class="pg-btn" onclick="goToPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+    html += `<span class="pg-info">Page ${currentPage} of ${totalPages}</span>`;
+    el.innerHTML = html;
+  }
+
+  function buildPageNumbers(current, total) {
+    if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+    const pages = [];
+    pages.push(1);
+    if (current > 3) pages.push('…');
+    for (let i = Math.max(2, current-1); i <= Math.min(total-1, current+1); i++) pages.push(i);
+    if (current < total - 2) pages.push('…');
+    pages.push(total);
+    return pages;
+  }
+
+  function goToPage(page) {
+    const totalPages = Math.ceil(_filteredProducts.length / ITEMS_PER_PAGE);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    const grid = document.getElementById("productGrid");
+    grid.innerHTML = '';
+    renderPagedFlatGrid(grid, _filteredProducts);
   }
 
   function getDisplayPrice(p) {
