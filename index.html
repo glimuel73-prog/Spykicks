@@ -2006,6 +2006,8 @@ function goGroupsPage(page) {
     if (sectionHeader) sectionHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 30);
 }
+
+function renderPagedFlatGrid(grid, products) {
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
   if (currentPage > totalPages) currentPage = totalPages || 1;
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
