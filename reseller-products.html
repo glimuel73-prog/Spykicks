@@ -562,6 +562,10 @@
   .groups-pg-dot.active { background: #111; transform: scale(1.3); }
 
   /* ── Brand dropdowns on mobile ── */
+  /* Brand level2/3 hidden by default on desktop, shown by JS */
+  #brandLevel2.brand-chips-row,
+  #brandLevel3.brand-chips-row { display: none; }
+
   @media (max-width: 768px) {
     #brandLevel1.brand-chips-row,
     #brandLevel2.brand-chips-row,
