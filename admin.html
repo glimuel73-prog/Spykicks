@@ -2816,7 +2816,7 @@ async function doLogin() {
       createSession(data.token);
       document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("loginInput").value = "";
-      renderDashboard();
+      loadProductsFromBackend();
     } else if (res.status === 429) {
       // Server-side lockout
       const match = (data.error || "").match(/(\d+)s/);
