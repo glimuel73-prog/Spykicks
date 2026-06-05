@@ -1919,7 +1919,12 @@ function _applyFiltersAndRender() {
     if (child.id !== 'shopNoResults') child.remove();
   });
 
-  if (count === 0) { paginationEl.style.display = 'none'; return; }
+  if (count === 0) {
+    paginationEl.style.display = 'none';
+    const existingPg = document.getElementById('groupsPagePagination');
+    if (existingPg) existingPg.remove();
+    return;
+  }
 
   if (useGrouped) {
     paginationEl.style.display = 'none';
@@ -1939,6 +1944,8 @@ function _applyFiltersAndRender() {
     renderGroupsPage(grid, [...groups.entries()], noResults);
   } else {
     grid.classList.remove('grouped-mode');
+    const existingPg = document.getElementById('groupsPagePagination');
+    if (existingPg) existingPg.remove();
     renderPagedFlatGrid(grid, _filteredProducts);
   }
 }
