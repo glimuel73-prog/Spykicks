@@ -2979,10 +2979,7 @@
   (function initResellerSSE() {
     let es;
     let reconnectDelay = 3000;
-    let _firstMessageConsumed = false;
-
     function connect() {
-      _firstMessageConsumed = false;
       es = new EventSource('/events/products');
 
       es.onmessage = (event) => {
@@ -2995,32 +2992,31 @@
             const pt = p.publishTo || 'both';
             return pt === 'reseller' || pt === 'both';
           });
-          const incomingIds = new Set(incoming.map(p => String(p.id)));
 
-          // Capture current rendered IDs before any mutation
-          const currentIds = new Set(
-            [...document.querySelectorAll('.product-card[data-id]')].map(c => c.dataset.id)
+          // Fingerprint-based change detection — catches any field edit
+          const _fp = arr => JSON.stringify(
+            [...arr].sort((a,b) => String(a.id).localeCompare(String(b.id)))
+              .map(p => [p.id, p.name, p.resellerPrice, p.price, p.stock, p.status,
+                         p.publishTo, p.category, p.brand, p.brandLine, p.brandModel,
+                         p.badge, p.colorway, (p.images||[]).join(','),
+                         JSON.stringify(p.sizes||[])])
           );
 
-          if (!_firstMessageConsumed) {
-            _firstMessageConsumed = true;
-            if (!window._resellerProducts || window._resellerProducts.length === 0) {
-              // onload hasn't populated products yet — use SSE data directly
-              window._resellerProducts = incoming;
-              applyView();
-            } else {
-              // onload already populated — do a full sync and re-render
-              window._resellerProducts = incoming;
-              applyView();
-            }
-            loadResellerNewArrivals();
-            return;
-          }
+          const prev = window._resellerProducts || [];
+          const prevFP = _fp(prev);
+          const newFP = _fp(incoming);
 
-          // Full re-render on every subsequent broadcast so name/price/image
-          // changes appear immediately, not just stock labels.
+          // Always update the data store
           window._resellerProducts = incoming;
 
+          // Only re-render if something actually changed
+          if (prevFP === newFP && prev.length > 0) return;
+
+          // Track newly added products for toast
+          const prevIds = new Set(prev.map(p => String(p.id)));
+          const newProducts = incoming.filter(p => !prevIds.has(String(p.id)));
+
+          // Rebuild category chips
           (function rebuildCatChips(products) {
             const STATIC = ['all', 'new-arrivals'];
             const cats = [...new Set(products.map(p => (p.category || '').toLowerCase()).filter(c => c && !STATIC.includes(c)))].sort();
@@ -3043,8 +3039,6 @@
           applyView();
           loadResellerNewArrivals();
 
-          // Show a toast for newly added products
-          const newProducts = incoming.filter(p => !currentIds.has(String(p.id)));
           if (newProducts.length > 0) {
             showSSEToast(`${newProducts.length} new product${newProducts.length > 1 ? 's' : ''} added!`);
           }
