@@ -1614,7 +1614,6 @@ async function loadAdminProducts() {
 
   try {
     const res = await fetch('/products');
-    if (res.ok) window._productsEtag = res.headers.get('ETag') || '';
     const data = await res.json();
     const products = data.products || [];
 
@@ -2206,7 +2205,6 @@ function applyFiltersAndSort() {
     else naSection.classList.remove('visible');
   }
 
-  _destroyFlatPagination_index();
   Array.from(grid.children).forEach(child => {
     if (child.id !== 'shopNoResults') child.remove();
   });
@@ -2239,53 +2237,13 @@ function applyFiltersAndSort() {
 }
 
 function renderFlatGrid(grid, products) {
-  _destroyFlatPagination_index();
-  _indexFlatProducts = products;
   const noResults = document.getElementById("shopNoResults");
   const wrap = document.createElement('div');
   wrap.className = 'product-grid-flat';
-  grid.insertBefore(wrap, noResults);
-
-  _indexFlatObserver = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) _appendIndexBatch(wrap, noResults);
-  }, { rootMargin: '300px' });
-
-  _appendIndexBatch(wrap, noResults);
-}
-
-// ── Index pagination state ────────────────────────────────────────────────────
-let _indexFlatProducts = [];
-let _indexFlatShown    = 0;
-let _indexFlatObserver = null;
-
-function _destroyFlatPagination_index() {
-  if (_indexFlatObserver) { _indexFlatObserver.disconnect(); _indexFlatObserver = null; }
-  _indexFlatProducts = [];
-  _indexFlatShown = 0;
-}
-
-function _appendIndexBatch(wrap, noResults) {
-  const PAGE_SIZE = 20;
-  const batch = _indexFlatProducts.slice(_indexFlatShown, _indexFlatShown + PAGE_SIZE);
-  if (!batch.length) return;
-  const frag = document.createDocumentFragment();
-  batch.forEach(p => {
-    const tmp = document.createElement('div');
-    tmp.innerHTML = buildProductCard(p);
-    frag.appendChild(tmp.firstElementChild);
+  products.forEach(p => {
+    wrap.insertAdjacentHTML('beforeend', buildProductCard(p));
   });
-  _indexFlatShown += batch.length;
-  const oldSentinel = wrap.querySelector('.flat-sentinel');
-  if (oldSentinel) oldSentinel.remove();
-  wrap.appendChild(frag);
-  initCardCarousels(wrap);
-  if (_indexFlatShown < _indexFlatProducts.length) {
-    const sentinel = document.createElement('div');
-    sentinel.className = 'flat-sentinel';
-    sentinel.style.cssText = 'height:1px;grid-column:1/-1;';
-    wrap.appendChild(sentinel);
-    if (_indexFlatObserver) _indexFlatObserver.observe(sentinel);
-  }
+  grid.insertBefore(wrap, noResults);
 }
 
 function buildGroupSection(groupName, prods) {
@@ -3552,10 +3510,10 @@ function startLiveUpdates() {
   // an SSE connection to be established (SSE has no HTTP cache and adds ~200ms+
   // of connection overhead before the first data arrives).
   Promise.all([
-    fetch('/products').then(r => { if (r.ok) window._productsEtag = r.headers.get('ETag') || ''; return r.status === 304 ? { products: null } : r.json(); }),
+    fetch('/products').then(r => r.json()),
     fetch('/new-arrivals').then(r => r.json())
   ]).then(([prodData, naData]) => {
-    if (prodData.products) applyLiveProducts(prodData.products);
+    applyLiveProducts(prodData.products || []);
     renderNewArrivals(naData.products || []);
   }).catch(() => {});
 
@@ -3566,19 +3524,7 @@ function startLiveUpdates() {
     es.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
-        // Legacy full-payload support kept for backward compat
-        if (msg.type === 'products') { applyLiveProducts(msg.products); loadNewArrivals(); return; }
-        // Lightweight ping: re-fetch products via HTTP instead of receiving full payload over SSE
-        if (msg.type === 'products_updated') {
-          const headers = window._productsEtag ? { 'If-None-Match': window._productsEtag } : {};
-          fetch('/products', { headers }).then(r => {
-            if (r.status === 304) return null;
-            if (r.ok) window._productsEtag = r.headers.get('ETag') || window._productsEtag;
-            return r.json();
-          }).then(d => {
-            if (d && d.products) { applyLiveProducts(d.products); loadNewArrivals(); }
-          }).catch(() => {});
-        }
+        if (msg.type === 'products') { applyLiveProducts(msg.products); loadNewArrivals(); }
       } catch (err) {}
     };
     es.onerror = () => { es.close(); setTimeout(connect, 5000); };
