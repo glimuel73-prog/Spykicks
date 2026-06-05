@@ -82,7 +82,7 @@
     .na-header { padding: 20px 16px 12px; }
   }
 
-  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px 18px; max-width: 100%; margin: 0 auto; flex-wrap: wrap; gap: 12px; background: #f9f9f9; }
+  .section-header { display: flex; align-items: center; justify-content: flex-start; padding: 22px 40px 18px; max-width: 100%; margin: 0 auto; flex-wrap: wrap; gap: 12px; background: #f9f9f9; }
   .section-title { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #111; }
   .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
   .chip { padding: 7px 18px; border: 1px solid #ccc; background: none; color: #666; font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; border-radius: 20px; }
@@ -790,12 +790,7 @@
   </div>
 
   <div class="sort-bar">
-
     <span class="product-count" id="productCount"></span>
-    <div class="search-wrap">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="applyFiltersAndSort()">
-    </div>
   </div>
 </div>
 
@@ -834,6 +829,13 @@
       <select class="brand-select" id="modelSelectMobile" onchange="onModelSelectChange(this)">
         <option value="all">All Models</option>
       </select>
+    </div>
+  </div>
+
+  <div style="padding: 10px 40px; background: var(--white);">
+    <div class="search-wrap" style="width:100%;max-width:400px;">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="applyFiltersAndSort()">
     </div>
   </div>
 
