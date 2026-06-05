@@ -341,12 +341,24 @@ app.get("/new-arrivals", (req, res) => {
     try {
         const row = db.prepare("SELECT value FROM settings WHERE key = 'new_arrivals_ids'").get();
         const ids = row ? JSON.parse(row.value) : [];
-        if (ids.length === 0) return res.json({ products: [] });
         const allRows = db.prepare("SELECT data FROM products").all();
         const allProducts = allRows.map(r => JSON.parse(r.data));
-        const products = ids
-            .map(id => allProducts.find(p => String(p.id) === String(id)))
-            .filter(p => p && (!p.status || p.status === "active") && (p.publishTo === "buyer" || p.publishTo === "both" || !p.publishTo));
+
+        let products;
+        if (ids.length > 0) {
+            // Use the manually curated list
+            products = ids
+                .map(id => allProducts.find(p => String(p.id) === String(id)))
+                .filter(p => p && (!p.status || p.status === "active") &&
+                    (p.publishTo === "buyer" || p.publishTo === "both" || !p.publishTo));
+        } else {
+            // Fall back to products flagged with newArrival: true
+            products = allProducts.filter(p =>
+                p.newArrival &&
+                (!p.status || p.status === "active") &&
+                (p.publishTo === "buyer" || p.publishTo === "both" || !p.publishTo)
+            );
+        }
         res.json({ products });
     } catch (err) {
         res.json({ products: [] });
