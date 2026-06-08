@@ -29,7 +29,8 @@
   .ticker span { font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #fff; margin: 0 36px; }
   @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-  .header { background: var(--white); border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+  .sticky-top-wrap { position: sticky; top: 0; z-index: 100; }
+  .header { background: var(--white); border-bottom: 1px solid #e0e0e0; }
   .header-top { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 64px; max-width: 1400px; margin: 0 auto; gap: 12px; }
   .logo { font-family: Arial, sans-serif; font-weight: 900; font-size: 15px; letter-spacing: 1.5px; color: #000; text-transform: uppercase; text-decoration: none; white-space: nowrap; flex-shrink: 0; line-height: 1.2; }
   .logo span { color: #000; }
@@ -738,9 +739,8 @@
 <body>
 
 
+<div class="sticky-top-wrap">
 <div class="ticker"><div class="ticker-inner" id="tickerInner"></div></div>
-
-
 <div class="header">
   <div class="header-top">
     <a href="#" class="logo">
@@ -772,6 +772,7 @@
     </div>
   </div>
 </div>
+</div><!-- /.sticky-top-wrap -->
 
 
 <div id="buyer" class="content active">
