@@ -2608,6 +2608,20 @@ function renderTicker(ticker) {
   ).join('');
 }
 
+function restartTickerAnimation() {
+  const inner = document.getElementById('tickerInner');
+  if (!inner) return;
+  inner.style.animation = 'none';
+  inner.offsetHeight; // force reflow
+  inner.style.animation = '';
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') restartTickerAnimation();
+});
+window.addEventListener('focus', restartTickerAnimation);
+window.addEventListener('pageshow', restartTickerAnimation);
+
 (async function initTicker() {
   try {
     const r = await fetch('/ticker');
@@ -2616,6 +2630,7 @@ function renderTicker(ticker) {
   } catch(e) {
     renderTicker({ items: ['Available Stocks'], separator: '•' });
   }
+  requestAnimationFrame(() => requestAnimationFrame(restartTickerAnimation));
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
