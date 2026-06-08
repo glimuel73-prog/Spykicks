@@ -33,7 +33,8 @@
   .ticker-inner span { font-family: Arial,sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: white; }
   @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-  .header { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .sticky-top-wrap { position: sticky; top: 0; z-index: 100; }
+  .header { background: var(--white); border-bottom: 1px solid var(--border); }
   .header-top { display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 64px; max-width: 1400px; margin: 0 auto; }
   .logo { font-family: Arial,sans-serif; font-weight: 900; font-size: 28px; letter-spacing: 4px; color: var(--black); text-transform: uppercase; text-decoration: none; }
   .logo span { color: var(--black); }
@@ -611,6 +612,7 @@
 </head>
 <body>
 
+<div class="sticky-top-wrap">
 <div class="ticker"><div class="ticker-inner" id="tickerInner"></div></div>
 
 <div class="header">
@@ -632,6 +634,7 @@
     </div>
   </div>
 </div>
+</div><!-- /.sticky-top-wrap -->
 
 <div id="loading" class="state-box">
   <div class="loading-spinner"></div>
