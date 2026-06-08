@@ -5404,6 +5404,7 @@ function renderInventoryTable() {
       <td class="inv-td">
         <div style="display:flex;gap:4px;">
           <button class="inv-act-btn" onclick="openInvItemModal('${p.id}')">Edit</button>
+          <button class="inv-act-btn" style="color:var(--blue);border-color:rgba(59,130,246,.3);" onclick="duplicateInvItem('${p.id}')" title="Duplicate">Dup</button>
           <button class="inv-act-btn" style="color:var(--red);border-color:rgba(255,59,48,.3);" onclick="deleteInvItem('${p.id}')">Del</button>
         </div>
       </td>
@@ -5564,6 +5565,45 @@ function openInvItemModal(id = null) {
     document.getElementById('invf_status').value = 'active';
     document.getElementById('invf_publishTo').value = 'both';
     addInvSizeRow(); // start with one empty row
+  }
+
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('invf_name').focus(), 80);
+}
+
+function duplicateInvItem(id) {
+  const p = invProducts.find(x => x.id === id);
+  if (!p) return;
+
+  // Open modal as a NEW item (editingInvId = null)
+  editingInvId = null;
+  const modal = document.getElementById('invItemModal');
+  document.getElementById('invItemModalTitle').textContent = 'Duplicate Inventory Item';
+  document.getElementById('invSizeRows').innerHTML = '';
+
+  document.getElementById('invf_name').value = (p.name || '') + ' (Copy)';
+  document.getElementById('invf_brand').value = p.brand || '';
+  document.getElementById('invf_sku').value = '';  // clear SKU — must be unique
+  document.getElementById('invf_colorway').value = p.colorway || '';
+  document.getElementById('invf_category').value = p.category || '';
+  document.getElementById('invf_status').value = p.status || 'active';
+  document.getElementById('invf_publishTo').value = p.publishTo || 'both';
+  document.getElementById('invf_price').value = p.price || '';
+  document.getElementById('invf_resellerPrice').value = p.resellerPrice || '';
+  document.getElementById('invf_wholesalePrice').value = p.wholesalePrice || '';
+  document.getElementById('invf_supplier').value = p.supplier || '';
+  let notesObj = {};
+  try { notesObj = JSON.parse(p._raw.notes || '{}'); } catch(e) {}
+  document.getElementById('invf_notes').value = notesObj._userNotes || '';
+
+  if (p.sizes && p.sizes.length) {
+    p.sizes.forEach(s => {
+      if (typeof s === 'object') addInvSizeRow(s.size, s.stock);
+      else addInvSizeRow(s, 0);
+    });
+  } else {
+    addInvSizeRow();
   }
 
   modal.style.display = 'flex';
