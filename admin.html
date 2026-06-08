@@ -1656,6 +1656,10 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
       Orders
       <span id="pendingOrdersBadge" style="display:none;background:#ff3b30;color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px;margin-left:auto;">0</span>
     </div>
+    <div class="nav-item" onclick="showPage('ticker', this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h12"/></svg>
+      Ticker
+    </div>
     <div class="nav-item" onclick="showPage('settings', this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       Settings
@@ -2273,6 +2277,102 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
   </div>
 
 </div>
+
+<div id="page-ticker" class="page" style="max-width:100%;">
+  <div style="max-width:620px;margin:0;width:100%;display:flex;flex-direction:column;gap:20px;">
+
+    <div style="width:100%;">
+      <div style="margin-bottom:8px;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);">Ticker Banner</div>
+      <div class="settings-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;overflow:hidden;">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:22px;line-height:1.6;">
+          Edit the scrolling banner at the top of the Buyer and Reseller pages. Changes publish live instantly.
+        </p>
+
+        <!-- Separator -->
+        <div style="margin-bottom:22px;">
+          <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Separator</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="tickerSepBtns"></div>
+        </div>
+
+        <!-- Items -->
+        <div style="margin-bottom:20px;">
+          <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Items</div>
+          <div id="tickerItemsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+          <button onclick="tickerAddItem()"
+            style="width:100%;background:none;border:1px dashed var(--border2);color:var(--text-dim);font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:11px;border-radius:6px;cursor:pointer;transition:all .15s;"
+            onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)';"
+            onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text-dim)';">
+            + Add Item
+          </button>
+        </div>
+
+        <!-- Preview -->
+        <div style="margin-bottom:24px;">
+          <div style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;">Preview</div>
+          <div style="background:#000;overflow:hidden;white-space:nowrap;padding:7px 0;border-radius:6px;">
+            <div id="tickerPreview" style="display:inline-flex;gap:28px;animation:_tickerAnim 14s linear infinite;"></div>
+          </div>
+        </div>
+
+        <button onclick="tickerSave()" id="tickerSaveBtn"
+          style="background:var(--accent);color:#fff;font-family:var(--font);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:13px 28px;border:none;border-radius:7px;cursor:pointer;transition:background .15s,transform .1s;min-height:44px;"
+          onmouseover="this.style.background='var(--accent-hover)';this.style.transform='translateY(-1px)'"
+          onmouseout="this.style.background='var(--accent)';this.style.transform=''">
+          Save &amp; Publish
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  @keyframes _tickerAnim { 0% { transform:translateX(0); } 100% { transform:translateX(-50%); } }
+  .ticker-sep-opt {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-muted);
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all .15s;
+    font-family: var(--font);
+  }
+  .ticker-sep-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .ticker-sep-opt.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .ticker-row { display:flex; align-items:center; gap:8px; }
+  .ticker-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    padding: 10px 13px;
+    outline: none;
+    border-radius: 6px;
+    transition: border-color .2s;
+  }
+  .ticker-row input:focus { border-color: var(--accent); background: var(--surface); }
+  .ticker-row-del {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all .15s;
+    font-size: 18px;
+    line-height: 1;
+  }
+  .ticker-row-del:hover { border-color: var(--red); color: var(--red); }
+</style>
 
 <button class="fab-add" id="fabAddBtn" onclick="openModal()" style="display:none;" aria-label="Add Product">+</button>
 </div>
@@ -2960,6 +3060,7 @@ function showPage(page, el) {
   if (page === 'dashboard') renderDashboard();
   if (page === 'resellers') loadResellers();
   if (page === 'settings') { loadSocialLinks(); }
+  if (page === 'ticker') loadTickerPage();
   if (page === 'orders') loadOrders();
   if (page === 'inventory') loadInventoryProducts();
   if (page === 'new-arrivals') loadNewArrivalsPage();
@@ -5924,6 +6025,86 @@ async function naSaveList() {
     </div>
   </div>
 </div>
+
+
+// ── Ticker Admin ─────────────────────────────────────────────────────────────
+(function() {
+  const SEPS = ['•', '/', '|', '★', '—', '·'];
+  let _items = ['Available Stocks'];
+  let _sep   = '•';
+
+  window.loadTickerPage = async function() {
+    try {
+      const d = await fetch('/admin/ticker').then(r => r.json());
+      const t = d.ticker || {};
+      _items = (t.items && t.items.length) ? [...t.items] : ['Available Stocks'];
+      _sep   = t.separator || '•';
+    } catch(e) {}
+    _render();
+  };
+
+  function _render() {
+    // Sep buttons
+    const sepEl = document.getElementById('tickerSepBtns');
+    if (sepEl) {
+      sepEl.innerHTML = SEPS.map(s =>
+        `<button class="ticker-sep-opt${s===_sep?' active':''}" onclick="window._tickerSep('${s}')">${s}</button>`
+      ).join('');
+    }
+    // Items list
+    const listEl = document.getElementById('tickerItemsList');
+    if (listEl) {
+      listEl.innerHTML = _items.map((item, i) => `
+        <div class="ticker-row">
+          <input type="text" value="${_esc(item)}" placeholder="Ticker text…"
+            oninput="window._tickerEdit(${i},this.value)">
+          <button class="ticker-row-del" onclick="window._tickerDel(${i})" title="Remove">×</button>
+        </div>`).join('');
+    }
+    _preview();
+  }
+
+  function _preview() {
+    const el = document.getElementById('tickerPreview');
+    if (!el) return;
+    const items = _items.filter(s => s.trim()) || ['Available Stocks'];
+    const doubled = [...items, ...items];
+    el.innerHTML = doubled.map(item =>
+      `<span style="font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#fff;">${_esc(item)}</span>` +
+      `<span style="font-family:Arial,sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.4);">${_esc(_sep)}</span>`
+    ).join('');
+  }
+
+  window._tickerSep  = s => { _sep = s; _render(); };
+  window._tickerEdit = (i, v) => { _items[i] = v; _preview(); };
+  window._tickerDel  = i => { if (_items.length > 1) { _items.splice(i, 1); _render(); } };
+  window.tickerAddItem = () => { _items.push(''); _render(); setTimeout(() => { const ins = document.querySelectorAll('#tickerItemsList input'); if (ins.length) ins[ins.length-1].focus(); }, 50); };
+
+  window.tickerSave = async function() {
+    const btn = document.getElementById('tickerSaveBtn');
+    const items = _items.map(s => s.trim()).filter(Boolean);
+    if (!items.length) { showToast('Add at least one ticker item.', true); return; }
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const d = await fetch('/admin/ticker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticker: { items, separator: _sep } })
+      }).then(r => r.json());
+      if (d.success) showToast('Ticker published live!');
+      else showToast(d.error || 'Save failed.', true);
+    } catch(e) {
+      showToast('Connection error.', true);
+    }
+    btn.disabled = false;
+    btn.textContent = 'Save & Publish';
+  };
+
+  function _esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
 
 </body>
 </html>
