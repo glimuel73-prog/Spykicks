@@ -29,7 +29,7 @@
   body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
   .ticker { background: black; overflow: hidden; white-space: nowrap; padding: 6px 0; }
-  .ticker-inner { display: inline-flex; gap: 32px; animation: ticker 18s linear infinite; }
+  .ticker-inner { display: flex; width: max-content; gap: 32px; animation: ticker 18s linear infinite; }
   .ticker-inner span { font-family: Arial,sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: white; }
   @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
