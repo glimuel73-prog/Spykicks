@@ -24,9 +24,9 @@
   }
   body { font-family: Arial, sans-serif; background: var(--black); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-  .ticker { background: var(--black); border-bottom: 1px solid var(--border); overflow: hidden; white-space: nowrap; padding: 7px 0; }
-  .ticker-inner { display: flex; width: max-content; animation: ticker 22s linear infinite; }
-  .ticker span { font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #fff; margin: 0 36px; }
+  .ticker { background: var(--black); border-bottom: 1px solid var(--border); overflow: hidden; padding: 7px 0; }
+  .ticker-inner { display: flex; flex-wrap: nowrap; white-space: nowrap; width: max-content; animation: ticker 22s linear infinite; will-change: transform; }
+  .ticker span { font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #fff; margin: 0 36px; flex-shrink: 0; }
   @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
   .sticky-top-wrap { position: sticky; top: 0; z-index: 100; }
