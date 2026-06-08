@@ -611,18 +611,7 @@
 </head>
 <body>
 
-<div class="ticker">
-  <div class="ticker-inner">
-    <span>Available Stocks</span><span>•</span>
-    <span>Available Stocks</span><span>•</span>
-    <span>Available Stocks</span><span>•</span>
-    <span>Available Stocks</span><span>•</span>
-    <span>Available Stocks</span><span>•</span>
-    <span>Available Stocks</span><span>•</span>
-    <span>Available Stocks</span><span>•</span>
-    <span>Available Stocks</span><span>•</span>
-  </div>
-</div>
+<div class="ticker"><div class="ticker-inner" id="tickerInner"></div></div>
 
 <div class="header">
   <div class="header-top">
@@ -2662,6 +2651,7 @@
       es.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
+          if (msg.type === 'ticker') { renderTicker(msg.ticker); return; }
           if (msg.type !== 'products') return;
 
           const incoming = (msg.products || []).filter(p => {
@@ -2947,6 +2937,29 @@
       }, 2000);
     }).catch(() => {});
   }
+
+  // ── Ticker ───────────────────────────────────────────────────────────────────
+  function renderTicker(ticker) {
+    const inner = document.getElementById('tickerInner');
+    if (!inner) return;
+    const items = (ticker.items || ['Available Stocks']).filter(s => s.trim());
+    const sep = ticker.separator || '•';
+    // Repeat items enough times to fill wide screens seamlessly (duplicate for loop)
+    const repeated = [...items, ...items, ...items, ...items, ...items, ...items, ...items, ...items];
+    inner.innerHTML = repeated.map((item, i) =>
+      (i % items.length === 0 && i > 0 ? `<span>${sep}</span>` : '') + `<span>${item}</span><span>${sep}</span>`
+    ).join('');
+  }
+
+  (async function initTicker() {
+    try {
+      const r = await fetch('/ticker');
+      const d = await r.json();
+      renderTicker(d.ticker || { items: ['Available Stocks'], separator: '•' });
+    } catch(e) {
+      renderTicker({ items: ['Available Stocks'], separator: '•' });
+    }
+  })();
 
   // ── Boot: load server-side cart & favorites, then init the page ───────────
   (async function boot() {
