@@ -147,6 +147,18 @@ function broadcastProducts() {
     } catch (e) {}
 }
 
+function broadcastTicker() {
+    if (sseClients.size === 0) return;
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'ticker'").get();
+        const ticker = row ? JSON.parse(row.value) : { items: ["Available Stocks"], separator: "•" };
+        const payload = JSON.stringify({ type: "ticker", ticker });
+        for (const res of sseClients) {
+            try { res.write(`data: ${payload}\n\n`); } catch (e) { sseClients.delete(res); }
+        }
+    } catch (e) {}
+}
+
 const DATA_DIR = "/data";
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -301,6 +313,39 @@ app.post("/admin/social-links", requireAdmin, (req, res) => {
             for (const [k, v] of Object.entries(obj)) stmt.run("social_" + k, v || "");
         });
         save(links);
+        res.json({ success: true });
+    } catch (err) {
+        res.json({ success: false, error: err.message });
+    }
+});
+
+// ── Ticker ────────────────────────────────────────────────────────────────────
+app.get("/ticker", (req, res) => {
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'ticker'").get();
+        const ticker = row ? JSON.parse(row.value) : { items: ["Available Stocks"], separator: "•" };
+        res.json({ ticker });
+    } catch (err) {
+        res.json({ ticker: { items: ["Available Stocks"], separator: "•" } });
+    }
+});
+
+app.get("/admin/ticker", requireAdmin, (req, res) => {
+    try {
+        const row = db.prepare("SELECT value FROM settings WHERE key = 'ticker'").get();
+        const ticker = row ? JSON.parse(row.value) : { items: ["Available Stocks"], separator: "•" };
+        res.json({ ticker });
+    } catch (err) {
+        res.json({ ticker: { items: ["Available Stocks"], separator: "•" } });
+    }
+});
+
+app.post("/admin/ticker", requireAdmin, (req, res) => {
+    const { ticker } = req.body;
+    if (!ticker || !Array.isArray(ticker.items)) return res.json({ success: false, error: "Invalid ticker data" });
+    try {
+        db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('ticker', ?)").run(JSON.stringify(ticker));
+        broadcastTicker();
         res.json({ success: true });
     } catch (err) {
         res.json({ success: false, error: err.message });
@@ -1171,6 +1216,12 @@ app.get("/events/products", (req, res) => {
         const rows = db.prepare("SELECT data FROM products").all();
         const products = rows.map(r => JSON.parse(r.data));
         res.write(`data: ${JSON.stringify({ type: "products", products })}\n\n`);
+    } catch (e) {}
+
+    try {
+        const tickerRow = db.prepare("SELECT value FROM settings WHERE key = 'ticker'").get();
+        const ticker = tickerRow ? JSON.parse(tickerRow.value) : { items: ["Available Stocks"], separator: "•" };
+        res.write(`data: ${JSON.stringify({ type: "ticker", ticker })}\n\n`);
     } catch (e) {}
 
     sseClients.add(res);
