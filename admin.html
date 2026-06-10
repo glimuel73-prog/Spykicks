@@ -1867,6 +1867,15 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <option value="caps">Caps</option>
           <option value="other">Other</option>
         </select>
+        <select class="select-filter" id="brandFilter" onchange="onBrandFilterChange()">
+          <option value="">All Brands</option>
+        </select>
+        <select class="select-filter" id="lineFilter" onchange="onLineFilterChange()">
+          <option value="">All Lines</option>
+        </select>
+        <select class="select-filter" id="modelFilter" onchange="renderProductsTable()">
+          <option value="">All Models</option>
+        </select>
       </div>
     </div>
     <table class="products-table">
@@ -3111,6 +3120,33 @@ async function loadPendingOrderCount() {
 }
 
 
+function onBrandFilterChange() {
+  const brand = (document.getElementById('brandFilter')?.value || '').toLowerCase();
+  const lineFilter = document.getElementById('lineFilter');
+  const modelFilter = document.getElementById('modelFilter');
+  // Repopulate lines for selected brand
+  while (lineFilter.options.length > 1) lineFilter.remove(1);
+  while (modelFilter.options.length > 1) modelFilter.remove(1);
+  if (brand) {
+    const lines = [...new Set(products.filter(p => (p.brand||'').toLowerCase() === brand).map(p => (p.brandLine||'').trim()).filter(Boolean))].sort();
+    lines.forEach(l => { const o = document.createElement('option'); o.value = l; o.textContent = l; lineFilter.appendChild(o); });
+  }
+  renderProductsTable();
+}
+
+function onLineFilterChange() {
+  const brand = (document.getElementById('brandFilter')?.value || '').toLowerCase();
+  const line = (document.getElementById('lineFilter')?.value || '').toLowerCase();
+  const modelFilter = document.getElementById('modelFilter');
+  // Repopulate models for selected brand+line
+  while (modelFilter.options.length > 1) modelFilter.remove(1);
+  if (brand && line) {
+    const models = [...new Set(products.filter(p => (p.brand||'').toLowerCase() === brand && (p.brandLine||'').toLowerCase() === line).map(p => (p.brandModel||'').trim()).filter(Boolean))].sort();
+    models.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; modelFilter.appendChild(o); });
+  }
+  renderProductsTable();
+}
+
 function renderProductsTable() {
 
   const KNOWN_CATS = ['sneakers','apparel','accessories','bags','caps','other'];
@@ -3129,13 +3165,29 @@ function renderProductsTable() {
     catFilter.appendChild(opt);
   });
   catFilter.value = currentCat;
+
+  // Populate brand dropdown dynamically
+  const brandFilter = document.getElementById('brandFilter');
+  const currentBrand = brandFilter.value;
+  while (brandFilter.options.length > 1) brandFilter.remove(1);
+  [...new Set(products.map(p => (p.brand||'').trim()).filter(Boolean))].sort().forEach(b => {
+    const o = document.createElement('option'); o.value = b; o.textContent = b; brandFilter.appendChild(o);
+  });
+  brandFilter.value = currentBrand;
+
   const q = (document.getElementById('prodSearch')?.value || '').toLowerCase();
   const cat = document.getElementById('catFilter')?.value || '';
+  const brand = (document.getElementById('brandFilter')?.value || '').toLowerCase();
+  const line = (document.getElementById('lineFilter')?.value || '').toLowerCase();
+  const model = (document.getElementById('modelFilter')?.value || '').toLowerCase();
 
   let filtered = products.filter(p => {
     const matchQ = !q || p.name.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q);
     const matchCat = !cat || p.category === cat;
-    return matchQ && matchCat;
+    const matchBrand = !brand || (p.brand||'').toLowerCase() === brand;
+    const matchLine = !line || (p.brandLine||'').toLowerCase() === line;
+    const matchModel = !model || (p.brandModel||'').toLowerCase() === model;
+    return matchQ && matchCat && matchBrand && matchLine && matchModel;
   });
 
   const tbody = document.getElementById('productsTableBody');
