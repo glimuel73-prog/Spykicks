@@ -1876,6 +1876,11 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
         <select class="select-filter" id="modelFilter" onchange="renderProductsTable()">
           <option value="">All Models</option>
         </select>
+        <select class="select-filter" id="newArrivalFilter" onchange="renderProductsTable()">
+          <option value="">All Products</option>
+          <option value="new">New Arrivals Only</option>
+          <option value="notnew">Not New Arrivals</option>
+        </select>
       </div>
     </div>
     <table class="products-table">
@@ -3180,6 +3185,7 @@ function renderProductsTable() {
   const brand = (document.getElementById('brandFilter')?.value || '').toLowerCase();
   const line = (document.getElementById('lineFilter')?.value || '').toLowerCase();
   const model = (document.getElementById('modelFilter')?.value || '').toLowerCase();
+  const newArrivalFilter = document.getElementById('newArrivalFilter')?.value || '';
 
   let filtered = products.filter(p => {
     const matchQ = !q || p.name.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q);
@@ -3187,7 +3193,8 @@ function renderProductsTable() {
     const matchBrand = !brand || (p.brand||'').toLowerCase() === brand;
     const matchLine = !line || (p.brandLine||'').toLowerCase() === line;
     const matchModel = !model || (p.brandModel||'').toLowerCase() === model;
-    return matchQ && matchCat && matchBrand && matchLine && matchModel;
+    const matchNewArrival = !newArrivalFilter || (newArrivalFilter === 'new' ? !!p.newArrival : !p.newArrival);
+    return matchQ && matchCat && matchBrand && matchLine && matchModel && matchNewArrival;
   });
 
   const tbody = document.getElementById('productsTableBody');
