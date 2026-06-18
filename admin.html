@@ -1881,6 +1881,12 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
           <option value="new">New Arrivals Only</option>
           <option value="notnew">Not New Arrivals</option>
         </select>
+        <select class="select-filter" id="publishFilter" onchange="renderProductsTable()">
+          <option value="">All Channels</option>
+          <option value="both">Both</option>
+          <option value="buyer">Buyer Only</option>
+          <option value="reseller">Reseller Only</option>
+        </select>
       </div>
     </div>
     <table class="products-table">
@@ -2610,7 +2616,7 @@ td:nth-child(3) .size-price-input:focus { border-color: var(--green); box-shadow
                 <div style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;" id="ptDotBuyer"><div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:none;" id="ptDotBuyerInner"></div></div>
                 <div>
                   <div style="font-family:var(--font);font-size:13px;font-weight:700;color:var(--text);">🛍 Buyer Page</div>
-                  <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:1px;">Visible on the public store (index)</div>
+                  <div style="font-family:var(--font);font-size:11px;color:var(--text-dim);margin-top:1px;">Visible on the public store </div>
                 </div>
               </label>
               <label id="ptLabelReseller" style="display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:10px 14px;transition:all .15s;background:var(--surface);" for="fPublishReseller">
@@ -3186,6 +3192,7 @@ function renderProductsTable() {
   const line = (document.getElementById('lineFilter')?.value || '').toLowerCase();
   const model = (document.getElementById('modelFilter')?.value || '').toLowerCase();
   const newArrivalFilter = document.getElementById('newArrivalFilter')?.value || '';
+  const publishFilter = document.getElementById('publishFilter')?.value || '';
 
   let filtered = products.filter(p => {
     const matchQ = !q || p.name.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q);
@@ -3194,7 +3201,8 @@ function renderProductsTable() {
     const matchLine = !line || (p.brandLine||'').toLowerCase() === line;
     const matchModel = !model || (p.brandModel||'').toLowerCase() === model;
     const matchNewArrival = !newArrivalFilter || (newArrivalFilter === 'new' ? !!p.newArrival : !p.newArrival);
-    return matchQ && matchCat && matchBrand && matchLine && matchModel && matchNewArrival;
+    const matchPublish = !publishFilter || (p.publishTo || 'both') === publishFilter;
+    return matchQ && matchCat && matchBrand && matchLine && matchModel && matchNewArrival && matchPublish;
   });
 
   const tbody = document.getElementById('productsTableBody');
