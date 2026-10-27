@@ -1564,24 +1564,6 @@ app.post("/reseller/save-email", async (req, res) => {
     }
 });
 
-// ── TEMPORARY BACKUP ROUTES — DELETE AFTER USE ────────────────────────────────
-const { execFile } = require("child_process");
-
-app.get("/__backup/db/:token", async (req, res) => {
-    if (req.params.token !== process.env.BACKUP_TOKEN) return res.sendStatus(404);
-    await db.backup("/tmp/users-backup.db");
-    res.download("/tmp/users-backup.db", "users.db");
-});
-
-app.get("/__backup/uploads/:token", (req, res) => {
-    if (req.params.token !== process.env.BACKUP_TOKEN) return res.sendStatus(404);
-    execFile("tar", ["-czf", "/tmp/uploads.tar.gz", "-C", "/data", "uploads"], (err) => {
-        if (err) return res.status(500).send("tar failed");
-        res.download("/tmp/uploads.tar.gz", "uploads.tar.gz");
-    });
-});
-// ── END TEMPORARY BACKUP ROUTES ───────────────────────────────────────────────
-
 app.listen(process.env.PORT || 3000, () => {
     console.log("Server running on port " + (process.env.PORT || 3000));
 });
